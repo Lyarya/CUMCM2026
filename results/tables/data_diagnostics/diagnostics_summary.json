@@ -1,0 +1,113 @@
+{
+  "configuration": {
+    "lags": [
+      1,
+      6,
+      144,
+      1008
+    ],
+    "daylight_threshold_kw": 0.0,
+    "history_steps": 1008,
+    "forecast_horizon_steps": 144,
+    "hankel_rows": 144,
+    "spectrum_stride": 1008,
+    "forecastability_stride": 144,
+    "maximum_spectrum_rank": 30,
+    "zscore_threshold": 3.0,
+    "iqr_multiplier": 1.5
+  },
+  "representative_date": "2025-03-19",
+  "hankel_audit": {
+    "signal": "PV",
+    "series_length": 52560,
+    "lookback": 1008,
+    "hankel_rows": 144,
+    "hankel_columns": 865,
+    "stride": 1008,
+    "candidate_windows": 52,
+    "selected_windows": 52,
+    "valid_nonconstant_windows": 52,
+    "excluded_zero_energy_windows": 0,
+    "seed": 2026
+  },
+  "hankel_energy_median": {
+    "top1": 0.40787619624270344,
+    "top3": 0.9020086597587484,
+    "top5": 0.9896445556990586
+  },
+  "official_overall": {
+    "count": 35004.0,
+    "mae": 186.60920503942404,
+    "rmse": 438.55766692537196,
+    "bias": -30.7621921780368
+  },
+  "lowrank_forecastability_correlations": [
+    {
+      "energy_metric": "top1_energy",
+      "forecastability_metric": "negative_yesterday_mae",
+      "correlation_method": "pearson",
+      "count": 358,
+      "correlation": -0.6761158352057279,
+      "p_value": 3.714894712688416e-49
+    },
+    {
+      "energy_metric": "top1_energy",
+      "forecastability_metric": "negative_yesterday_mae",
+      "correlation_method": "spearman",
+      "count": 358,
+      "correlation": -0.7154547911818125,
+      "p_value": 2.1311662304668375e-57
+    },
+    {
+      "energy_metric": "top1_energy",
+      "forecastability_metric": "negative_yesterday_rmse",
+      "correlation_method": "pearson",
+      "count": 358,
+      "correlation": -0.6137580851988119,
+      "p_value": 1.9594867496773323e-38
+    },
+    {
+      "energy_metric": "top1_energy",
+      "forecastability_metric": "negative_yesterday_rmse",
+      "correlation_method": "spearman",
+      "count": 358,
+      "correlation": -0.6494715157814266,
+      "p_value": 2.8829074922579767e-44
+    },
+    {
+      "energy_metric": "top3_energy",
+      "forecastability_metric": "negative_yesterday_mae",
+      "correlation_method": "pearson",
+      "count": 358,
+      "correlation": -0.6772176454640789,
+      "p_value": 2.273109660589799e-49
+    },
+    {
+      "energy_metric": "top3_energy",
+      "forecastability_metric": "negative_yesterday_mae",
+      "correlation_method": "spearman",
+      "count": 358,
+      "correlation": -0.7176519757464928,
+      "p_value": 6.714414080338385e-58
+    },
+    {
+      "energy_metric": "top3_energy",
+      "forecastability_metric": "negative_yesterday_rmse",
+      "correlation_method": "pearson",
+      "count": 358,
+      "correlation": -0.6158020474402125,
+      "p_value": 9.514692011882403e-39
+    },
+    {
+      "energy_metric": "top3_energy",
+      "forecastability_metric": "negative_yesterday_rmse",
+      "correlation_method": "spearman",
+      "count": 358,
+      "correlation": -0.6518347772653513,
+      "p_value": 1.1117332139098826e-44
+    }
+  ],
+  "anomaly_candidate_count": {
+    "Price": 1
+  }
+}

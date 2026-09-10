@@ -1,0 +1,17 @@
+variable,subset,lag_steps,lag_hours,count,pearson_correlation
+PV,full_series,1,0.1666666667,52559,0.9979704929
+PV,daylight_only,1,0.1666666667,26107,0.9946410814
+PV,full_series,6,1,52554,0.943076958
+PV,daylight_only,6,1,26830,0.8732144225
+PV,full_series,144,24,52416,0.9923139365
+PV,daylight_only,144,24,28791,0.984478269
+PV,full_series,1008,168,51552,0.9903393354
+PV,daylight_only,1008,168,27479,0.9789254043
+Load,full_series,1,0.1666666667,52559,0.9870376487
+Load,full_series,6,1,52554,0.9169087327
+Load,full_series,144,24,52416,0.6792228203
+Load,full_series,1008,168,51552,0.9854841732
+Net Load,full_series,1,0.1666666667,52559,0.9934433727
+Net Load,full_series,6,1,52554,0.9186569715
+Net Load,full_series,144,24,52416,0.8806201487
+Net Load,full_series,1008,168,51552,0.9808934373
