@@ -1,0 +1,2 @@
+interval_end,variable,value,zscore,zscore_flag,iqr_lower,iqr_upper,iqr_flag,action
+2025-07-03 20:40:00,Price,1.7936,3.015827944,True,-0.40685,1.88795,False,flag_only_do_not_delete

@@ -1,0 +1,9 @@
+energy_metric,forecastability_metric,correlation_method,count,correlation,p_value
+top1_energy,negative_yesterday_mae,pearson,358,-0.6761158352,3.714894713e-49
+top1_energy,negative_yesterday_mae,spearman,358,-0.7154547912,2.13116623e-57
+top1_energy,negative_yesterday_rmse,pearson,358,-0.6137580852,1.95948675e-38
+top1_energy,negative_yesterday_rmse,spearman,358,-0.6494715158,2.882907492e-44
+top3_energy,negative_yesterday_mae,pearson,358,-0.6772176455,2.273109661e-49
+top3_energy,negative_yesterday_mae,spearman,358,-0.7176519757,6.71441408e-58
+top3_energy,negative_yesterday_rmse,pearson,358,-0.6158020474,9.514692012e-39
+top3_energy,negative_yesterday_rmse,spearman,358,-0.6518347773,1.111733214e-44
