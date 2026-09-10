@@ -19,3 +19,4 @@ joblib
 seaborn
 xlsxwriter
 pyarrow
+pytest>=8.4
