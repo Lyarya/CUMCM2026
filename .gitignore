@@ -1,0 +1,56 @@
+# macOS
+.DS_Store
+._*
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Environments and local configuration
+.venv/
+venv/
+env/
+.env
+
+# IDEs
+.vscode/
+.idea/
+
+# LaTeX build products
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+*.bbl
+*.blg
+*.xdv
+*.lof
+*.lot
+*.run.xml
+paper/main.pdf
+
+# Temporary files
+*.tmp
+*.bak
+*~
+~$*
+
+# Model checkpoints
+*.pth
+*.pt
+*.ckpt
+
+# Runtime logs and caches
+results/logs/*
+!results/logs/.gitkeep
+.cache/
+
+# Keep competition inputs versioned until their size is known.
+# data/raw/ is intentionally NOT ignored.
