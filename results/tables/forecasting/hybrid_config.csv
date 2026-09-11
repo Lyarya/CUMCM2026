@@ -1,0 +1,2 @@
+lookback_days,hankel_rows,rank,polynomial_degree,polynomial_ridge,hidden_units,activation,training_loss,optimizer,seed,formal_parameter_count,generic_fixed_hybrid,reproduces_unpublished_architecture
+7,144,1,2,5.00000000,16,GELU,MSE,AdamW,2026,18592,True,False

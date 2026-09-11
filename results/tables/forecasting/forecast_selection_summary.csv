@@ -1,0 +1,2 @@
+selection_period,formal_period,selection_rule,selected_generation_forecaster,selected_validation_rmse_kw,selected_oos_rmse_kw,best_hindsight_oos_model,best_hindsight_oos_rmse_kw,formal_model_and_scaler_frozen,online_learning,official_attachment3_used,regenerate_q2_scenarios
+2025-01-18/2025-01-31,2025-02-01/2025-12-31,minimum pooled January RMSE; MAE breaks exact ties,7-day same-slot mean,213.55082318,303.85773926,7-day same-slot mean,303.85773926,True,False,False,False

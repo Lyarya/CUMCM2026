@@ -1,0 +1,2 @@
+selected_normalization,best_zscore_rmse_kw,same_config_raw_rmse_kw,material_harm_threshold,zscore_material_harm,final_scaler_fit_end,final_training_target_end,formal_target_start,formal_scaler_frozen,formal_gradients_disabled,hybrid_residual_scaler_fit_end,hybrid_residual_scaler_frozen
+causal_zscore,261.48080553,917.36710608,0.05000000,False,2025-02-01T00:00:00.000000000,2025-02-01T00:00:00.000000000,2025-02-01T00:10:00.000000000,True,True,2025-02-01T00:00:00.000000000,True

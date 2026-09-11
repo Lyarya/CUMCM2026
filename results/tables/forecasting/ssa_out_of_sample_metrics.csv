@@ -1,0 +1,35 @@
+scope,subset,model,model_family,window_days,rank,selected_ssa,count,mae_kw,rmse_kw,bias_kw,mean_actual_kw,cv_rmse,cv_status
+february_december_walk_forward,full_series,Yesterday,baseline,,,False,48096,185.3464915274,375.1748781366,0.7610173133,2378.8535422010,0.1577124743,ok
+february_december_walk_forward,effective_generation,Yesterday,baseline,,,False,26880,331.6338315997,501.8495969877,1.3576795238,4256.4486594382,0.1179033596,ok
+february_december_walk_forward,full_series,Last Week,baseline,,,False,48096,214.6882313789,419.9479682303,4.7135338323,2378.8535422010,0.1765337633,ok
+february_december_walk_forward,effective_generation,Last Week,baseline,,,False,26880,383.9102628534,561.7294061522,8.2055361719,4256.4486594382,0.1319713806,ok
+february_december_walk_forward,full_series,7-day same-slot mean,baseline,,,False,48096,153.3997067249,303.8577392555,2.7692022125,2378.8535422010,0.1277328486,ok
+february_december_walk_forward,effective_generation,7-day same-slot mean,baseline,,,False,26880,274.3841699256,406.4499569802,4.8631600659,4256.4486594382,0.0954903934,ok
+february_december_walk_forward,full_series,Seasonal,baseline,,,False,48096,170.5709126800,341.3729606527,2.5396497469,2378.8535422010,0.1435031433,ok
+february_december_walk_forward,effective_generation,Seasonal,baseline,,,False,26880,305.0951533350,456.6319772415,4.4392150154,4256.4486594382,0.1072800388,ok
+february_december_walk_forward,full_series,Polynomial-Vandermonde rank 1,polynomial_vandermonde,,,False,48096,2525.1227716565,3130.8122639071,-656.9583594209,2378.8535422010,1.3161013103,ok
+february_december_walk_forward,effective_generation,Polynomial-Vandermonde rank 1,polynomial_vandermonde,,,False,26880,3196.5003263666,3839.1395757953,-2497.1519831683,4256.4486594382,0.9019583890,ok
+february_december_walk_forward,full_series,Polynomial-Vandermonde rank 3,polynomial_vandermonde,,,False,48096,2620.9130068378,2973.1974836422,-82.5949200954,2378.8535422010,1.2498446966,ok
+february_december_walk_forward,effective_generation,Polynomial-Vandermonde rank 3,polynomial_vandermonde,,,False,26880,2907.5825016541,3411.8361339370,-1929.7656104657,4256.4486594382,0.8015687271,ok
+february_december_walk_forward,full_series,Polynomial-Vandermonde rank 5,polynomial_vandermonde,,,False,48096,2605.0020708378,2968.7622216200,-133.8020611095,2378.8535422010,1.2479802430,ok
+february_december_walk_forward,effective_generation,Polynomial-Vandermonde rank 5,polynomial_vandermonde,,,False,26880,2924.1929815955,3434.6216683961,-1976.3101259245,4256.4486594382,0.8069219068,ok
+february_december_walk_forward,full_series,Current final forecaster,current_final,,,False,48096,153.3997067249,303.8577392555,2.7692022125,2378.8535422010,0.1277328486,ok
+february_december_walk_forward,effective_generation,Current final forecaster,current_final,,,False,26880,274.3841699256,406.4499569802,4.8631600659,4256.4486594382,0.0954903934,ok
+february_december_walk_forward,full_series,SSA window 3d rank 1,ssa_recurrent,3.0000000000,1.0000000000,False,48096,1557.8379189397,2026.6026355360,35.6960734280,2378.8535422010,0.8519240885,ok
+february_december_walk_forward,effective_generation,SSA window 3d rank 1,ssa_recurrent,3.0000000000,1.0000000000,False,26880,1946.7884587594,2354.9333275993,-776.7582005311,4256.4486594382,0.5532624768,ok
+february_december_walk_forward,full_series,SSA window 3d rank 3,ssa_recurrent,3.0000000000,3.0000000000,False,48096,559.9382593037,804.5447380075,151.2429061655,2378.8535422010,0.3382069235,ok
+february_december_walk_forward,effective_generation,SSA window 3d rank 3,ssa_recurrent,3.0000000000,3.0000000000,False,26880,805.9627175401,980.9402939724,74.6899606749,4256.4486594382,0.2304597970,ok
+february_december_walk_forward,full_series,SSA window 3d rank 5,ssa_recurrent,3.0000000000,5.0000000000,False,48096,276.8533559112,427.9215838127,71.5916173572,2378.8535422010,0.1798856366,ok
+february_december_walk_forward,effective_generation,SSA window 3d rank 5,ssa_recurrent,3.0000000000,5.0000000000,False,26880,408.7609620676,542.0372835580,41.4890655834,4256.4486594382,0.1273449598,ok
+february_december_walk_forward,full_series,SSA window 7d rank 1,ssa_recurrent,7.0000000000,1.0000000000,False,48096,1521.6126455462,1983.4949926918,39.5958564942,2378.8535422010,0.8338029044,ok
+february_december_walk_forward,effective_generation,SSA window 7d rank 1,ssa_recurrent,7.0000000000,1.0000000000,False,26880,1914.0225704619,2308.8722299123,-737.7288985205,4256.4486594382,0.5424409912,ok
+february_december_walk_forward,full_series,SSA window 7d rank 3,ssa_recurrent,7.0000000000,3.0000000000,False,48096,561.4704179831,804.9384601809,157.7845175542,2378.8535422010,0.3383724327,ok
+february_december_walk_forward,effective_generation,SSA window 7d rank 3,ssa_recurrent,7.0000000000,3.0000000000,False,26880,807.2278282028,978.9033241402,84.9184135069,4256.4486594382,0.2299812361,ok
+february_december_walk_forward,full_series,SSA window 7d rank 5,ssa_recurrent,7.0000000000,5.0000000000,False,48096,257.4727653745,391.8738161910,71.4480026780,2378.8535422010,0.1647322163,ok
+february_december_walk_forward,effective_generation,SSA window 7d rank 5,ssa_recurrent,7.0000000000,5.0000000000,False,26880,370.5111376704,489.0679552848,37.6596872742,4256.4486594382,0.1149004709,ok
+february_december_walk_forward,full_series,SSA window 14d rank 1,ssa_recurrent,14.0000000000,1.0000000000,False,48096,1636.8030840409,2112.1503090756,39.1271103016,2378.8535422010,0.8878858121,ok
+february_december_walk_forward,effective_generation,SSA window 14d rank 1,ssa_recurrent,14.0000000000,1.0000000000,False,26880,2013.3537606787,2442.6405578374,-845.3450351906,4256.4486594382,0.5738682064,ok
+february_december_walk_forward,full_series,SSA window 14d rank 3,ssa_recurrent,14.0000000000,3.0000000000,False,48096,591.9758006861,851.9392205397,186.0613065406,2378.8535422010,0.3581301688,ok
+february_december_walk_forward,effective_generation,SSA window 14d rank 3,ssa_recurrent,14.0000000000,3.0000000000,False,26880,852.6287370266,1034.4261641395,126.3317314305,4256.4486594382,0.2430256411,ok
+february_december_walk_forward,full_series,SSA window 14d rank 5,ssa_recurrent,14.0000000000,5.0000000000,True,48096,260.8339716149,393.8328473812,76.4509231420,2378.8535422010,0.1655557353,ok
+february_december_walk_forward,effective_generation,SSA window 14d rank 5,ssa_recurrent,14.0000000000,5.0000000000,True,26880,367.6601302605,484.8462551600,37.7461756715,4256.4486594382,0.1139086346,ok

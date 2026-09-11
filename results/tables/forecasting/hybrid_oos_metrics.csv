@@ -1,0 +1,2 @@
+scope,lookback_days,hankel_rows,rank,hidden_units,parameter_count,full_count,full_mae_kw,full_rmse_kw,full_bias_kw,full_mean_actual_kw,full_cvrmse,full_cvrmse_status,effective_count,effective_mae_kw,effective_rmse_kw,effective_bias_kw,effective_mean_actual_kw,effective_cvrmse,effective_cvrmse_status
+february_december_frozen_model,7,144,1,16,18592,48096,1400.66335114,1993.19831675,-211.75455877,2378.85354220,0.83788190,ok,26880,1763.09654777,2304.92287910,-1121.97978389,4256.44865944,0.54151314,ok

@@ -1,0 +1,4 @@
+scope,variable,subset,model,count,mae_kw,rmse_kw,bias_kw
+february_december_walk_forward,load,full_series,Last Week,48096,176.79572117,244.28661500,1.94946970
+february_december_walk_forward,generation,full_series,7-day mean,48096,153.39970672,303.85773926,2.76920221
+february_december_walk_forward,generation,active_generation,7-day mean,26880,274.38416993,406.44995698,4.86316007

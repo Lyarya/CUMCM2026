@@ -1,0 +1,18 @@
+{
+  "canonical_source": "processed/C题/actual_10min.csv",
+  "calibration_period": "2025-01-01/2025-01-31",
+  "formal_evaluation_period": "2025-02-01/2025-12-31",
+  "formal_prediction_rows": 48096,
+  "formal_evaluation_days": 334,
+  "timestamps_per_day": 144,
+  "formal_parameters_fixed": true,
+  "online_parameter_learning": false,
+  "official_forecast_used": false,
+  "scenario_source_dates_strictly_before_target": true,
+  "scenario_method": "paired_whole_day_residual_resampling",
+  "scenario_count_per_day": 50,
+  "generation_physical_upper_bound": null,
+  "generation_upper_bound_note": "No rated capacity is supplied; only the physical lower bound zero is enforced.",
+  "representative_scenario_figure_date": "2025-10-04",
+  "ready_for_stage2b": true
+}

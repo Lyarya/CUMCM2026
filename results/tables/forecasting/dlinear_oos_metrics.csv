@@ -1,0 +1,2 @@
+scope,lookback_days,kernel_size,normalization,parameter_count,full_count,full_mae_kw,full_rmse_kw,full_bias_kw,full_mean_actual_kw,full_cvrmse,full_cvrmse_status,effective_count,effective_mae_kw,effective_rmse_kw,effective_bias_kw,effective_mean_actual_kw,effective_cvrmse,effective_cvrmse_status
+february_december_frozen_model,7,73,causal_zscore,290592,48096,423.39744515,692.69233841,-191.07278049,2378.85354220,0.29118747,ok,26880,677.21759161,903.89187020,-422.24520498,4256.44865944,0.21235822,ok

@@ -1,0 +1,33 @@
+scope,variable,subset,model,count,mae_kw,rmse_kw,bias_kw
+january_rolling_validation,generation,full_series,Yesterday,3456,112.80051852,249.56916341,-11.95318704
+january_rolling_validation,generation,full_series,Last Week,3456,128.51132538,266.49185365,-67.14645310
+january_rolling_validation,generation,full_series,7-day mean,3456,90.33732399,191.04272959,-39.97730914
+january_rolling_validation,generation,full_series,Seasonal,3456,103.47625489,222.18272891,-36.79015676
+january_rolling_validation,generation,full_series,Low-Rank rank 1,3456,1831.82198341,2403.39830015,-598.89799912
+january_rolling_validation,generation,full_series,Low-Rank rank 3,3456,1992.15738390,2282.73570081,-17.64030405
+january_rolling_validation,generation,full_series,Low-Rank rank 5,3456,1954.32791453,2282.18823747,-135.27640542
+january_rolling_validation,generation,full_series,Seasonal + Low-Rank,3456,103.47625489,222.18272891,-36.79015676
+january_rolling_validation,generation,active_generation,Yesterday,1657,235.26703042,360.42635123,-24.93140435
+january_rolling_validation,generation,active_generation,Last Week,1657,268.01460362,384.86592348,-140.06824635
+january_rolling_validation,generation,active_generation,7-day mean,1657,188.40728345,275.90278596,-83.38956152
+january_rolling_validation,generation,active_generation,Seasonal,1657,215.81025674,320.87499876,-76.74298325
+january_rolling_validation,generation,active_generation,Low-Rank rank 1,1657,2722.36129320,3264.52964983,-2347.38418635
+january_rolling_validation,generation,active_generation,Low-Rank rank 3,1657,2418.44081806,2840.11737243,-1773.38827642
+january_rolling_validation,generation,active_generation,Low-Rank rank 5,1657,2469.16652790,2911.35150472,-1889.11502295
+january_rolling_validation,generation,active_generation,Seasonal + Low-Rank,1657,215.81025674,320.87499876,-76.74298325
+february_december_walk_forward,generation,full_series,Yesterday,48096,185.34649153,375.17487814,0.76101731
+february_december_walk_forward,generation,full_series,Last Week,48096,214.68823138,419.94796823,4.71353383
+february_december_walk_forward,generation,full_series,7-day mean,48096,153.39970672,303.85773926,2.76920221
+february_december_walk_forward,generation,full_series,Seasonal,48096,170.57091268,341.37296065,2.53964975
+february_december_walk_forward,generation,full_series,Low-Rank rank 1,48096,2525.12277166,3130.81226391,-656.95835942
+february_december_walk_forward,generation,full_series,Low-Rank rank 3,48096,2620.91300684,2973.19748364,-82.59492010
+february_december_walk_forward,generation,full_series,Low-Rank rank 5,48096,2605.00207084,2968.76222162,-133.80206111
+february_december_walk_forward,generation,full_series,Seasonal + Low-Rank,48096,170.57091268,341.37296065,2.53964975
+february_december_walk_forward,generation,active_generation,Yesterday,26880,331.63383160,501.84959699,1.35767952
+february_december_walk_forward,generation,active_generation,Last Week,26880,383.91026285,561.72940615,8.20553617
+february_december_walk_forward,generation,active_generation,7-day mean,26880,274.38416993,406.44995698,4.86316007
+february_december_walk_forward,generation,active_generation,Seasonal,26880,305.09515334,456.63197724,4.43921502
+february_december_walk_forward,generation,active_generation,Low-Rank rank 1,26880,3196.50032637,3839.13957580,-2497.15198317
+february_december_walk_forward,generation,active_generation,Low-Rank rank 3,26880,2907.58250165,3411.83613394,-1929.76561047
+february_december_walk_forward,generation,active_generation,Low-Rank rank 5,26880,2924.19298160,3434.62166840,-1976.31012592
+february_december_walk_forward,generation,active_generation,Seasonal + Low-Rank,26880,305.09515334,456.63197724,4.43921502

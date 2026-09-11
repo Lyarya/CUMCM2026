@@ -1,0 +1,2 @@
+calibration_period,formal_evaluation_period,seasonal_alpha,selected_hankel_rank,seasonal_weight,low_rank_weight,weights_fixed_during_formal_evaluation,online_parameter_learning
+2025-01-01/2025-01-31,2025-02-01/2025-12-31,0.55000000,5,1.00000000,0.00000000,True,False

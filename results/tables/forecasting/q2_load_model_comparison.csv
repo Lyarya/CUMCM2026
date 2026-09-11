@@ -1,0 +1,7 @@
+scope,variable,subset,model,count,mae_kw,rmse_kw,bias_kw
+january_rolling_validation,load,full_series,Yesterday,3312,676.28779378,1163.31809696,84.57613037
+january_rolling_validation,load,full_series,Last Week,3312,142.31818560,177.57351839,16.22009315
+january_rolling_validation,load,full_series,Ridge phase-aware,3312,178.83931827,267.32016800,18.56904140
+february_december_walk_forward,load,full_series,Yesterday,48096,650.02006751,1128.39123803,-5.46179954
+february_december_walk_forward,load,full_series,Last Week,48096,176.79572117,244.28661500,1.94946970
+february_december_walk_forward,load,full_series,Ridge phase-aware,48096,171.79583552,235.90759976,-9.17543199

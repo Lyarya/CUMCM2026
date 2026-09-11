@@ -1,0 +1,43 @@
+{
+  "strict_causal_protocol": true,
+  "common_validation_period": "2025-01-18/2025-01-31",
+  "formal_evaluation_period": "2025-02-01/2025-12-31",
+  "formal_model_and_scaler_frozen": true,
+  "gradients_disabled_during_formal_evaluation": true,
+  "official_attachment3_used": false,
+  "protected_artifact_hashes_before": {
+    "q2_forecast_predictions.csv": "188e82dceff5a8b4fff27a2c35f2f802e53746ed638db875f5cf8862b5eff49e",
+    "q2_scenarios.npz": "74ed72efbf495aed32e66ebfa3af2e9dcdc72f96f9567804389a0f1e0ba70718",
+    "q2_scenario_manifest.csv": "5dd08adaf18f4e5632051617bc80283f08a73981c9237c74a855c17684dcf552",
+    "q2_forecast_metrics.csv": "39ef2e28a1f24737e16c88f700c957c0fe2851fe66f4d3e8b879f70f4e2da071",
+    "q2_model_decision.json": "dfa983357dbbcfc8b40fc692a36e05ca6225811abd734828713e8fcef7755aee",
+    "q2_leakage_audit.json": "893b5ed6f10da09ca07678c6e4b11583404f48817c2646867892fd72d59ad549"
+  },
+  "protected_artifact_hashes_after": {
+    "q2_forecast_predictions.csv": "188e82dceff5a8b4fff27a2c35f2f802e53746ed638db875f5cf8862b5eff49e",
+    "q2_scenarios.npz": "74ed72efbf495aed32e66ebfa3af2e9dcdc72f96f9567804389a0f1e0ba70718",
+    "q2_scenario_manifest.csv": "5dd08adaf18f4e5632051617bc80283f08a73981c9237c74a855c17684dcf552",
+    "q2_forecast_metrics.csv": "39ef2e28a1f24737e16c88f700c957c0fe2851fe66f4d3e8b879f70f4e2da071",
+    "q2_model_decision.json": "dfa983357dbbcfc8b40fc692a36e05ca6225811abd734828713e8fcef7755aee",
+    "q2_leakage_audit.json": "893b5ed6f10da09ca07678c6e4b11583404f48817c2646867892fd72d59ad549"
+  },
+  "protected_artifacts_unchanged": true,
+  "raw_excel_hashes_before": {
+    "附件1.xlsx": "66b87134f5ecccd68184d3539bb1293ef039f9e0fdd955a589b9bfa7f227c377",
+    "附件2.xlsx": "2e95fd446bfafa0d8c59577b5c2e2ea8b3f1def20dde54a3062556f4da9b4c72",
+    "附件3.xlsx": "8a61b06c52bd0d639a1cc37c61a7d9f5b75edcbca718f64c1bd3498ec9f9d843",
+    "附件4.xlsx": "20e9c93aeab5e8e21ae4dd15587f9e190f7408692504c1319598461cd654fe71"
+  },
+  "raw_excel_hashes_after": {
+    "附件1.xlsx": "66b87134f5ecccd68184d3539bb1293ef039f9e0fdd955a589b9bfa7f227c377",
+    "附件2.xlsx": "2e95fd446bfafa0d8c59577b5c2e2ea8b3f1def20dde54a3062556f4da9b4c72",
+    "附件3.xlsx": "8a61b06c52bd0d639a1cc37c61a7d9f5b75edcbca718f64c1bd3498ec9f9d843",
+    "附件4.xlsx": "20e9c93aeab5e8e21ae4dd15587f9e190f7408692504c1319598461cd654fe71"
+  },
+  "raw_excel_hashes_unchanged": true,
+  "representative_figure_date": "2025-10-04",
+  "selected_generation_forecaster": "7-day same-slot mean",
+  "best_hindsight_oos_model": "7-day same-slot mean",
+  "generic_fixed_hybrid_reproduces_unpublished_architecture": false,
+  "ready_for_stage2b": true
+}

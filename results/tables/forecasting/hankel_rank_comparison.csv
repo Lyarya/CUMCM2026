@@ -1,0 +1,7 @@
+scope,rank,count,mae_kw,rmse_kw,bias_kw,variable,subset
+january_rolling_validation,1,3456,1831.82198341,2403.39830015,-598.89799912,,
+january_rolling_validation,3,3456,1992.15738390,2282.73570081,-17.64030405,,
+january_rolling_validation,5,3456,1954.32791453,2282.18823747,-135.27640542,,
+february_december_walk_forward,1,48096,2525.12277166,3130.81226391,-656.95835942,generation,full_series
+february_december_walk_forward,3,48096,2620.91300684,2973.19748364,-82.59492010,generation,full_series
+february_december_walk_forward,5,48096,2605.00207084,2968.76222162,-133.80206111,generation,full_series

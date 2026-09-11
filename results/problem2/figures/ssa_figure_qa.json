@@ -1,0 +1,28 @@
+{
+  "core_conclusion": "比较奇异谱能量、标准SSA递推误差与周期基线误差，判断低秩压缩是否转化为多步预测优势。",
+  "evidence_chain": [
+    "一月共同起点的秩—窗口误差与能量",
+    "334个正式预测日的成对误差分布与月度汇总",
+    "按成对误差中位数客观选取的代表日曲线"
+  ],
+  "archetype": "quantitative grid",
+  "backend": "python",
+  "source_rows": {
+    "validation_daily_rows": 153,
+    "formal_prediction_rows": 48096,
+    "paired_days": 334
+  },
+  "exclusions": "none",
+  "transformations": "mean centering only inside SSA; no standardization; no plotted downsampling",
+  "uncertainty": "daily-unit nonparametric bootstrap, 2000 resamples, seed 2026",
+  "representative_day_rule": "closest daily RMSE difference to the median paired difference",
+  "representative_day": "2025-02-22",
+  "formats": [
+    "svg",
+    "pdf",
+    "jpg",
+    "png"
+  ],
+  "language": "Chinese labels throughout",
+  "stage2a_artifacts_unchanged": true
+}
