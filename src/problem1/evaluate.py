@@ -21,6 +21,7 @@ class ValidationReport:
     maximum_discharge_kw: float
     simultaneous_charge_discharge_count: int
     negative_grid_purchase_count: int
+    maximum_spill_excess_kw: float
     maximum_power_balance_residual_kw: float
     maximum_energy_transition_residual_kwh: float
     objective_recalculation_error_yuan: float
@@ -68,6 +69,9 @@ def validate_dispatch(
             ((frame["charge_kw"] > tolerance) & (frame["discharge_kw"] > tolerance)).sum()
         ),
         negative_grid_purchase_count=int((frame["grid_purchase_kw"] < -tolerance).sum()),
+        maximum_spill_excess_kw=float(
+            np.maximum(frame["spill_kw"] - frame["pv_forecast_kw"], 0.0).max()
+        ),
         maximum_power_balance_residual_kw=float(np.abs(power_residual).max()),
         maximum_energy_transition_residual_kwh=float(np.abs(transition_residual).max()),
         objective_recalculation_error_yuan=abs(objective - result.objective_yuan),
@@ -82,6 +86,7 @@ def validate_dispatch(
         "discharge power": report.maximum_discharge_kw <= parameters.maximum_discharge_kw + tolerance,
         "mutual exclusion": report.simultaneous_charge_discharge_count == 0,
         "nonnegative grid purchase": report.negative_grid_purchase_count == 0,
+        "spill bounded by photovoltaic generation": report.maximum_spill_excess_kw <= tolerance,
         "power balance": report.maximum_power_balance_residual_kw <= tolerance,
         "energy transition": report.maximum_energy_transition_residual_kwh <= tolerance,
         "objective accounting": report.objective_recalculation_error_yuan <= tolerance,
@@ -132,6 +137,7 @@ def build_summary(
         **baseline,
         "cost_saving_yuan": saving,
         "cost_saving_percent": 100 * saving / baseline["baseline_cost_yuan"],
+        "maximum_spill_excess_kw": validation.maximum_spill_excess_kw,
         "maximum_power_balance_residual_kw": validation.maximum_power_balance_residual_kw,
         "maximum_energy_transition_residual_kwh": validation.maximum_energy_transition_residual_kwh,
         "objective_recalculation_error_yuan": validation.objective_recalculation_error_yuan,

@@ -33,6 +33,7 @@ def test_problem1_solution_is_feasible_and_improves_cost(solved_dispatch) -> Non
     assert validation.minimum_energy_kwh >= 1_200.0 - 1e-5
     assert validation.maximum_energy_kwh <= 10_800.0 + 1e-5
     assert validation.simultaneous_charge_discharge_count == 0
+    assert validation.maximum_spill_excess_kw <= 1e-3
     assert validation.maximum_power_balance_residual_kw <= 1e-3
     assert validation.maximum_energy_transition_residual_kwh <= 1e-3
 

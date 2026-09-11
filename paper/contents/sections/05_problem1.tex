@@ -2,34 +2,45 @@
 
 \subsection{数据与确定性调度边界}
 
-本问直接读取第一阶段形成的单日标准表，将附件给出的负荷、光伏预测功率和分时购电价统一到
-144个10分钟区间。记区间长度为 $\Delta t=1/6\ \mathrm{h}$。本问只讨论题设预测值已知时的
-日前确定性调度，不引入预测模型和预测误差。
+本问直接读取第一阶段形成的单日标准表，将附件给出的负荷功率、光伏发电功率和分时购电价统一到
+144个10分钟区间。记时间步长为 $\Delta t=1/6\ \mathrm{h}$。本问将题设给定数据视为已知量，
+只讨论日前确定性调度，不引入预测模型和预测误差。
 
 \subsection{混合整数线性规划模型}
 
 对区间 $t=1,\ldots,144$，定义外网购电功率 $g_t$、储能充电功率 $c_t$、放电功率
-$d_t$、弃光功率 $s_t$ 和区间起点储能电量 $E_t$。负荷与光伏预测功率分别记为
+$d_t$、弃光功率 $s_t$，并以 $E_t$ 表示第 $t$ 个区间起点的储能电量。负荷功率与光伏发电功率分别记为
 $L_t$ 和 $P_t^{\mathrm{pv}}$，购电价为 $\lambda_t$。以全天购电成本最小为目标：
 \begin{equation}
   \min \ C=\sum_{t=1}^{144}\lambda_t g_t\Delta t .
   \label{eq:p1-objective}
 \end{equation}
-逐区间功率平衡和储能电量递推为
+各区间的功率平衡和储能电量递推为
 \begin{align}
-  g_t+P_t^{\mathrm{pv}}+d_t &= L_t+c_t+s_t, \\
+  g_t+P_t^{\mathrm{pv}}+d_t &= L_t+c_t+s_t,
+  &&t=1,\ldots,144, \\
   E_{t+1} &= E_t+\eta_c c_t\Delta t-\frac{d_t\Delta t}{\eta_d} .
+  &&t=1,\ldots,144.
   \label{eq:p1-dynamics}
 \end{align}
-其中 $\eta_c=\eta_d=0.9$。由题设，储能容量为 $12000\ \mathrm{kWh}$，运行区间为
-$1200\le E_t\le10800\ \mathrm{kWh}$，充、放电功率上限均为 $5000\ \mathrm{kW}$，且
-$E_1=E_{145}=6000\ \mathrm{kWh}$。引入二元变量 $u_t$ 排除同时充放电：
+其中 $\eta_c=\eta_d=0.9$。由题设，储能额定容量为 $12000\ \mathrm{kWh}$，允许运行区间为
+\begin{equation}
+  1200\le E_t\le10800\ \mathrm{kWh},\qquad t=1,\ldots,145,
+  \label{eq:p1-energy-bound}
+\end{equation}
+且 $E_1=E_{145}=6000\ \mathrm{kWh}$。储能最大充、放电功率均为 $5000\ \mathrm{kW}$。
+引入二元变量 $u_t$ 排除同时充放电：
 \begin{equation}
   0\le c_t\le5000u_t,\qquad
   0\le d_t\le5000(1-u_t),\qquad u_t\in\{0,1\}.
   \label{eq:p1-mode}
 \end{equation}
-同时规定 $g_t\ge0$、$s_t\ge0$。模型由 PuLP 建模并调用 CBC 求解器求得全局最优解。
+其中 $t=1,\ldots,144$。此外，购电功率非负，弃光功率不得超过该区间的光伏发电功率：
+\begin{equation}
+  g_t\ge0,\qquad 0\le s_t\le P_t^{\mathrm{pv}},\qquad t=1,\ldots,144.
+  \label{eq:p1-spill-bound}
+\end{equation}
+由此得到含连续变量与二元变量的混合整数线性规划模型，采用 PuLP 建模并调用 CBC 求解器求解。
 
 \subsection{调度结果}
 

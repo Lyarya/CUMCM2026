@@ -99,6 +99,7 @@ def solve_deterministic_dispatch(
         model += (
             discharge[t] <= parameters.maximum_discharge_kw * (1 - mode[t])
         ), f"discharge_limit_{t + 1:03d}"
+        model += spill[t] <= pv_kw, f"spill_limit_{t + 1:03d}"
 
     model += pulp.lpSum(
         float(frame.at[t, "price_yuan_per_kwh"]) * grid[t] * DT_HOURS
