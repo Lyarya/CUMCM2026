@@ -92,8 +92,8 @@ def test_cross_day_soc_is_carried_without_reset_to_6000() -> None:
 def test_full_period_outputs_preserve_result2_template() -> None:
     daily = pd.read_csv(TABLE_DIR / "table_p2_daily_summary.csv")
     intervals = pd.read_csv(TABLE_DIR / "table_p2_dispatch.csv")
-    assert daily.shape == (334, 22)
-    assert intervals.shape == (334 * 144, 18)
+    assert daily.shape == (334, 26)
+    assert intervals.shape == (334 * 144, 25)
     assert (daily["status"] == "Optimal").all()
     assert np.max(
         np.abs(
@@ -118,3 +118,17 @@ def test_full_period_outputs_preserve_result2_template() -> None:
     assert workbook["紧急购电量"].max_column == 3
     assert workbook["计划购电量"]["A2"].value.date().isoformat() == "2025-02-01"
     assert workbook["计划购电量"]["A335"].value.date().isoformat() == "2025-12-31"
+
+    table3 = pd.read_csv(TABLE_DIR / "table_p2_table3_emergency.csv")
+    assert table3.shape == (103, 8)
+    assert list(table3.columns) == [
+        "2025.3.20_时间段",
+        "2025.3.20_购电量_kWh",
+        "2025.6.21_时间段",
+        "2025.6.21_购电量_kWh",
+        "2025.9.23_时间段",
+        "2025.9.23_购电量_kWh",
+        "2025.12.21_时间段",
+        "2025.12.21_购电量_kWh",
+    ]
+    assert table3["2025.3.20_购电量_kWh"].sum() == pytest.approx(5378.415405, abs=1e-5)

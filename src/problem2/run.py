@@ -33,6 +33,7 @@ from src.problem2.model import Q2DayResult, Q2DispatchParameters, solve_expected
 FORMAL_START = "2025-02-01"
 FORMAL_END = "2025-12-31"
 OFFICIAL_INITIAL_ENERGY_KWH = 6_000.0
+TABLE3_DATES = ("2025-03-20", "2025-06-21", "2025-09-23", "2025-12-21")
 OUTPUT_DIR = problem_results_dir(2)
 TABLE_DIR = OUTPUT_DIR / "tables"
 TEMPLATE_PATH = PROJECT_ROOT / "data" / "raw" / "C题" / "附件" / "附件5" / "result2.xlsx"
@@ -76,6 +77,161 @@ def _apply_row_style(sheet, style, target_row: int) -> None:
         target.number_format = number_format
         target.alignment = copy(alignment)
         target.protection = copy(protection)
+
+
+def _interval_label(slot: int) -> str:
+    start_minutes = (int(slot) - 1) * 10
+    end_minutes = int(slot) * 10
+    start_hour, start_minute = divmod(start_minutes, 60)
+    end_hour, end_minute = divmod(end_minutes, 60)
+    return f"{start_hour}:{start_minute:02d}-{end_hour}:{end_minute:02d}"
+
+
+def attach_realized_outcomes(
+    daily: pd.DataFrame, intervals: pd.DataFrame
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Evaluate a fixed day-ahead plan against Appendix 2 actual observations."""
+
+    actual = pd.read_csv(
+        FORMAL_FORECAST_PATH,
+        usecols=["operating_date", "datetime", "actual_load", "actual_generation"],
+        parse_dates=["datetime"],
+    ).sort_values(["operating_date", "datetime"], kind="stable")
+    frame = intervals.copy().sort_values(["date", "timestamp"], kind="stable").reset_index(drop=True)
+    actual = actual.loc[actual["operating_date"].astype(str).isin(frame["date"].astype(str).unique())]
+    actual = actual.reset_index(drop=True)
+    if len(frame) != len(actual):
+        raise AssertionError("dispatch and Appendix 2 actual observations have different lengths")
+    if not np.array_equal(frame["date"].astype(str), actual["operating_date"].astype(str)):
+        raise AssertionError("dispatch dates do not align with Appendix 2 actual observations")
+    if not np.array_equal(
+        pd.to_datetime(frame["timestamp"]).to_numpy(dtype="datetime64[ns]"),
+        actual["datetime"].to_numpy(dtype="datetime64[ns]"),
+    ):
+        raise AssertionError("dispatch timestamps do not align with Appendix 2 actual observations")
+
+    frame["actual_load_kw"] = actual["actual_load"].to_numpy(dtype=float)
+    frame["actual_pv_kw"] = actual["actual_generation"].to_numpy(dtype=float)
+    shortfall = (
+        frame["actual_load_kw"]
+        + frame["charge_kw"]
+        - frame["planned_grid_kw"]
+        - frame["actual_pv_kw"]
+        - frame["discharge_kw"]
+    )
+    frame["realized_emergency_kw"] = np.maximum(shortfall, 0.0)
+    frame["realized_surplus_kw"] = np.maximum(-shortfall, 0.0)
+    frame["realized_emergency_kwh"] = frame["realized_emergency_kw"] / 6.0
+    frame["realized_surplus_kwh"] = frame["realized_surplus_kw"] / 6.0
+    frame["realized_emergency_cost_yuan"] = (
+        5.0
+        * frame["price_yuan_per_kwh"]
+        * frame["realized_emergency_kwh"]
+    )
+
+    realized_daily = frame.groupby("date", sort=True).agg(
+        realized_emergency_energy_kwh=("realized_emergency_kwh", "sum"),
+        realized_emergency_cost_yuan=("realized_emergency_cost_yuan", "sum"),
+        realized_surplus_energy_kwh=("realized_surplus_kwh", "sum"),
+    )
+    daily_frame = daily.copy()
+    for column in realized_daily.columns:
+        daily_frame[column] = daily_frame["date"].map(realized_daily[column])
+    if daily_frame[list(realized_daily.columns)].isna().any().any():
+        raise AssertionError("realized Q2 daily outcomes contain missing values")
+    daily_frame["realized_total_cost_yuan"] = (
+        daily_frame["planned_purchase_cost_yuan"]
+        + daily_frame["realized_emergency_cost_yuan"]
+    )
+    return daily_frame, frame
+
+
+def write_table3_outputs(intervals: pd.DataFrame) -> tuple[Path, Path]:
+    """Write the four-date emergency-purchase table in the official Table 3 form."""
+
+    selected: dict[str, pd.DataFrame] = {}
+    for target in TABLE3_DATES:
+        rows = intervals.loc[
+            (intervals["date"] == target)
+            & (intervals["realized_emergency_kwh"] > 1e-9),
+            ["slot", "realized_emergency_kwh"],
+        ].sort_values("slot")
+        selected[target] = rows.reset_index(drop=True)
+    row_count = max(len(rows) for rows in selected.values())
+    table = pd.DataFrame(index=range(row_count))
+    display_dates = [
+        f"{pd.Timestamp(target).year}.{pd.Timestamp(target).month}.{pd.Timestamp(target).day}"
+        for target in TABLE3_DATES
+    ]
+    for target, display_date in zip(TABLE3_DATES, display_dates):
+        rows = selected[target]
+        table[f"{display_date}_时间段"] = [
+            _interval_label(int(rows.at[index, "slot"])) if index < len(rows) else ""
+            for index in range(row_count)
+        ]
+        table[f"{display_date}_购电量_kWh"] = [
+            float(rows.at[index, "realized_emergency_kwh"]) if index < len(rows) else np.nan
+            for index in range(row_count)
+        ]
+
+    TABLE_DIR.mkdir(parents=True, exist_ok=True)
+    csv_path = TABLE_DIR / "table_p2_table3_emergency.csv"
+    tex_path = TABLE_DIR / "table_p2_table3_emergency.tex"
+    table.to_csv(csv_path, index=False, float_format="%.6f")
+    lines = ["\\clearpage"]
+    rows_per_page = 36
+    page_starts = list(range(0, row_count, rows_per_page))
+    for page_index, page_start in enumerate(page_starts):
+        lines.extend(
+            [
+                "\\begin{table}[H]",
+                "\\centering",
+                "\\scriptsize",
+                "\\setlength{\\tabcolsep}{2.5pt}",
+                (
+                    "\\caption{微网在指定日期的紧急购电量}"
+                    "\\label{tab:p2-table3-emergency}"
+                    if page_index == 0
+                    else "\\caption*{表~\\ref{tab:p2-table3-emergency}（续）}"
+                ),
+                "\\begin{tabular}{@{}crcrcrcr@{}}",
+                "\\toprule",
+                " & ".join(
+                    f"\\multicolumn{{2}}{{c}}{{{date}}}" for date in display_dates
+                )
+                + " \\\\",
+                "\\cmidrule(lr){1-2}\\cmidrule(lr){3-4}\\cmidrule(lr){5-6}\\cmidrule(lr){7-8}",
+                " & ".join(["时间段 & 购电量"] * 4) + " \\\\",
+                "\\midrule",
+            ]
+        )
+        for row_index in range(page_start, min(page_start + rows_per_page, row_count)):
+            cells: list[str] = []
+            for target in TABLE3_DATES:
+                rows = selected[target]
+                if row_index < len(rows):
+                    cells.extend(
+                        [
+                            _interval_label(int(rows.at[row_index, "slot"])).replace("-", "--"),
+                            f"{float(rows.at[row_index, 'realized_emergency_kwh']):.3f}",
+                        ]
+                    )
+                else:
+                    cells.extend(["", ""])
+            lines.append(" & ".join(cells) + " \\\\")
+        lines.extend(
+            [
+                "\\bottomrule",
+                "\\multicolumn{8}{r}{\\footnotesize 注：购电量单位为 kWh。}\\\\",
+                "\\end{tabular}",
+                "\\end{table}",
+            ]
+        )
+        if page_index < len(page_starts) - 1:
+            lines.append("\\clearpage")
+    lines.append("")
+    tex_path.write_text("\n".join(lines), encoding="utf-8")
+    return csv_path, tex_path
 
 
 def export_result2(
@@ -145,9 +301,9 @@ def export_result2(
     target_row = 2
     for _, day_row in daily.iterrows():
         day_frame = intervals.loc[intervals["date"] == day_row["date"]].sort_values("slot")
-        positive = day_frame.loc[day_frame["expected_emergency_kwh"] > 1e-9]
+        positive = day_frame.loc[day_frame["realized_emergency_kwh"] > 1e-9]
         if positive.empty:
-            positive = day_frame.iloc[[0]].assign(expected_emergency_kwh=0.0)
+            positive = day_frame.iloc[[0]].assign(realized_emergency_kwh=0.0)
         for item_index, (_, interval_row) in enumerate(positive.iterrows()):
             _apply_row_style(emergency_sheet, emergency_styles[min(item_index, 2)], target_row)
             emergency_sheet.cell(
@@ -155,8 +311,8 @@ def export_result2(
                 1,
                 pd.Timestamp(day_row["date"]).to_pydatetime() if item_index == 0 else None,
             )
-            emergency_sheet.cell(target_row, 2, purchase_sheet.cell(1, int(interval_row["slot"]) + 1).value)
-            emergency_sheet.cell(target_row, 3, float(interval_row["expected_emergency_kwh"])).number_format = "0.000000"
+            emergency_sheet.cell(target_row, 2, _interval_label(int(interval_row["slot"])))
+            emergency_sheet.cell(target_row, 3, float(interval_row["realized_emergency_kwh"])).number_format = "0.000000"
             target_row += 1
 
     workbook.calculation.fullCalcOnLoad = True
@@ -226,8 +382,11 @@ def _aggregate_summary(daily: pd.DataFrame, intervals: pd.DataFrame) -> dict[str
         "planned_purchase_cost_yuan": float(daily["planned_purchase_cost_yuan"].sum()),
         "expected_emergency_cost_yuan": float(daily["expected_emergency_cost_yuan"].sum()),
         "expected_total_cost_yuan": float(daily["expected_total_cost_yuan"].sum()),
+        "realized_emergency_cost_yuan": float(daily["realized_emergency_cost_yuan"].sum()),
+        "realized_total_cost_yuan": float(daily["realized_total_cost_yuan"].sum()),
         "planned_purchase_energy_kwh": float(daily["planned_purchase_energy_kwh"].sum()),
         "expected_emergency_energy_kwh": float(daily["expected_emergency_energy_kwh"].sum()),
+        "realized_emergency_energy_kwh": float(daily["realized_emergency_energy_kwh"].sum()),
         "charge_energy_kwh": float(daily["charge_energy_kwh"].sum()),
         "discharge_energy_kwh": float(daily["discharge_energy_kwh"].sum()),
         "expected_spill_energy_kwh": float(daily["expected_spill_energy_kwh"].sum()),
@@ -255,6 +414,7 @@ def main() -> None:
     daily, intervals, emergency, spill, source_dates = run_chronological(
         pd.DatetimeIndex(dates), progress=True
     )
+    daily, intervals = attach_realized_outcomes(daily, intervals)
     protected_after = {str(path): _sha256(path) for path in PROTECTED_FORECAST_PATHS}
     if protected_before != protected_after:
         raise AssertionError("a frozen Stage 2A forecast/scenario artifact changed")
@@ -289,6 +449,7 @@ def main() -> None:
     (TABLE_DIR / "table_p2_summary.json").write_text(
         json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8"
     )
+    write_table3_outputs(intervals)
     export_result2(daily, intervals)
     print("Q2 expected-cost stochastic MILP complete.")
     print(json.dumps(summary, ensure_ascii=False, indent=2))
