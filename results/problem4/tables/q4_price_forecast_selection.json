@@ -1,0 +1,38 @@
+{
+  "selection_rule": "lowest January validation RMSE; MAE tie-break",
+  "calibration_period": [
+    "2025-01-08",
+    "2025-01-16"
+  ],
+  "validation_period": [
+    "2025-01-17",
+    "2025-01-30"
+  ],
+  "evaluation_period": [
+    "2025-02-01",
+    "2025-12-31"
+  ],
+  "selected_method": "因果岭回归",
+  "selected_output_column": "selected_price_forecast_yuan_per_kwh",
+  "selected_ridge_alpha": 0.01,
+  "feature_columns": [
+    "previous_day_price_yuan_per_kwh",
+    "previous_week_price_yuan_per_kwh",
+    "same_slot_7d_mean_price_yuan_per_kwh",
+    "slot_sin",
+    "slot_cos",
+    "weekday_sin",
+    "weekday_cos",
+    "month_sin",
+    "month_cos"
+  ],
+  "all_price_lags_strictly_historical": true,
+  "model_frozen_before_evaluation": true,
+  "forecast_issue_rule": "operating_date 00:00; completed interval-end observations available at issue",
+  "latest_possible_feature_observation": "target_time - 1 day <= forecast issue",
+  "intraday_price_assimilation": false,
+  "validation_mae_yuan_per_kwh": 0.038198652588751825,
+  "validation_rmse_yuan_per_kwh": 0.048559692365667484,
+  "evaluation_mae_yuan_per_kwh": 0.04527507765498404,
+  "evaluation_rmse_yuan_per_kwh": 0.06244829577371955
+}

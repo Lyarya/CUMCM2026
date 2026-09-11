@@ -1,0 +1,36 @@
+{
+  "source_path": "/Users/yingli/Documents/ChatGPT/cumum2026/data/raw/C题/附件/附件4.xlsx",
+  "source_sha256": "20e9c93aeab5e8e21ae4dd15587f9e190f7408692504c1319598461cd654fe71",
+  "sheet": "Sheet1",
+  "sheet_names": [
+    "Sheet1"
+  ],
+  "raw_shape": [
+    365,
+    145
+  ],
+  "raw_missing_cells": 0,
+  "price_unit": "yuan/kWh",
+  "observed_points": 52560,
+  "date_start": "2025-01-01",
+  "date_end": "2025-12-31",
+  "interval_end_start": "2025-01-01 00:10:00",
+  "interval_end_end": "2026-01-01 00:00:00",
+  "temporal_resolution": "10min interval-end timestamps",
+  "missing_price_count": 0,
+  "duplicate_timestamp_count": 0,
+  "non_10min_gap_count": 0,
+  "invalid_timestamp_count": 0,
+  "missing_timestamp_count": 0,
+  "minimum_records_per_day": 144,
+  "maximum_records_per_day": 144,
+  "negative_price_count": 0,
+  "zero_price_count": 0,
+  "iqr_upper_extreme_count": 0,
+  "iqr_lower_extreme_count": 0,
+  "absolute_z_gt_3_count": 1,
+  "minimum_price": 0.0076,
+  "maximum_price": 1.7936,
+  "timestamp_alignment_pass": true,
+  "raw_to_stage1_max_absolute_price_gap": 0.0
+}

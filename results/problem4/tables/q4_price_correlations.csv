@@ -1,0 +1,7 @@
+variable,column,method,n,coefficient,p_value
+实际负荷,load_kw,Pearson,52560,0.507721433049,0
+实际负荷,load_kw,Spearman,52560,0.57976775863,0
+实际光伏,pv_actual_kw,Pearson,52560,0.0284302149513,7.07472151481e-11
+实际光伏,pv_actual_kw,Spearman,52560,0.189438728179,0
+净负荷,net_load_kw,Pearson,52560,0.260169920235,0
+净负荷,net_load_kw,Spearman,52560,0.262375795603,0
