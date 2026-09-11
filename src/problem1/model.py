@@ -66,12 +66,12 @@ def solve_deterministic_dispatch(
 
     periods = range(len(frame))
     model = pulp.LpProblem("CUMCM2026_Q1_Deterministic_Dispatch", pulp.LpMinimize)
-    grid = model.add_variable_dicts("grid_kw", periods, lowBound=0)
-    charge = model.add_variable_dicts("charge_kw", periods, lowBound=0)
-    discharge = model.add_variable_dicts("discharge_kw", periods, lowBound=0)
-    spill = model.add_variable_dicts("spill_kw", periods, lowBound=0)
-    mode = model.add_variable_dicts("charge_mode", periods, cat=pulp.LpBinary)
-    energy = model.add_variable_dicts(
+    grid = pulp.LpVariable.dicts("grid_kw", periods, lowBound=0)
+    charge = pulp.LpVariable.dicts("charge_kw", periods, lowBound=0)
+    discharge = pulp.LpVariable.dicts("discharge_kw", periods, lowBound=0)
+    spill = pulp.LpVariable.dicts("spill_kw", periods, lowBound=0)
+    mode = pulp.LpVariable.dicts("charge_mode", periods, cat=pulp.LpBinary)
+    energy = pulp.LpVariable.dicts(
         "energy_kwh",
         range(len(frame) + 1),
         lowBound=parameters.minimum_energy_kwh,
