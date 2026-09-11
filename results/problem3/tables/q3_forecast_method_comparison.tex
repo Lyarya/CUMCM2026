@@ -1,0 +1,18 @@
+\begin{table}[H]
+\centering
+\small
+\caption{问题三候选光伏预测方法的样本外比较}
+\label{tab:q3-method-comparison}
+\begin{tabular}{lrrrr}
+\toprule
+方法 & 样本数 & MAE/kW & RMSE/kW & 偏差/kW \\
+\midrule
+官方预测 & 32028 & 191.83 & 447.97 & -32.39 \\
+七日同刻均值 & 32028 & 153.86 & 305.44 & 2.81 \\
+静态凸融合 & 32028 & 139.29 & 276.92 & -1.53 \\
+提前期分箱融合 & 32028 & 121.73 & 252.99 & -0.81 \\
+发布时间分组融合 & 32028 & 132.19 & 265.56 & -1.28 \\
+在线因果融合 & 32028 & 153.86 & 305.44 & 2.81 \\
+\bottomrule
+\end{tabular}
+\end{table}

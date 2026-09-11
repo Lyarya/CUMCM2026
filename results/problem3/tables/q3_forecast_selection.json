@@ -1,0 +1,32 @@
+{
+  "calibration_period": "2025-01-08/2025-01-16",
+  "validation_period": "2025-01-17/2025-01-30",
+  "evaluation_period": "2025-02-01/2025-12-31",
+  "selected_seasonal_method": "七日同刻均值",
+  "selected_method": "提前期分箱融合",
+  "selected_column": "lead_aware_fusion_kw",
+  "selected_online_eta": 4.0,
+  "validation_mae_kw": 83.71793422287112,
+  "validation_rmse_kw": 179.7938638422382,
+  "evaluation_mae_kw": 121.73238012062845,
+  "evaluation_rmse_kw": 252.98733309462145,
+  "lead_aware": true,
+  "release_aware": false,
+  "structural_expert_included": false,
+  "structural_expert_reason": "现有结构化专家没有覆盖四个发布批次的同一整点协议，故不作不公平拼接。",
+  "fusion_is_causal": true,
+  "lead_weights": {
+    "1-3h": 0.871028657152665,
+    "13-18h": 0.032687266551996524,
+    "19-24h": 0.0889347684294856,
+    "4-6h": 0.4498754778240101,
+    "7-12h": 0.23207427737868855
+  },
+  "release_weights": {
+    "0": 0.08170898773210622,
+    "6": 0.45794157513928696,
+    "12": 0.11472724549524799,
+    "18": 0.0783267664796659
+  },
+  "global_official_weight": 0.12317486162102613
+}
