@@ -141,7 +141,8 @@ $6000\ \mathrm{kWh}$；该数值由目标函数与数据共同产生，而非每
 
 实际紧急购电按
 $e_t^{\mathrm{real}}=\max\{0,L_t^{\mathrm{real}}+c_t-g_t-P_t^{\mathrm{real}}-d_t\}$
-计算。按照题面表 3 的日期、分组表头和“时间段--购电量”列结构，将所有紧急购电量大于零的
-10 分钟区间列于表~\ref{tab:p2-table3-emergency}。
+计算。按照题面表 3 的日期、分组表头和“时间段--购电量”列结构，完整结果保留每个指定日期
+全部 144 个 10 分钟区间及其紧急购电量，零值时段也不省略。正文表~\ref{tab:p2-table3-emergency}
+受篇幅限制仅展示前 6 个时段，完整结果见附件 \texttt{result2.xlsx}。
 
 \input{../results/problem2/tables/table_p2_table3_emergency.tex}

@@ -152,12 +152,13 @@ def write_table3_outputs(intervals: pd.DataFrame) -> tuple[Path, Path]:
     selected: dict[str, pd.DataFrame] = {}
     for target in TABLE3_DATES:
         rows = intervals.loc[
-            (intervals["date"] == target)
-            & (intervals["realized_emergency_kwh"] > 1e-9),
+            intervals["date"] == target,
             ["slot", "realized_emergency_kwh"],
         ].sort_values("slot")
+        if len(rows) != 144:
+            raise AssertionError(f"{target} does not contain all 144 Table 3 intervals")
         selected[target] = rows.reset_index(drop=True)
-    row_count = max(len(rows) for rows in selected.values())
+    row_count = 144
     table = pd.DataFrame(index=range(row_count))
     display_dates = [
         f"{pd.Timestamp(target).year}.{pd.Timestamp(target).month}.{pd.Timestamp(target).day}"
@@ -166,11 +167,11 @@ def write_table3_outputs(intervals: pd.DataFrame) -> tuple[Path, Path]:
     for target, display_date in zip(TABLE3_DATES, display_dates):
         rows = selected[target]
         table[f"{display_date}_时间段"] = [
-            _interval_label(int(rows.at[index, "slot"])) if index < len(rows) else ""
+            _interval_label(int(rows.at[index, "slot"]))
             for index in range(row_count)
         ]
         table[f"{display_date}_购电量_kWh"] = [
-            float(rows.at[index, "realized_emergency_kwh"]) if index < len(rows) else np.nan
+            float(rows.at[index, "realized_emergency_kwh"])
             for index in range(row_count)
         ]
 
@@ -178,57 +179,42 @@ def write_table3_outputs(intervals: pd.DataFrame) -> tuple[Path, Path]:
     csv_path = TABLE_DIR / "table_p2_table3_emergency.csv"
     tex_path = TABLE_DIR / "table_p2_table3_emergency.tex"
     table.to_csv(csv_path, index=False, float_format="%.6f")
-    lines = ["\\clearpage"]
-    rows_per_page = 36
-    page_starts = list(range(0, row_count, rows_per_page))
-    for page_index, page_start in enumerate(page_starts):
-        lines.extend(
-            [
-                "\\begin{table}[H]",
-                "\\centering",
-                "\\scriptsize",
-                "\\setlength{\\tabcolsep}{2.5pt}",
-                (
-                    "\\caption{微网在指定日期的紧急购电量}"
-                    "\\label{tab:p2-table3-emergency}"
-                    if page_index == 0
-                    else "\\caption*{表~\\ref{tab:p2-table3-emergency}（续）}"
-                ),
-                "\\begin{tabular}{@{}crcrcrcr@{}}",
-                "\\toprule",
-                " & ".join(
-                    f"\\multicolumn{{2}}{{c}}{{{date}}}" for date in display_dates
-                )
-                + " \\\\",
-                "\\cmidrule(lr){1-2}\\cmidrule(lr){3-4}\\cmidrule(lr){5-6}\\cmidrule(lr){7-8}",
-                " & ".join(["时间段 & 购电量"] * 4) + " \\\\",
-                "\\midrule",
-            ]
-        )
-        for row_index in range(page_start, min(page_start + rows_per_page, row_count)):
-            cells: list[str] = []
-            for target in TABLE3_DATES:
-                rows = selected[target]
-                if row_index < len(rows):
-                    cells.extend(
-                        [
-                            _interval_label(int(rows.at[row_index, "slot"])).replace("-", "--"),
-                            f"{float(rows.at[row_index, 'realized_emergency_kwh']):.3f}",
-                        ]
-                    )
-                else:
-                    cells.extend(["", ""])
-            lines.append(" & ".join(cells) + " \\\\")
-        lines.extend(
-            [
-                "\\bottomrule",
-                "\\multicolumn{8}{r}{\\footnotesize 注：购电量单位为 kWh。}\\\\",
-                "\\end{tabular}",
-                "\\end{table}",
-            ]
-        )
-        if page_index < len(page_starts) - 1:
-            lines.append("\\clearpage")
+    lines = [
+        "\\begin{table}[H]",
+        "\\centering",
+        "\\scriptsize",
+        "\\setlength{\\tabcolsep}{2.5pt}",
+        "\\caption{微网在指定日期的紧急购电量}",
+        "\\label{tab:p2-table3-emergency}",
+        "\\begin{tabular}{@{}crcrcrcr@{}}",
+        "\\toprule",
+        " & ".join(f"\\multicolumn{{2}}{{c}}{{{date}}}" for date in display_dates) + " \\\\",
+        "\\cmidrule(lr){1-2}\\cmidrule(lr){3-4}\\cmidrule(lr){5-6}\\cmidrule(lr){7-8}",
+        " & ".join(["时间段 & 购电量"] * 4) + " \\\\",
+        "\\midrule",
+    ]
+    for row_index in range(6):
+        cells: list[str] = []
+        for target in TABLE3_DATES:
+            rows = selected[target]
+            cells.extend(
+                [
+                    _interval_label(int(rows.at[row_index, "slot"])).replace("-", "--"),
+                    f"{float(rows.at[row_index, 'realized_emergency_kwh']):.3f}",
+                ]
+            )
+        lines.append(" & ".join(cells) + " \\\\")
+    lines.extend(
+        [
+            "\\multicolumn{2}{c}{$\\vdots$} & \\multicolumn{2}{c}{$\\vdots$} & "
+            "\\multicolumn{2}{c}{$\\vdots$} & \\multicolumn{2}{c}{$\\vdots$} \\\\",
+            "\\bottomrule",
+            "\\end{tabular}",
+            "\\par\\vspace{2pt}",
+            "\\parbox{0.88\\textwidth}{\\footnotesize 注：购电量单位为 kWh。因篇幅限制，此处仅展示各指定日期前 6 个时段；全部 144 个 10 分钟时段（含紧急购电量为 0 的时段）已完整保存在附件 \\texttt{result2.xlsx} 中。}",
+            "\\end{table}",
+        ]
+    )
     lines.append("")
     tex_path.write_text("\n".join(lines), encoding="utf-8")
     return csv_path, tex_path
@@ -301,10 +287,9 @@ def export_result2(
     target_row = 2
     for _, day_row in daily.iterrows():
         day_frame = intervals.loc[intervals["date"] == day_row["date"]].sort_values("slot")
-        positive = day_frame.loc[day_frame["realized_emergency_kwh"] > 1e-9]
-        if positive.empty:
-            positive = day_frame.iloc[[0]].assign(realized_emergency_kwh=0.0)
-        for item_index, (_, interval_row) in enumerate(positive.iterrows()):
+        if len(day_frame) != 144:
+            raise AssertionError(f"{day_row['date']} does not contain 144 emergency intervals")
+        for item_index, (_, interval_row) in enumerate(day_frame.iterrows()):
             _apply_row_style(emergency_sheet, emergency_styles[min(item_index, 2)], target_row)
             emergency_sheet.cell(
                 target_row,

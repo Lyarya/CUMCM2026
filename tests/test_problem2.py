@@ -115,12 +115,12 @@ def test_full_period_outputs_preserve_result2_template() -> None:
     assert workbook.sheetnames == ["计划购电量", "充放电量", "紧急购电量"]
     assert (workbook["计划购电量"].max_row, workbook["计划购电量"].max_column) == (335, 147)
     assert (workbook["充放电量"].max_row, workbook["充放电量"].max_column) == (2005, 6)
-    assert workbook["紧急购电量"].max_column == 3
+    assert (workbook["紧急购电量"].max_row, workbook["紧急购电量"].max_column) == (334 * 144 + 1, 3)
     assert workbook["计划购电量"]["A2"].value.date().isoformat() == "2025-02-01"
     assert workbook["计划购电量"]["A335"].value.date().isoformat() == "2025-12-31"
 
     table3 = pd.read_csv(TABLE_DIR / "table_p2_table3_emergency.csv")
-    assert table3.shape == (103, 8)
+    assert table3.shape == (144, 8)
     assert list(table3.columns) == [
         "2025.3.20_时间段",
         "2025.3.20_购电量_kWh",
@@ -131,4 +131,7 @@ def test_full_period_outputs_preserve_result2_template() -> None:
         "2025.12.21_时间段",
         "2025.12.21_购电量_kWh",
     ]
+    assert not table3.isna().any().any()
+    assert (table3.filter(like="购电量_kWh") >= 0.0).all().all()
+    assert (table3.filter(like="购电量_kWh") == 0.0).any().all()
     assert table3["2025.3.20_购电量_kWh"].sum() == pytest.approx(5378.415405, abs=1e-5)
