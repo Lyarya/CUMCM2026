@@ -82,7 +82,9 @@ def build_windows(
     )
 
     expected = pd.Timedelta(frequency).value
-    time_ns = timestamps.asi8
+    # Pandas 3 may retain datetime64[us], while Timedelta.value is always ns.
+    # Normalize explicitly so continuity checks do not depend on array resolution.
+    time_ns = timestamps.to_numpy(dtype="datetime64[ns]").astype("int64")
     continuity = np.array(
         [
             np.all(
@@ -137,7 +139,8 @@ def summarize_windows(
     history_valid = history_valid_all[:n_windows]
     target_valid = target_valid_all[history_steps : history_steps + n_windows]
 
-    step_ok = np.diff(timestamps.asi8) == pd.Timedelta(frequency).value
+    time_ns = timestamps.to_numpy(dtype="datetime64[ns]").astype("int64")
+    step_ok = np.diff(time_ns) == pd.Timedelta(frequency).value
     bad_prefix = np.concatenate([[0], np.cumsum(~step_ok)])
     continuity = np.array(
         [

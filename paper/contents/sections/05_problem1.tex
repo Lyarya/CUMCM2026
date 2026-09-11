@@ -1,12 +1,119 @@
 \section{问题一的模型与求解}
 
-依次写明数据预处理、数学表达、求解算法、结果与本问结论。
+\subsection{数据与确定性调度边界}
 
-\IfFileExists{figures/common/test_pipeline.pdf}{
+本问直接读取第一阶段形成的单日标准表，将附件给出的负荷功率、光伏发电功率和分时购电价统一到
+144个10分钟区间。记时间步长为 $\Delta t=1/6\ \mathrm{h}$。本问将题设给定数据视为已知量，
+只讨论日前确定性调度，不引入预测模型和预测误差。
+
+\subsection{混合整数线性规划模型}
+
+对区间 $t=1,\ldots,144$，定义外网购电功率 $g_t$、储能充电功率 $c_t$、放电功率
+$d_t$、弃光功率 $s_t$，并以 $E_t$ 表示第 $t$ 个区间起点的储能电量。负荷功率与光伏发电功率分别记为
+$L_t$ 和 $P_t^{\mathrm{pv}}$，购电价为 $\lambda_t$。以全天购电成本最小为目标：
+\begin{equation}
+  \min \ C=\sum_{t=1}^{144}\lambda_t g_t\Delta t .
+  \label{eq:p1-objective}
+\end{equation}
+各区间的功率平衡和储能电量递推为
+\begin{align}
+  g_t+P_t^{\mathrm{pv}}+d_t &= L_t+c_t+s_t,
+  &&t=1,\ldots,144, \\
+  E_{t+1} &= E_t+\eta_c c_t\Delta t-\frac{d_t\Delta t}{\eta_d} .
+  &&t=1,\ldots,144.
+  \label{eq:p1-dynamics}
+\end{align}
+其中 $\eta_c=\eta_d=0.9$。由题设，储能额定容量为 $12000\ \mathrm{kWh}$，允许运行区间为
+\begin{equation}
+  1200\le E_t\le10800\ \mathrm{kWh},\qquad t=1,\ldots,145,
+  \label{eq:p1-energy-bound}
+\end{equation}
+且 $E_1=E_{145}=6000\ \mathrm{kWh}$。储能最大充、放电功率均为 $5000\ \mathrm{kW}$。
+引入二元变量 $u_t$ 排除同时充放电：
+\begin{equation}
+  0\le c_t\le5000u_t,\qquad
+  0\le d_t\le5000(1-u_t),\qquad u_t\in\{0,1\}.
+  \label{eq:p1-mode}
+\end{equation}
+其中 $t=1,\ldots,144$。此外，购电功率非负，弃光功率不得超过该区间的光伏发电功率：
+\begin{equation}
+  g_t\ge0,\qquad 0\le s_t\le P_t^{\mathrm{pv}},\qquad t=1,\ldots,144.
+  \label{eq:p1-spill-bound}
+\end{equation}
+由此得到含连续变量与二元变量的混合整数线性规划模型，采用 PuLP 建模并调用 CBC 求解器求解。
+
+\subsection{调度结果}
+
+图~\ref{fig:p1-dispatch} 给出负荷、光伏、购电及储能功率。低价时段外网购电除满足负荷外还为
+储能充电；光伏高出负荷以及高价时段则优先放电，因而将电量转移到购电成本较高的时段。
+
+\IfFileExists{figures/problem1/fig_p1_dispatch_power.pdf}{
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.75\textwidth]{figures/common/test_pipeline.pdf}
-  \caption{Python 到 LaTeX 的赛前流水线测试图}
-  \label{fig:pipeline-test}
+  \includegraphics[width=0.98\textwidth]{figures/problem1/fig_p1_dispatch_power.pdf}
+  \caption{问题一确定性调度的供需功率与储能功率}
+  \label{fig:p1-dispatch}
 \end{figure}
 }{}
+
+表~\ref{tab:p1-purchase-samples} 列出题目指定的六个代表区间。购电量按
+$q_t=g_t\Delta t$ 计算，单位为千瓦时。
+
+\begin{table}[htbp]
+  \centering
+  \caption{微网在指定时间段的购电量及全天的购电量和购电费}
+  \label{tab:p1-purchase-samples}
+  \small
+  \begin{tabular}{crcrcr}
+    \toprule
+    时间段 & 购电量 & 时间段 & 购电量 & 时间段 & 购电量 \\
+    \midrule
+    10:00--10:10 & 0.000   & 12:00--12:10 & 486.403 & 14:00--14:10 & 0.000 \\
+    16:00--16:10 & 394.931 & 18:00--18:10 & 636.983 & 20:00--20:10 & 0.000 \\
+    \midrule
+    全天购电量 & \multicolumn{2}{c}{59482.699 kWh}
+      & 全天购电费 & \multicolumn{2}{c}{35126.949 元} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+六个4小时区间的储能吞吐量如表~\ref{tab:p1-storage-blocks} 所示。全天累计充电
+$20740.666\ \mathrm{kWh}$，累计放电 $16799.940\ \mathrm{kWh}$；二者差异来自充、放电效率损耗。
+
+\begin{table}[htbp]
+  \centering
+  \caption{储能设备在指定时间段的充放电量及0:00和24:00的储电量}
+  \label{tab:p1-storage-blocks}
+  \small
+  \begin{tabular}{crrcrr}
+    \toprule
+    时间段 & 充电量 & 放电量 & 时间段 & 充电量 & 放电量 \\
+    \midrule
+    0:00--4:00   & 4500.000 & 0.000    & 4:00--8:00   & 833.333  & 6365.841 \\
+    8:00--12:00  & 4787.964 & 1702.997 & 12:00--16:00 & 5286.035 & 91.101 \\
+    16:00--20:00 & 0.000    & 5780.132 & 20:00--24:00 & 5333.333 & 2859.868 \\
+    \midrule
+    0:00储电量 & \multicolumn{2}{c}{6000.000 kWh}
+      & 24:00储电量 & \multicolumn{2}{c}{6000.000 kWh} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+图~\ref{fig:p1-storage} 显示储能电量始终处于 $1200$--$10800\ \mathrm{kWh}$ 允许区间，
+且日末回到 $6000\ \mathrm{kWh}$，因此没有通过透支日末电量人为降低成本。
+
+\IfFileExists{figures/problem1/fig_p1_storage_price.pdf}{
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.98\textwidth]{figures/problem1/fig_p1_storage_price.pdf}
+  \caption{储能电量轨迹与分时购电价}
+  \label{fig:p1-storage}
+\end{figure}
+}{}
+
+最优计划的全天购电量为 $59482.699\ \mathrm{kWh}$，购电成本为 $35126.949$ 元。
+作为对照，不配置储能时直接以光伏抵扣负荷，全天需购电 $61789.935\ \mathrm{kWh}$，成本为
+$48052.047$ 元。优化后节约 $12925.098$ 元，降幅为 $26.898\%$，并将原本
+$6247.963\ \mathrm{kWh}$ 的富余光伏全部消纳。逐时段复核得到最大功率平衡残差
+$4.0\times10^{-5}\ \mathrm{kW}$、最大电量递推残差 $4.7\times10^{-4}\ \mathrm{kWh}$，
+均处于求解器数值精度范围内，且无同时充放电或负购电情形。
