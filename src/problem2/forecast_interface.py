@@ -80,9 +80,13 @@ class _FormalArtifacts:
 
 def _sha256(path: Path) -> str:
     digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for block in iter(lambda: handle.read(1024 * 1024), b""):
-            digest.update(block)
+    content = path.read_bytes()
+    if path.suffix.lower() in {".csv", ".json"}:
+        # Git may check text artifacts out with CRLF on Windows.  The frozen
+        # Stage 2A hashes were recorded from LF bytes, so canonicalize only
+        # line endings while retaining content-level change detection.
+        content = content.replace(b"\r\n", b"\n")
+    digest.update(content)
     return digest.hexdigest()
 
 
