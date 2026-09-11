@@ -3,15 +3,22 @@
 from __future__ import annotations
 
 import shutil
+import sys
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
 
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from src.common.plotting import CUMCM_PALETTE, configure_plots
+
 ROOT = Path(__file__).resolve().parents[1]
 
 
 def main() -> None:
+    configure_plots()
     results_dir = ROOT / "results" / "figures"
     paper_dir = ROOT / "paper" / "figures" / "common"
     results_dir.mkdir(parents=True, exist_ok=True)
@@ -20,8 +27,8 @@ def main() -> None:
     x = np.linspace(0, 10, 200)
     y = np.sin(x)
     fig, ax = plt.subplots(figsize=(6.4, 3.8))
-    ax.plot(x, y, color="#1f77b4", linewidth=1.8)
-    ax.set(xlabel="x", ylabel="sin(x)", title="Python to LaTeX pipeline test")
+    ax.plot(x, y, color=CUMCM_PALETTE["primary"], linewidth=1.8)
+    ax.set(xlabel="横坐标 $x$", ylabel=r"$\sin(x)$", title="Python 与 LaTeX 绘图流程测试")
     ax.grid(alpha=0.25)
     fig.tight_layout()
 

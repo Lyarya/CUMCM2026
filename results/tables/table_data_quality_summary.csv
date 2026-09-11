@@ -1,0 +1,6 @@
+dataset,observed_points,expected_points,coverage_percent,measurement_missing,negative_values,duplicate_timestamps,unexpected_time_gaps
+attachment1,144,144,100.0,0,0,0,0
+attachment2_load,52560,52560,100.0,0,0,0,0
+attachment2_pv,52560,52560,100.0,0,0,0,0
+attachment3_pv_forecast,35040,35040,100.0,0,0,0,0
+attachment4_price,52560,52560,100.0,0,0,0,0

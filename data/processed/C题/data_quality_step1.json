@@ -1,0 +1,182 @@
+{
+  "stage": "step1_raw_data_quality_audit",
+  "scope": "No cleaning, imputation, interpolation, standardization, windowing, or modeling.",
+  "raw_directory": "data/raw/C题/附件",
+  "workbook_sheets": {
+    "附件1.xlsx": [
+      "Sheet1"
+    ],
+    "附件2.xlsx": [
+      "小区负载",
+      "光伏发电实际功率"
+    ],
+    "附件3.xlsx": [
+      "Sheet1"
+    ],
+    "附件4.xlsx": [
+      "Sheet1"
+    ]
+  },
+  "source_sha256": {
+    "附件1.xlsx": "66b87134f5ecccd68184d3539bb1293ef039f9e0fdd955a589b9bfa7f227c377",
+    "附件2.xlsx": "2e95fd446bfafa0d8c59577b5c2e2ea8b3f1def20dde54a3062556f4da9b4c72",
+    "附件3.xlsx": "8a61b06c52bd0d639a1cc37c61a7d9f5b75edcbca718f64c1bd3498ec9f9d843",
+    "附件4.xlsx": "20e9c93aeab5e8e21ae4dd15587f9e190f7408692504c1319598461cd654fe71"
+  },
+  "raw_files_unchanged": true,
+  "datasets": {
+    "attachment1": {
+      "source_file": "data/raw/C题/附件/附件1.xlsx",
+      "sheet": "Sheet1",
+      "raw_rows": 144,
+      "raw_columns": 4,
+      "observed_points": 144,
+      "expected_points": 144,
+      "measurement_missing": 0,
+      "duplicate_slots": 0,
+      "non_ten_minute_gaps": 0,
+      "negative_values": 0,
+      "zero_values": 55,
+      "interval_end_start": "00:10:00",
+      "interval_end_end": "0:00+1",
+      "columns": [
+        "时间",
+        "电价",
+        "小区负载",
+        "光伏发电预测功率"
+      ]
+    },
+    "attachment2_load": {
+      "source_file": "data/raw/C题/附件/附件2.xlsx",
+      "sheet": "小区负载",
+      "value_name": "load_kw",
+      "raw_rows": 365,
+      "raw_columns": 145,
+      "observed_points": 52560,
+      "expected_points": 52560,
+      "measurement_missing": 0,
+      "negative_values": 0,
+      "zero_values": 0,
+      "duplicate_timestamps": 0,
+      "non_ten_minute_gaps": 0,
+      "operating_date_start": "2025-01-01",
+      "operating_date_end": "2025-12-31",
+      "interval_end_start": "2025-01-01 00:10:00",
+      "interval_end_end": "2026-01-01 00:00:00",
+      "days": 365,
+      "minimum_records_per_day": 144,
+      "maximum_records_per_day": 144,
+      "minimum": 1995.7176,
+      "maximum": 7978.8849,
+      "mean": 4626.033670125571
+    },
+    "attachment2_pv": {
+      "source_file": "data/raw/C题/附件/附件2.xlsx",
+      "sheet": "光伏发电实际功率",
+      "value_name": "pv_actual_kw",
+      "raw_rows": 365,
+      "raw_columns": 145,
+      "observed_points": 52560,
+      "expected_points": 52560,
+      "measurement_missing": 0,
+      "negative_values": 0,
+      "zero_values": 23540,
+      "duplicate_timestamps": 0,
+      "non_ten_minute_gaps": 0,
+      "operating_date_start": "2025-01-01",
+      "operating_date_end": "2025-12-31",
+      "interval_end_start": "2025-01-01 00:10:00",
+      "interval_end_end": "2026-01-01 00:00:00",
+      "days": 365,
+      "minimum_records_per_day": 144,
+      "maximum_records_per_day": 144,
+      "minimum": 0.0,
+      "maximum": 10216.2,
+      "mean": 2311.785709096271
+    },
+    "attachment3_pv_forecast": {
+      "source_file": "data/raw/C题/附件/附件3.xlsx",
+      "sheet": "Sheet1",
+      "raw_rows": 1460,
+      "raw_columns": 26,
+      "forecast_values": 35040,
+      "expected_forecast_values": 35040,
+      "measurement_missing": 0,
+      "structural_blank_date_cells": 1095,
+      "negative_values": 0,
+      "zero_values": 17525,
+      "duplicate_release_times": 0,
+      "non_six_hour_release_gaps": 0,
+      "operating_date_start": "2025-01-01",
+      "operating_date_end": "2025-12-31",
+      "release_time_start": "2025-01-01 00:00:00",
+      "release_time_end": "2025-12-31 18:00:00",
+      "days": 365,
+      "minimum_releases_per_day": 4,
+      "maximum_releases_per_day": 4,
+      "forecast_horizons": 24,
+      "minimum": 0.0,
+      "maximum": 9995.8875,
+      "mean": 2279.8011315325343
+    },
+    "attachment4_price": {
+      "source_file": "data/raw/C题/附件/附件4.xlsx",
+      "sheet": "Sheet1",
+      "value_name": "price_yuan_per_kwh",
+      "raw_rows": 365,
+      "raw_columns": 145,
+      "observed_points": 52560,
+      "expected_points": 52560,
+      "measurement_missing": 0,
+      "negative_values": 0,
+      "zero_values": 0,
+      "duplicate_timestamps": 0,
+      "non_ten_minute_gaps": 0,
+      "operating_date_start": "2025-01-01",
+      "operating_date_end": "2025-12-31",
+      "interval_end_start": "2025-01-01 00:10:00",
+      "interval_end_end": "2026-01-01 00:00:00",
+      "days": 365,
+      "minimum_records_per_day": 144,
+      "maximum_records_per_day": 144,
+      "minimum": 0.0076,
+      "maximum": 1.7936,
+      "mean": 0.7661976046423135
+    }
+  },
+  "attachment1_vs_annual_slot_mean": [
+    {
+      "variable": "load_kw",
+      "mae": 2.8485540364423894e-05,
+      "maximum_absolute_error": 5.0410958920110716e-05,
+      "mean_absolute_reference": 4626.033670125571,
+      "normalized_mae_percent": 6.157659540694755e-07
+    },
+    {
+      "variable": "pv_kw",
+      "mae": 0.0009049181887223424,
+      "maximum_absolute_error": 0.04310438356164384,
+      "mean_absolute_reference": 2311.7857090962707,
+      "normalized_mae_percent": 3.914368815248432e-05
+    },
+    {
+      "variable": "price_yuan_per_kwh",
+      "mae": 2.553462709285478e-05,
+      "maximum_absolute_error": 5.150684931509719e-05,
+      "mean_absolute_reference": 0.7661976046423136,
+      "normalized_mae_percent": 0.0033326425112977466
+    }
+  ],
+  "units": {
+    "load": "kW",
+    "pv_power": "kW",
+    "electricity_price": "yuan/kWh",
+    "dispatch_energy_output": "kWh"
+  },
+  "time_semantics": {
+    "attachments_1_2_4": "10-minute interval-end timestamps",
+    "end_marker": "0:00+1 is next-day 00:00 (24:00 of operating_date)",
+    "attachment_3": "forecast releases every 6 hours with 24 hourly horizons"
+  },
+  "downstream_status": "pending_step2_transformation_and_alignment"
+}
