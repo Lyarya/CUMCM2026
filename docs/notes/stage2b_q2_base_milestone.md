@@ -1,6 +1,6 @@
-# Stage 2B Q2 base MILP milestone
+# Stage 2B Q2 physical-settlement milestone
 
-This milestone freezes the completed expected-cost stochastic dispatch model before any CVaR or other risk extension.
+This milestone records the completed expected-cost stochastic dispatch and physical realized-settlement model before any CVaR or other risk extension.
 
 ## Validated scope
 
@@ -8,27 +8,17 @@ This milestone freezes the completed expected-cost stochastic dispatch model bef
 - Solver outcome: 334/334 days `Optimal` with PuLP--HiGHS.
 - Uncertainty representation: 50 paired load--PV scenarios per day.
 - Official workbook: `results/problem2/result2.xlsx`.
-- Full test suite: 55 passed.
+- Full test suite: 58 passed.
 - `git diff --check`: passed.
 
-## Terminal battery treatment
+## Terminal and realized battery treatment
 
-The final battery energy is exactly `6000.0 kWh`; all 334 daily results have `final_energy_kwh = 6000.0`.
+The planning model uses a decreasing piecewise-linear continuation value and has no daily terminal target or reset. The first day starts from the official `6000 kWh`.
 
-The model uses a soft horizon-end treatment. For each day, the reference is the energy carried into that day, and nonnegative deviation variables satisfy
+Planned charge and discharge are upper bounds on actual execution. The realized settlement caps discharge by the actual absorbable deficit and available SOC, caps charge by SOC headroom, and advances SOC using the actual executed actions. Each next day receives the preceding day's actual terminal SOC. Actual SOC remains between `1200` and `10800 kWh`, the maximum cross-day mismatch is zero, and the final battery energy is `7834.330492 kWh`.
 
-```text
-E[144] - reference = terminal_above - terminal_below.
-```
+## Cost scope
 
-The objective includes the linear penalty
-
-```text
-penalty_rate * (terminal_above + terminal_below),
-```
-
-where the default penalty rate is `eta_d * max(price) = 1.25568 yuan/kWh`. The optimized terminal deviation and its penalty are zero on every formal day. The first day starts from the official `6000 kWh`; after each solve, `result.final_energy_kwh` is explicitly passed as the next day's initial energy. Because each optimal daily terminal value equals its carried reference, the sequence remains at `6000 kWh`.
-
-This is not a hidden daily hard constraint. The only initial-state equality is `E[0] = inputs.initial_energy`. There is no constraint `E[144] = E[0]`, no constraint `E[144] = 6000`, and no daily assignment that resets the initial state to `6000`. The cross-day continuity test also starts from `7321.5 kWh` and verifies that the next day receives the preceding optimized final state.
+Q2 uses the fixed 144-slot price profile from Appendix 1. Appendix 2 actual load and PV are used for backtesting, and emergency purchases are charged at five times the corresponding Appendix 1 price. The model expected total is `14,374,345.246186 yuan`; the realized backtest total is `14,839,462.002357 yuan`. Appendix 4 dynamic-price calculations are diagnostic only and are not the formal Q2 result.
 
 No CVaR, Q3, or Q4 work is included in this milestone.

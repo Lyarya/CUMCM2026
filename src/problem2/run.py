@@ -88,10 +88,96 @@ def _interval_label(slot: int) -> str:
     return f"{start_hour}:{start_minute:02d}-{end_hour}:{end_minute:02d}{suffix}"
 
 
+def settle_realized_day(
+    plan: pd.DataFrame,
+    actual: pd.DataFrame,
+    initial_energy_kwh: float,
+    *,
+    minimum_energy_kwh: float = 1_200.0,
+    maximum_energy_kwh: float = 10_800.0,
+    charge_efficiency: float = 0.9,
+    discharge_efficiency: float = 0.9,
+    dt_hours: float = 1.0 / 6.0,
+) -> tuple[pd.DataFrame, float]:
+    """Replay one day with planned battery actions as physical upper bounds."""
+
+    frame = plan.copy().sort_values("slot", kind="stable").reset_index(drop=True)
+    actual = actual.copy().sort_values("datetime", kind="stable").reset_index(drop=True)
+    if len(frame) != 144 or len(actual) != 144:
+        raise AssertionError("a Q2 day must contain exactly 144 intervals")
+
+    energy = float(initial_energy_kwh)
+    realized_rows: list[dict[str, float]] = []
+    for index, row in frame.iterrows():
+        load_kw = float(actual.at[index, "actual_load"])
+        pv_kw = max(float(actual.at[index, "actual_generation"]), 0.0)
+        planned_grid_kw = max(float(row["planned_grid_kw"]), 0.0)
+        planned_charge_kw = max(float(row["planned_charge_limit_kw"]), 0.0)
+        planned_discharge_kw = max(float(row["planned_discharge_limit_kw"]), 0.0)
+
+        charge_headroom_kw = max(
+            (maximum_energy_kwh - energy) / (charge_efficiency * dt_hours), 0.0
+        )
+        actual_charge_kw = min(planned_charge_kw, charge_headroom_kw)
+
+        demand_after_pv_kw = load_kw + actual_charge_kw - pv_kw
+        available_discharge_kw = max(
+            (energy - minimum_energy_kwh) * discharge_efficiency / dt_hours, 0.0
+        )
+        actual_discharge_kw = min(
+            planned_discharge_kw,
+            max(demand_after_pv_kw, 0.0),
+            available_discharge_kw,
+        )
+        net_after_battery_kw = demand_after_pv_kw - actual_discharge_kw
+        grid_used_kw = min(planned_grid_kw, max(net_after_battery_kw, 0.0))
+        emergency_kw = max(net_after_battery_kw - grid_used_kw, 0.0)
+        pv_spill_kw = max(-net_after_battery_kw, 0.0)
+
+        next_energy = (
+            energy
+            + charge_efficiency * actual_charge_kw * dt_hours
+            - actual_discharge_kw * dt_hours / discharge_efficiency
+        )
+        if next_energy < minimum_energy_kwh - 2e-6 or next_energy > maximum_energy_kwh + 2e-6:
+            raise AssertionError("realized SOC left the permitted range")
+        next_energy = min(max(next_energy, minimum_energy_kwh), maximum_energy_kwh)
+        realized_rows.append(
+            {
+                "actual_load_kw": load_kw,
+                "actual_pv_kw": pv_kw,
+                "actual_charge_kw": actual_charge_kw,
+                "actual_discharge_kw": actual_discharge_kw,
+                "actual_storage_start_kwh": energy,
+                "actual_storage_end_kwh": next_energy,
+                "realized_planned_grid_used_kw": grid_used_kw,
+                "realized_unused_planned_grid_kw": planned_grid_kw - grid_used_kw,
+                "realized_emergency_kw": emergency_kw,
+                "realized_pv_spill_kw": pv_spill_kw,
+            }
+        )
+        energy = next_energy
+
+    frame = pd.concat([frame, pd.DataFrame(realized_rows)], axis=1)
+    for column in (
+        "actual_charge",
+        "actual_discharge",
+        "realized_planned_grid_used",
+        "realized_unused_planned_grid",
+        "realized_emergency",
+        "realized_pv_spill",
+    ):
+        frame[f"{column}_kwh"] = frame[f"{column}_kw"] * dt_hours
+    frame["realized_emergency_cost_yuan"] = (
+        5.0 * frame["price_yuan_per_kwh"] * frame["realized_emergency_kwh"]
+    )
+    return frame, energy
+
+
 def attach_realized_outcomes(
     daily: pd.DataFrame, intervals: pd.DataFrame
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Evaluate a fixed day-ahead plan against Appendix 2 actual observations."""
+    """Replay existing plans sequentially with actual SOC carried across days."""
 
     actual = pd.read_csv(
         FORMAL_FORECAST_PATH,
@@ -111,57 +197,26 @@ def attach_realized_outcomes(
     ):
         raise AssertionError("dispatch timestamps do not align with Appendix 2 actual observations")
 
-    frame["actual_load_kw"] = actual["actual_load"].to_numpy(dtype=float)
-    frame["actual_pv_kw"] = actual["actual_generation"].to_numpy(dtype=float)
-    net_grid_requirement = (
-        frame["actual_load_kw"]
-        + frame["charge_kw"]
-        - frame["actual_pv_kw"]
-        - frame["discharge_kw"]
-    )
-    frame["realized_planned_grid_used_kw"] = np.minimum(
-        frame["planned_grid_kw"], np.maximum(net_grid_requirement, 0.0)
-    )
-    frame["realized_unused_planned_grid_kw"] = (
-        frame["planned_grid_kw"] - frame["realized_planned_grid_used_kw"]
-    )
-    frame["realized_emergency_kw"] = np.maximum(
-        net_grid_requirement - frame["planned_grid_kw"], 0.0
-    )
-    realized_excess_generation = np.maximum(-net_grid_requirement, 0.0)
-    frame["realized_pv_spill_kw"] = np.minimum(
-        frame["actual_pv_kw"], realized_excess_generation
-    )
-    frame["realized_unabsorbed_discharge_kw"] = (
-        realized_excess_generation - frame["realized_pv_spill_kw"]
-    )
-    frame["realized_surplus_kw"] = (
-        frame["realized_unused_planned_grid_kw"] + frame["realized_pv_spill_kw"]
-    )
-    frame["realized_planned_grid_used_kwh"] = frame["realized_planned_grid_used_kw"] / 6.0
-    frame["realized_unused_planned_grid_kwh"] = frame["realized_unused_planned_grid_kw"] / 6.0
-    frame["realized_pv_spill_kwh"] = frame["realized_pv_spill_kw"] / 6.0
-    frame["realized_unabsorbed_discharge_kwh"] = (
-        frame["realized_unabsorbed_discharge_kw"] / 6.0
-    )
-    frame["realized_emergency_kwh"] = frame["realized_emergency_kw"] / 6.0
-    frame["realized_surplus_kwh"] = frame["realized_surplus_kw"] / 6.0
-    frame["realized_emergency_cost_yuan"] = (
-        5.0
-        * frame["price_yuan_per_kwh"]
-        * frame["realized_emergency_kwh"]
-    )
+    settled_days: list[pd.DataFrame] = []
+    realized_end_by_date: dict[str, float] = {}
+    carried_energy = float(daily.iloc[0]["initial_energy_kwh"])
+    for date, planned_day in frame.groupby("date", sort=True):
+        actual_day = actual.loc[actual["operating_date"].astype(str) == str(date)]
+        settled_day, carried_energy = settle_realized_day(
+            planned_day, actual_day, carried_energy
+        )
+        settled_days.append(settled_day)
+        realized_end_by_date[str(date)] = carried_energy
+    frame = pd.concat(settled_days, ignore_index=True)
 
     realized_daily = frame.groupby("date", sort=True).agg(
         realized_emergency_energy_kwh=("realized_emergency_kwh", "sum"),
         realized_emergency_cost_yuan=("realized_emergency_cost_yuan", "sum"),
-        realized_surplus_energy_kwh=("realized_surplus_kwh", "sum"),
         realized_planned_grid_used_energy_kwh=("realized_planned_grid_used_kwh", "sum"),
         realized_unused_planned_grid_energy_kwh=("realized_unused_planned_grid_kwh", "sum"),
         realized_pv_spill_energy_kwh=("realized_pv_spill_kwh", "sum"),
-        realized_unabsorbed_discharge_energy_kwh=(
-            "realized_unabsorbed_discharge_kwh", "sum"
-        ),
+        actual_charge_energy_kwh=("actual_charge_kwh", "sum"),
+        actual_discharge_energy_kwh=("actual_discharge_kwh", "sum"),
     )
     daily_frame = daily.copy()
     for column in realized_daily.columns:
@@ -172,6 +227,9 @@ def attach_realized_outcomes(
         daily_frame["planned_purchase_cost_yuan"]
         + daily_frame["realized_emergency_cost_yuan"]
     )
+    daily_frame["planned_final_energy_kwh"] = daily_frame["final_energy_kwh"]
+    daily_frame["actual_final_energy_kwh"] = daily_frame["date"].map(realized_end_by_date)
+    daily_frame["final_energy_kwh"] = daily_frame["actual_final_energy_kwh"]
     return daily_frame, frame
 
 
@@ -275,6 +333,8 @@ def export_result2(
     purchase_sheet = workbook["计划购电量"]
     if purchase_sheet.max_row != 335 or purchase_sheet.max_column != 147:
         raise ValueError("official planned-purchase sheet shape changed")
+    for slot in range(1, 145):
+        purchase_sheet.cell(1, slot + 1, _interval_label(slot))
     for day_index, (_, row) in enumerate(daily.iterrows(), start=2):
         day_frame = intervals.loc[intervals["date"] == row["date"]].sort_values("slot")
         if len(day_frame) != 144:
@@ -297,14 +357,14 @@ def export_result2(
             block_frame = day_frame.iloc[block * 24 : (block + 1) * 24]
             storage_sheet.cell(target_row, 1, pd.Timestamp(day_row["date"]).to_pydatetime() if block == 0 else None)
             storage_sheet.cell(target_row, 2, time_label)
-            storage_sheet.cell(target_row, 3, float(block_frame["charge_kwh"].sum())).number_format = "0.000000"
-            storage_sheet.cell(target_row, 4, float(block_frame["discharge_kwh"].sum())).number_format = "0.000000"
+            storage_sheet.cell(target_row, 3, float(block_frame["actual_charge_kwh"].sum())).number_format = "0.000000"
+            storage_sheet.cell(target_row, 4, float(block_frame["actual_discharge_kwh"].sum())).number_format = "0.000000"
             if block == 0:
                 storage_sheet.cell(target_row, 5, "00:00")
-                storage_sheet.cell(target_row, 6, float(day_row["initial_energy_kwh"])).number_format = "0.000000"
+                storage_sheet.cell(target_row, 6, float(day_row["actual_initial_energy_kwh"])).number_format = "0.000000"
             elif block == 1:
                 storage_sheet.cell(target_row, 5, "24:00")
-                storage_sheet.cell(target_row, 6, float(day_row["final_energy_kwh"])).number_format = "0.000000"
+                storage_sheet.cell(target_row, 6, float(day_row["actual_final_energy_kwh"])).number_format = "0.000000"
             else:
                 storage_sheet.cell(target_row, 5, None)
                 storage_sheet.cell(target_row, 6, None)
@@ -356,7 +416,7 @@ def run_chronological(
     np.ndarray,
     np.ndarray,
 ]:
-    """Solve dates in order, carrying each optimal final SOC into the next day."""
+    """Solve and settle dates in order, carrying realized final SOC forward."""
 
     parameters = parameters or Q2DispatchParameters()
     carried_energy = float(initial_energy_kwh)
@@ -367,21 +427,74 @@ def run_chronological(
     planned_grid_used_days: list[np.ndarray] = []
     unused_planned_grid_days: list[np.ndarray] = []
     source_days: list[np.ndarray] = []
+    actual_observations = pd.read_csv(
+        FORMAL_FORECAST_PATH,
+        usecols=["operating_date", "datetime", "actual_load", "actual_generation"],
+        parse_dates=["datetime"],
+    )
     for day_index, target in enumerate(dates, start=1):
         inputs = get_q2_day_inputs(target, initial_energy=carried_energy)
         result: Q2DayResult = solve_expected_cost_dispatch(inputs, parameters)
         validation = validate_q2_day(inputs, result, parameters)
         summary = build_daily_summary(result, validation, inputs)
+        actual_day = actual_observations.loc[
+            actual_observations["operating_date"].astype(str) == str(target.date())
+        ]
+        settled_day, realized_end_energy = settle_realized_day(
+            result.dispatch, actual_day, carried_energy
+        )
+        summary["planned_final_energy_kwh"] = summary["final_energy_kwh"]
+        summary["actual_initial_energy_kwh"] = carried_energy
+        summary["actual_final_energy_kwh"] = realized_end_energy
+        summary["final_energy_kwh"] = realized_end_energy
+        summary["realized_emergency_energy_kwh"] = float(
+            settled_day["realized_emergency_kwh"].sum()
+        )
+        summary["realized_emergency_cost_yuan"] = float(
+            settled_day["realized_emergency_cost_yuan"].sum()
+        )
+        summary["realized_total_cost_yuan"] = float(
+            summary["planned_purchase_cost_yuan"]
+            + summary["realized_emergency_cost_yuan"]
+        )
+        summary["realized_planned_grid_used_energy_kwh"] = float(
+            settled_day["realized_planned_grid_used_kwh"].sum()
+        )
+        summary["realized_unused_planned_grid_energy_kwh"] = float(
+            settled_day["realized_unused_planned_grid_kwh"].sum()
+        )
+        summary["realized_pv_spill_energy_kwh"] = float(
+            settled_day["realized_pv_spill_kwh"].sum()
+        )
+        summary["actual_charge_energy_kwh"] = float(
+            settled_day["actual_charge_kwh"].sum()
+        )
+        summary["actual_discharge_energy_kwh"] = float(
+            settled_day["actual_discharge_kwh"].sum()
+        )
+        charge_clip = (
+            settled_day["planned_charge_limit_kw"] - settled_day["actual_charge_kw"]
+        ).clip(lower=0.0)
+        discharge_clip = (
+            settled_day["planned_discharge_limit_kw"]
+            - settled_day["actual_discharge_kw"]
+        ).clip(lower=0.0)
+        summary["battery_clipping_energy_kwh"] = float(
+            (charge_clip + discharge_clip).sum() * inputs.dt_hours
+        )
+        summary["battery_clipping_intervals"] = int(
+            ((charge_clip + discharge_clip) > 1e-9).sum()
+        )
         if summaries and abs(float(summary["initial_energy_kwh"]) - float(summaries[-1]["final_energy_kwh"])) > 2e-3:
             raise AssertionError(f"cross-day SOC discontinuity before {target.date()}")
         summaries.append(summary)
-        interval_frames.append(result.dispatch)
+        interval_frames.append(settled_day)
         emergency_days.append(result.emergency_kw)
         spill_days.append(result.spill_kw)
         planned_grid_used_days.append(result.planned_grid_used_kw)
         unused_planned_grid_days.append(result.unused_planned_grid_kw)
         source_days.append(result.scenario_source_dates)
-        carried_energy = result.final_energy_kwh
+        carried_energy = realized_end_energy
         if progress and (day_index == 1 or day_index % 10 == 0 or day_index == len(dates)):
             print(
                 f"Q2 progress: {day_index}/{len(dates)} days; "
@@ -430,14 +543,16 @@ def _aggregate_summary(daily: pd.DataFrame, intervals: pd.DataFrame) -> dict[str
         "realized_pv_spill_energy_kwh": float(
             daily["realized_pv_spill_energy_kwh"].sum()
         ),
-        "realized_unabsorbed_discharge_energy_kwh": float(
-            daily["realized_unabsorbed_discharge_energy_kwh"].sum()
-        ),
-        "charge_energy_kwh": float(daily["charge_energy_kwh"].sum()),
-        "discharge_energy_kwh": float(daily["discharge_energy_kwh"].sum()),
+        "unabsorbed_discharge_energy_kwh": 0.0,
+        "planned_charge_energy_kwh": float(daily["charge_energy_kwh"].sum()),
+        "planned_discharge_energy_kwh": float(daily["discharge_energy_kwh"].sum()),
+        "actual_charge_energy_kwh": float(daily["actual_charge_energy_kwh"].sum()),
+        "actual_discharge_energy_kwh": float(daily["actual_discharge_energy_kwh"].sum()),
+        "battery_clipping_energy_kwh": float(daily["battery_clipping_energy_kwh"].sum()),
+        "battery_clipping_intervals": int(daily["battery_clipping_intervals"].sum()),
         "expected_spill_energy_kwh": float(daily["expected_spill_energy_kwh"].sum()),
-        "minimum_energy_kwh": float(intervals[["storage_start_kwh", "storage_end_kwh"]].min().min()),
-        "maximum_energy_kwh": float(intervals[["storage_start_kwh", "storage_end_kwh"]].max().max()),
+        "minimum_energy_kwh": float(intervals[["actual_storage_start_kwh", "actual_storage_end_kwh"]].min().min()),
+        "maximum_energy_kwh": float(intervals[["actual_storage_start_kwh", "actual_storage_end_kwh"]].max().max()),
         "final_battery_energy_kwh": float(daily["final_energy_kwh"].iloc[-1]),
         "maximum_power_balance_residual_kw": float(daily["maximum_power_balance_residual_kw"].max()),
         "maximum_soc_residual_kwh": float(daily["maximum_soc_residual_kwh"].max()),
@@ -471,7 +586,7 @@ def main() -> None:
     ) = run_chronological(
         pd.DatetimeIndex(dates), progress=True
     )
-    daily, intervals = attach_realized_outcomes(daily, intervals)
+    # Realized settlement and SOC carry are performed inside run_chronological.
     protected_after = {str(path): _sha256(path) for path in PROTECTED_FORECAST_PATHS}
     if protected_before != protected_after:
         raise AssertionError("a frozen Stage 2A forecast/scenario artifact changed")

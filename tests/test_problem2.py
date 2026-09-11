@@ -12,7 +12,38 @@ import pytest
 from src.problem2.evaluate import validate_q2_day
 from src.problem2.forecast_interface import SCENARIO_PATH, get_q2_day_inputs
 from src.problem2.model import Q2DispatchParameters, solve_expected_cost_dispatch
-from src.problem2.run import RESULT2_PATH, TABLE_DIR, _interval_label, run_chronological
+from src.problem2.run import (
+    RESULT2_PATH,
+    TABLE_DIR,
+    _interval_label,
+    run_chronological,
+    settle_realized_day,
+)
+
+
+def _synthetic_day(
+    *, load_kw: float = 0.0, pv_kw: float = 0.0, grid_kw: float = 0.0,
+    charge_kw: float = 0.0, discharge_kw: float = 0.0,
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    timestamps = pd.date_range("2025-01-01 00:10", periods=144, freq="10min")
+    plan = pd.DataFrame(
+        {
+            "slot": np.arange(1, 145),
+            "timestamp": timestamps,
+            "planned_grid_kw": grid_kw,
+            "planned_charge_limit_kw": charge_kw,
+            "planned_discharge_limit_kw": discharge_kw,
+            "price_yuan_per_kwh": 1.0,
+        }
+    )
+    actual = pd.DataFrame(
+        {
+            "datetime": timestamps,
+            "actual_load": load_kw,
+            "actual_generation": pv_kw,
+        }
+    )
+    return plan, actual
 
 
 def _sha256(path) -> str:
@@ -159,3 +190,45 @@ def test_official_interval_labels_follow_template() -> None:
     assert _interval_label(1) == "0:10-0:20"
     assert _interval_label(143) == "23:50-0:00+1"
     assert _interval_label(144) == "0:00-0:10+1"
+
+
+def test_realized_settlement_has_no_unexplained_discharge_sink() -> None:
+    plan, actual = _synthetic_day(load_kw=20.0, discharge_kw=100.0)
+    settled, final_energy = settle_realized_day(plan, actual, 6_000.0)
+    assert "realized_unabsorbed_discharge_kw" not in settled.columns
+    assert settled["actual_discharge_kw"].max() <= 20.0 + 1e-9
+    balance = (
+        settled["realized_planned_grid_used_kw"]
+        + settled["realized_emergency_kw"]
+        + settled["actual_pv_kw"]
+        + settled["actual_discharge_kw"]
+        - settled["actual_load_kw"]
+        - settled["actual_charge_kw"]
+        - settled["realized_pv_spill_kw"]
+    )
+    assert balance.abs().max() < 1e-9
+    assert final_energy >= 1_200.0
+
+
+def test_realized_settlement_covers_unused_grid_pv_shortage_and_soc_bounds() -> None:
+    plan, actual = _synthetic_day(load_kw=50.0, grid_kw=100.0)
+    settled, _ = settle_realized_day(plan, actual, 6_000.0)
+    assert settled["realized_unused_planned_grid_kwh"].sum() == pytest.approx(1_200.0)
+    assert settled["realized_emergency_kwh"].sum() == pytest.approx(0.0)
+
+    plan, actual = _synthetic_day(load_kw=10.0, pv_kw=100.0)
+    settled, _ = settle_realized_day(plan, actual, 6_000.0)
+    assert settled["realized_pv_spill_kwh"].sum() == pytest.approx(2_160.0)
+    assert (settled["realized_pv_spill_kw"] <= settled["actual_pv_kw"] + 1e-9).all()
+
+    plan, actual = _synthetic_day(load_kw=200.0, grid_kw=100.0)
+    settled, _ = settle_realized_day(plan, actual, 6_000.0)
+    assert settled["realized_emergency_kwh"].sum() == pytest.approx(2_400.0)
+    assert settled["realized_emergency_cost_yuan"].sum() == pytest.approx(12_000.0)
+
+    plan, actual = _synthetic_day(charge_kw=5_000.0)
+    settled, final_energy = settle_realized_day(plan, actual, 10_799.0)
+    assert final_energy <= 10_800.0 + 1e-9
+    plan, actual = _synthetic_day(load_kw=5_000.0, discharge_kw=5_000.0)
+    settled, final_energy = settle_realized_day(plan, actual, 1_201.0)
+    assert final_energy >= 1_200.0 - 1e-9

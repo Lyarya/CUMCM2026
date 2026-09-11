@@ -138,8 +138,8 @@ def solve_expected_cost_dispatch(
         f"CUMCM2026_Q2_Expected_Cost_{inputs.date}", pulp.LpMinimize
     )
     grid = pulp.LpVariable.dicts("planned_grid_kw", periods, lowBound=0)
-    charge = pulp.LpVariable.dicts("charge_kw", periods, lowBound=0)
-    discharge = pulp.LpVariable.dicts("discharge_kw", periods, lowBound=0)
+    charge = pulp.LpVariable.dicts("planned_charge_limit_kw", periods, lowBound=0)
+    discharge = pulp.LpVariable.dicts("planned_discharge_limit_kw", periods, lowBound=0)
     mode = pulp.LpVariable.dicts("charge_mode", periods, cat=pulp.LpBinary)
     energy = pulp.LpVariable.dicts(
         "energy_kwh",
@@ -251,6 +251,8 @@ def solve_expected_cost_dispatch(
             "planned_grid_kw": grid_values,
             "charge_kw": [pulp.value(charge[t]) for t in periods],
             "discharge_kw": [pulp.value(discharge[t]) for t in periods],
+            "planned_charge_limit_kw": [pulp.value(charge[t]) for t in periods],
+            "planned_discharge_limit_kw": [pulp.value(discharge[t]) for t in periods],
             "storage_start_kwh": [pulp.value(energy[t]) for t in periods],
             "storage_end_kwh": [pulp.value(energy[t + 1]) for t in periods],
             "expected_emergency_kw": emergency_values.mean(axis=0),
