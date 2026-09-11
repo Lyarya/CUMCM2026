@@ -1,5 +1,9 @@
-"""Problem 3 preprocessing entry points."""
+"""Q3 forecast preprocessing entry points."""
+
+from src.problem3.forecast_data import build_official_canonical
 
 
-def preprocess() -> None:
-    raise NotImplementedError("Problem 3 data has not been released yet.")
+def preprocess():
+    """Build the read-only-derived canonical Attachment-3 table in memory."""
+
+    return build_official_canonical()
