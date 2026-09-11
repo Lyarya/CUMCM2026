@@ -172,6 +172,12 @@ def build_daily_summary(
         "expected_emergency_cost_yuan": result.expected_emergency_cost_yuan,
         "expected_total_cost_yuan": result.operating_cost_yuan,
         "optimization_objective_yuan": result.optimization_objective_yuan,
+        "risk_method": "CVaR" if result.risk_weight > 0.0 else "expected_cost",
+        "cvar_alpha": result.cvar_alpha,
+        "risk_weight": result.risk_weight,
+        "var_cost_yuan": result.var_cost_yuan,
+        "cvar_cost_yuan": result.cvar_cost_yuan,
+        "lambda_cvar_term_yuan": result.lambda_cvar_term_yuan,
         "planned_purchase_energy_kwh": float(frame["planned_grid_kwh"].sum()),
         "expected_emergency_energy_kwh": float(frame["expected_emergency_kwh"].sum()),
         "expected_planned_grid_used_energy_kwh": float(

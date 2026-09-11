@@ -26,6 +26,8 @@ class Q2DispatchParameters:
     emergency_price_multiplier: float = 5.0
     terminal_reserve_quantile: float = 0.80
     terminal_value_price_quantiles: tuple[float, ...] = (0.90, 0.50, 0.10)
+    cvar_alpha: float = 0.90
+    risk_weight: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -47,12 +49,37 @@ class Q2DayResult:
     operating_cost_yuan: float
     terminal_value_credit_yuan: float
     optimization_objective_yuan: float
+    scenario_emergency_cost_yuan: np.ndarray
+    cvar_alpha: float
+    risk_weight: float
+    var_cost_yuan: float
+    cvar_cost_yuan: float
+    cvar_excess_cost_yuan: np.ndarray
+    lambda_cvar_term_yuan: float
     terminal_value_breakpoints_kwh: tuple[float, ...]
     terminal_value_rates_yuan_per_kwh: tuple[float, ...]
 
     @property
     def final_energy_kwh(self) -> float:
         return float(self.dispatch["storage_end_kwh"].iloc[-1])
+
+
+def calculate_empirical_cvar(
+    scenario_costs_yuan: np.ndarray, alpha: float
+) -> tuple[float, float]:
+    """Return a discrete equal-weight VaR representative and exact CVaR value."""
+
+    costs = np.asarray(scenario_costs_yuan, dtype=float).reshape(-1)
+    if costs.size == 0 or not np.isfinite(costs).all():
+        raise ValueError("scenario costs must be a nonempty finite array")
+    if not 0.0 < alpha < 1.0:
+        raise ValueError("CVaR alpha must lie strictly between 0 and 1")
+    candidates = np.unique(costs)
+    objectives = np.array(
+        [zeta + np.maximum(costs - zeta, 0.0).mean() / (1.0 - alpha) for zeta in candidates]
+    )
+    index = int(np.argmin(objectives))
+    return float(candidates[index]), float(objectives[index])
 
 
 def _validate_inputs(inputs: Q2DayInputs, parameters: Q2DispatchParameters) -> None:
@@ -110,6 +137,10 @@ def solve_expected_cost_dispatch(
         raise ValueError("terminal reserve quantile must lie in [0, 1]")
     if any(not 0.0 <= quantile <= 1.0 for quantile in quantiles):
         raise ValueError("terminal value price quantiles must lie in [0, 1]")
+    if not 0.0 < parameters.cvar_alpha < 1.0:
+        raise ValueError("CVaR alpha must lie strictly between 0 and 1")
+    if parameters.risk_weight < 0.0:
+        raise ValueError("CVaR risk weight must be nonnegative")
     scenario_net_load = inputs.load_scenarios - inputs.pv_scenarios
     point_net_load = inputs.load_forecast - inputs.pv_forecast
     positive_error_energy = np.maximum(
@@ -200,21 +231,37 @@ def solve_expected_cost_dispatch(
     planned_cost = pulp.lpSum(
         float(inputs.price[t]) * grid[t] * inputs.dt_hours for t in periods
     )
-    expected_emergency_cost = (
+    scenario_emergency_costs = [
         pulp.lpSum(
             parameters.emergency_price_multiplier
             * float(inputs.price[t])
             * emergency[s][t]
             * inputs.dt_hours
-            for s in scenarios
             for t in periods
         )
-        / inputs.scenario_count
-    )
+        for s in scenarios
+    ]
+    expected_emergency_cost = pulp.lpSum(scenario_emergency_costs) / inputs.scenario_count
     terminal_value_credit = pulp.lpSum(
         rate * segment for rate, segment in zip(terminal_value_rates, terminal_segments)
     )
-    model += planned_cost + expected_emergency_cost - terminal_value_credit
+    cvar_zeta = None
+    cvar_excess = None
+    cvar_expression = None
+    if parameters.risk_weight > 0.0:
+        cvar_zeta = pulp.LpVariable("emergency_cost_var_yuan", lowBound=0)
+        cvar_excess = pulp.LpVariable.dicts(
+            "emergency_cost_excess_yuan", scenarios, lowBound=0
+        )
+        for s in scenarios:
+            model += (
+                cvar_excess[s] >= scenario_emergency_costs[s] - cvar_zeta
+            ), f"cvar_excess_s{s + 1:02d}"
+        cvar_expression = cvar_zeta + pulp.lpSum(cvar_excess) / (
+            (1.0 - parameters.cvar_alpha) * inputs.scenario_count
+        )
+    risk_term = 0.0 if cvar_expression is None else parameters.risk_weight * cvar_expression
+    model += planned_cost + expected_emergency_cost + risk_term - terminal_value_credit
 
     solver = pulp.HiGHS(msg=False, threads=1)
     started = perf_counter()
@@ -277,6 +324,22 @@ def solve_expected_cost_dispatch(
     planned_cost_value = float(pulp.value(planned_cost))
     emergency_cost_value = float(pulp.value(expected_emergency_cost))
     terminal_value_credit_value = float(pulp.value(terminal_value_credit))
+    scenario_emergency_cost_values = np.array(
+        [float(pulp.value(expression)) for expression in scenario_emergency_costs], dtype=float
+    )
+    empirical_var, empirical_cvar = calculate_empirical_cvar(
+        scenario_emergency_cost_values, parameters.cvar_alpha
+    )
+    if cvar_expression is None:
+        var_cost_value = empirical_var
+        cvar_cost_value = empirical_cvar
+        excess_values = np.maximum(scenario_emergency_cost_values - empirical_var, 0.0)
+    else:
+        var_cost_value = float(pulp.value(cvar_zeta))
+        cvar_cost_value = float(pulp.value(cvar_expression))
+        excess_values = np.array(
+            [float(pulp.value(cvar_excess[s])) for s in scenarios], dtype=float
+        )
     return Q2DayResult(
         date=inputs.date,
         dispatch=dispatch,
@@ -293,6 +356,13 @@ def solve_expected_cost_dispatch(
         operating_cost_yuan=planned_cost_value + emergency_cost_value,
         terminal_value_credit_yuan=terminal_value_credit_value,
         optimization_objective_yuan=float(pulp.value(model.objective)),
+        scenario_emergency_cost_yuan=scenario_emergency_cost_values,
+        cvar_alpha=parameters.cvar_alpha,
+        risk_weight=parameters.risk_weight,
+        var_cost_yuan=var_cost_value,
+        cvar_cost_yuan=cvar_cost_value,
+        cvar_excess_cost_yuan=excess_values,
+        lambda_cvar_term_yuan=parameters.risk_weight * cvar_cost_value,
         terminal_value_breakpoints_kwh=breakpoints,
         terminal_value_rates_yuan_per_kwh=terminal_value_rates,
     )
