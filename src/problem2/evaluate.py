@@ -21,6 +21,9 @@ class Q2ValidationReport:
     simultaneous_charge_discharge_count: int
     negative_grid_purchase_count: int
     negative_emergency_purchase_count: int
+    negative_planned_grid_use_count: int
+    maximum_planned_grid_use_excess_kw: float
+    maximum_unused_grid_identity_residual_kw: float
     maximum_spill_excess_kw: float
     maximum_power_balance_residual_kw: float
     maximum_energy_transition_residual_kwh: float
@@ -44,7 +47,7 @@ def validate_q2_day(
     charge = frame["charge_kw"].to_numpy(dtype=float)
     discharge = frame["discharge_kw"].to_numpy(dtype=float)
     power_residual = (
-        grid[None, :]
+        result.planned_grid_used_kw
         + result.emergency_kw
         + inputs.pv_scenarios
         + discharge[None, :]
@@ -83,6 +86,21 @@ def validate_q2_day(
         negative_emergency_purchase_count=int(
             np.count_nonzero(result.emergency_kw < -tolerance)
         ),
+        negative_planned_grid_use_count=int(
+            np.count_nonzero(result.planned_grid_used_kw < -tolerance)
+        ),
+        maximum_planned_grid_use_excess_kw=float(
+            np.max(np.maximum(result.planned_grid_used_kw - grid[None, :], 0.0))
+        ),
+        maximum_unused_grid_identity_residual_kw=float(
+            np.max(
+                np.abs(
+                    result.unused_planned_grid_kw
+                    + result.planned_grid_used_kw
+                    - grid[None, :]
+                )
+            )
+        ),
         maximum_spill_excess_kw=float(
             np.max(np.maximum(result.spill_kw - inputs.pv_scenarios, 0.0))
         ),
@@ -98,6 +116,8 @@ def validate_q2_day(
             np.array_equal(result.scenario_source_dates, inputs.scenario_source_dates)
             and result.emergency_kw.shape == inputs.load_scenarios.shape
             and result.spill_kw.shape == inputs.pv_scenarios.shape
+            and result.planned_grid_used_kw.shape == inputs.load_scenarios.shape
+            and result.unused_planned_grid_kw.shape == inputs.load_scenarios.shape
         ),
     )
     checks = {
@@ -110,6 +130,9 @@ def validate_q2_day(
         "mutual exclusion": report.simultaneous_charge_discharge_count == 0,
         "nonnegative planned grid": report.negative_grid_purchase_count == 0,
         "nonnegative emergency grid": report.negative_emergency_purchase_count == 0,
+        "nonnegative planned grid use": report.negative_planned_grid_use_count == 0,
+        "planned grid use upper bound": report.maximum_planned_grid_use_excess_kw <= tolerance,
+        "unused planned grid identity": report.maximum_unused_grid_identity_residual_kw <= tolerance,
         "spill upper bound": report.maximum_spill_excess_kw <= tolerance,
         "scenario power balance": report.maximum_power_balance_residual_kw <= tolerance,
         "SOC recursion": report.maximum_energy_transition_residual_kwh <= tolerance,
@@ -137,15 +160,26 @@ def build_daily_summary(
         "runtime_seconds": result.runtime_seconds,
         "initial_energy_kwh": float(inputs.initial_energy),
         "final_energy_kwh": result.final_energy_kwh,
-        "terminal_reference_kwh": result.terminal_reference_kwh,
-        "terminal_penalty_rate_yuan_per_kwh": result.terminal_penalty_rate_yuan_per_kwh,
-        "terminal_penalty_yuan": result.terminal_penalty_yuan,
+        "terminal_value_rates_yuan_per_kwh": "|".join(
+            f"{value:.10g}" for value in result.terminal_value_rates_yuan_per_kwh
+        ),
+        "terminal_value_breakpoints_kwh": "|".join(
+            f"{value:.10g}" for value in result.terminal_value_breakpoints_kwh
+        ),
+        "terminal_uncertainty_reserve_kwh": result.terminal_value_breakpoints_kwh[0],
+        "terminal_value_credit_yuan": result.terminal_value_credit_yuan,
         "planned_purchase_cost_yuan": result.planned_purchase_cost_yuan,
         "expected_emergency_cost_yuan": result.expected_emergency_cost_yuan,
         "expected_total_cost_yuan": result.operating_cost_yuan,
         "optimization_objective_yuan": result.optimization_objective_yuan,
         "planned_purchase_energy_kwh": float(frame["planned_grid_kwh"].sum()),
         "expected_emergency_energy_kwh": float(frame["expected_emergency_kwh"].sum()),
+        "expected_planned_grid_used_energy_kwh": float(
+            frame["expected_planned_grid_used_kwh"].sum()
+        ),
+        "expected_unused_planned_grid_energy_kwh": float(
+            frame["expected_unused_planned_grid_kwh"].sum()
+        ),
         "charge_energy_kwh": float(frame["charge_kwh"].sum()),
         "discharge_energy_kwh": float(frame["discharge_kwh"].sum()),
         "expected_spill_energy_kwh": float(frame["expected_spill_kwh"].sum()),

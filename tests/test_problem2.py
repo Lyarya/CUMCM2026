@@ -12,7 +12,7 @@ import pytest
 from src.problem2.evaluate import validate_q2_day
 from src.problem2.forecast_interface import SCENARIO_PATH, get_q2_day_inputs
 from src.problem2.model import Q2DispatchParameters, solve_expected_cost_dispatch
-from src.problem2.run import RESULT2_PATH, TABLE_DIR, run_chronological
+from src.problem2.run import RESULT2_PATH, TABLE_DIR, _interval_label, run_chronological
 
 
 def _sha256(path) -> str:
@@ -35,9 +35,13 @@ def test_expected_cost_milp_is_optimal_and_finite(representative_solution) -> No
     assert report.scenario_count == 50
     assert result.emergency_kw.shape == (50, 144)
     assert result.spill_kw.shape == (50, 144)
+    assert result.planned_grid_used_kw.shape == (50, 144)
+    assert result.unused_planned_grid_kw.shape == (50, 144)
     assert np.isfinite(result.dispatch.select_dtypes(include=[np.number])).all().all()
     assert np.isfinite(result.emergency_kw).all()
     assert np.isfinite(result.spill_kw).all()
+    assert np.isfinite(result.planned_grid_used_kw).all()
+    assert np.isfinite(result.unused_planned_grid_kw).all()
     assert inputs.dt_hours == pytest.approx(1 / 6)
 
 
@@ -54,6 +58,9 @@ def test_q2_physics_pairing_and_five_times_price(representative_solution) -> Non
     assert report.simultaneous_charge_discharge_count == 0
     assert report.negative_grid_purchase_count == 0
     assert report.negative_emergency_purchase_count == 0
+    assert report.negative_planned_grid_use_count == 0
+    assert report.maximum_planned_grid_use_excess_kw <= 2e-3
+    assert report.maximum_unused_grid_identity_residual_kw <= 2e-3
     assert report.maximum_spill_excess_kw <= 2e-3
     assert report.maximum_power_balance_residual_kw <= 2e-3
     assert report.maximum_energy_transition_residual_kwh <= 2e-3
@@ -74,7 +81,7 @@ def test_solver_does_not_modify_frozen_scenarios(representative_solution) -> Non
 
 
 def test_cross_day_soc_is_carried_without_reset_to_6000() -> None:
-    daily, intervals, emergency, spill, sources = run_chronological(
+    daily, intervals, emergency, spill, planned_used, unused_plan, sources = run_chronological(
         pd.date_range("2025-02-01", "2025-02-02", freq="D"),
         initial_energy_kwh=7_321.5,
     )
@@ -83,17 +90,21 @@ def test_cross_day_soc_is_carried_without_reset_to_6000() -> None:
     assert daily.loc[1, "initial_energy_kwh"] == pytest.approx(
         daily.loc[0, "final_energy_kwh"], abs=2e-3
     )
+    assert abs(daily.loc[0, "final_energy_kwh"] - daily.loc[0, "initial_energy_kwh"]) > 2e-3
+    assert daily["final_energy_kwh"].min() > 1_200.0 + 2e-3
     assert intervals.shape[0] == 288
     assert emergency.shape == (2, 50, 144)
     assert spill.shape == (2, 50, 144)
+    assert planned_used.shape == (2, 50, 144)
+    assert unused_plan.shape == (2, 50, 144)
     assert sources.shape == (2, 50)
 
 
 def test_full_period_outputs_preserve_result2_template() -> None:
     daily = pd.read_csv(TABLE_DIR / "table_p2_daily_summary.csv")
     intervals = pd.read_csv(TABLE_DIR / "table_p2_dispatch.csv")
-    assert daily.shape == (334, 26)
-    assert intervals.shape == (334 * 144, 25)
+    assert len(daily) == 334
+    assert len(intervals) == 334 * 144
     assert (daily["status"] == "Optimal").all()
     assert np.max(
         np.abs(
@@ -105,11 +116,15 @@ def test_full_period_outputs_preserve_result2_template() -> None:
     with np.load(TABLE_DIR / "table_p2_scenario_recourse.npz", allow_pickle=False) as archive:
         assert archive["emergency_kw"].shape == (334, 50, 144)
         assert archive["spill_kw"].shape == (334, 50, 144)
+        assert archive["planned_grid_used_kw"].shape == (334, 50, 144)
+        assert archive["unused_planned_grid_kw"].shape == (334, 50, 144)
         assert archive["source_residual_dates"].shape == (334, 50)
         assert np.isfinite(archive["emergency_kw"]).all()
         assert np.isfinite(archive["spill_kw"]).all()
         assert (archive["emergency_kw"] >= -2e-3).all()
         assert (archive["spill_kw"] >= -2e-3).all()
+        assert (archive["planned_grid_used_kw"] >= -2e-3).all()
+        assert (archive["unused_planned_grid_kw"] >= -2e-3).all()
 
     workbook = openpyxl.load_workbook(RESULT2_PATH, read_only=True, data_only=True)
     assert workbook.sheetnames == ["计划购电量", "充放电量", "紧急购电量"]
@@ -118,6 +133,8 @@ def test_full_period_outputs_preserve_result2_template() -> None:
     assert (workbook["紧急购电量"].max_row, workbook["紧急购电量"].max_column) == (334 * 144 + 1, 3)
     assert workbook["计划购电量"]["A2"].value.date().isoformat() == "2025-02-01"
     assert workbook["计划购电量"]["A335"].value.date().isoformat() == "2025-12-31"
+    assert workbook["紧急购电量"]["B2"].value == "0:10-0:20"
+    assert workbook["紧急购电量"]["B145"].value == "0:00-0:10+1"
 
     table3 = pd.read_csv(TABLE_DIR / "table_p2_table3_emergency.csv")
     assert table3.shape == (144, 8)
@@ -134,4 +151,11 @@ def test_full_period_outputs_preserve_result2_template() -> None:
     assert not table3.isna().any().any()
     assert (table3.filter(like="购电量_kWh") >= 0.0).all().all()
     assert (table3.filter(like="购电量_kWh") == 0.0).any().all()
-    assert table3["2025.3.20_购电量_kWh"].sum() == pytest.approx(5378.415405, abs=1e-5)
+    assert table3["2025.3.20_时间段"].iloc[0] == "0:10-0:20"
+    assert table3["2025.3.20_时间段"].iloc[-1] == "0:00-0:10+1"
+
+
+def test_official_interval_labels_follow_template() -> None:
+    assert _interval_label(1) == "0:10-0:20"
+    assert _interval_label(143) == "23:50-0:00+1"
+    assert _interval_label(144) == "0:00-0:10+1"

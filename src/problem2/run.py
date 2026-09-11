@@ -80,11 +80,12 @@ def _apply_row_style(sheet, style, target_row: int) -> None:
 
 
 def _interval_label(slot: int) -> str:
-    start_minutes = (int(slot) - 1) * 10
-    end_minutes = int(slot) * 10
-    start_hour, start_minute = divmod(start_minutes, 60)
-    end_hour, end_minute = divmod(end_minutes, 60)
-    return f"{start_hour}:{start_minute:02d}-{end_hour}:{end_minute:02d}"
+    start_minutes = int(slot) * 10
+    end_minutes = (int(slot) + 1) * 10
+    start_hour, start_minute = divmod(start_minutes % (24 * 60), 60)
+    end_hour, end_minute = divmod(end_minutes % (24 * 60), 60)
+    suffix = "+1" if end_minutes >= 24 * 60 else ""
+    return f"{start_hour}:{start_minute:02d}-{end_hour}:{end_minute:02d}{suffix}"
 
 
 def attach_realized_outcomes(
@@ -112,15 +113,37 @@ def attach_realized_outcomes(
 
     frame["actual_load_kw"] = actual["actual_load"].to_numpy(dtype=float)
     frame["actual_pv_kw"] = actual["actual_generation"].to_numpy(dtype=float)
-    shortfall = (
+    net_grid_requirement = (
         frame["actual_load_kw"]
         + frame["charge_kw"]
-        - frame["planned_grid_kw"]
         - frame["actual_pv_kw"]
         - frame["discharge_kw"]
     )
-    frame["realized_emergency_kw"] = np.maximum(shortfall, 0.0)
-    frame["realized_surplus_kw"] = np.maximum(-shortfall, 0.0)
+    frame["realized_planned_grid_used_kw"] = np.minimum(
+        frame["planned_grid_kw"], np.maximum(net_grid_requirement, 0.0)
+    )
+    frame["realized_unused_planned_grid_kw"] = (
+        frame["planned_grid_kw"] - frame["realized_planned_grid_used_kw"]
+    )
+    frame["realized_emergency_kw"] = np.maximum(
+        net_grid_requirement - frame["planned_grid_kw"], 0.0
+    )
+    realized_excess_generation = np.maximum(-net_grid_requirement, 0.0)
+    frame["realized_pv_spill_kw"] = np.minimum(
+        frame["actual_pv_kw"], realized_excess_generation
+    )
+    frame["realized_unabsorbed_discharge_kw"] = (
+        realized_excess_generation - frame["realized_pv_spill_kw"]
+    )
+    frame["realized_surplus_kw"] = (
+        frame["realized_unused_planned_grid_kw"] + frame["realized_pv_spill_kw"]
+    )
+    frame["realized_planned_grid_used_kwh"] = frame["realized_planned_grid_used_kw"] / 6.0
+    frame["realized_unused_planned_grid_kwh"] = frame["realized_unused_planned_grid_kw"] / 6.0
+    frame["realized_pv_spill_kwh"] = frame["realized_pv_spill_kw"] / 6.0
+    frame["realized_unabsorbed_discharge_kwh"] = (
+        frame["realized_unabsorbed_discharge_kw"] / 6.0
+    )
     frame["realized_emergency_kwh"] = frame["realized_emergency_kw"] / 6.0
     frame["realized_surplus_kwh"] = frame["realized_surplus_kw"] / 6.0
     frame["realized_emergency_cost_yuan"] = (
@@ -133,6 +156,12 @@ def attach_realized_outcomes(
         realized_emergency_energy_kwh=("realized_emergency_kwh", "sum"),
         realized_emergency_cost_yuan=("realized_emergency_cost_yuan", "sum"),
         realized_surplus_energy_kwh=("realized_surplus_kwh", "sum"),
+        realized_planned_grid_used_energy_kwh=("realized_planned_grid_used_kwh", "sum"),
+        realized_unused_planned_grid_energy_kwh=("realized_unused_planned_grid_kwh", "sum"),
+        realized_pv_spill_energy_kwh=("realized_pv_spill_kwh", "sum"),
+        realized_unabsorbed_discharge_energy_kwh=(
+            "realized_unabsorbed_discharge_kwh", "sum"
+        ),
     )
     daily_frame = daily.copy()
     for column in realized_daily.columns:
@@ -318,7 +347,15 @@ def run_chronological(
     initial_energy_kwh: float = OFFICIAL_INITIAL_ENERGY_KWH,
     parameters: Q2DispatchParameters | None = None,
     progress: bool = False,
-) -> tuple[pd.DataFrame, pd.DataFrame, np.ndarray, np.ndarray, np.ndarray]:
+) -> tuple[
+    pd.DataFrame,
+    pd.DataFrame,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+]:
     """Solve dates in order, carrying each optimal final SOC into the next day."""
 
     parameters = parameters or Q2DispatchParameters()
@@ -327,6 +364,8 @@ def run_chronological(
     interval_frames: list[pd.DataFrame] = []
     emergency_days: list[np.ndarray] = []
     spill_days: list[np.ndarray] = []
+    planned_grid_used_days: list[np.ndarray] = []
+    unused_planned_grid_days: list[np.ndarray] = []
     source_days: list[np.ndarray] = []
     for day_index, target in enumerate(dates, start=1):
         inputs = get_q2_day_inputs(target, initial_energy=carried_energy)
@@ -339,6 +378,8 @@ def run_chronological(
         interval_frames.append(result.dispatch)
         emergency_days.append(result.emergency_kw)
         spill_days.append(result.spill_kw)
+        planned_grid_used_days.append(result.planned_grid_used_kw)
+        unused_planned_grid_days.append(result.unused_planned_grid_kw)
         source_days.append(result.scenario_source_dates)
         carried_energy = result.final_energy_kwh
         if progress and (day_index == 1 or day_index % 10 == 0 or day_index == len(dates)):
@@ -352,6 +393,8 @@ def run_chronological(
         pd.concat(interval_frames, ignore_index=True),
         np.stack(emergency_days),
         np.stack(spill_days),
+        np.stack(planned_grid_used_days),
+        np.stack(unused_planned_grid_days),
         np.stack(source_days),
     )
 
@@ -371,7 +414,25 @@ def _aggregate_summary(daily: pd.DataFrame, intervals: pd.DataFrame) -> dict[str
         "realized_total_cost_yuan": float(daily["realized_total_cost_yuan"].sum()),
         "planned_purchase_energy_kwh": float(daily["planned_purchase_energy_kwh"].sum()),
         "expected_emergency_energy_kwh": float(daily["expected_emergency_energy_kwh"].sum()),
+        "expected_planned_grid_used_energy_kwh": float(
+            daily["expected_planned_grid_used_energy_kwh"].sum()
+        ),
+        "expected_unused_planned_grid_energy_kwh": float(
+            daily["expected_unused_planned_grid_energy_kwh"].sum()
+        ),
         "realized_emergency_energy_kwh": float(daily["realized_emergency_energy_kwh"].sum()),
+        "realized_planned_grid_used_energy_kwh": float(
+            daily["realized_planned_grid_used_energy_kwh"].sum()
+        ),
+        "realized_unused_planned_grid_energy_kwh": float(
+            daily["realized_unused_planned_grid_energy_kwh"].sum()
+        ),
+        "realized_pv_spill_energy_kwh": float(
+            daily["realized_pv_spill_energy_kwh"].sum()
+        ),
+        "realized_unabsorbed_discharge_energy_kwh": float(
+            daily["realized_unabsorbed_discharge_energy_kwh"].sum()
+        ),
         "charge_energy_kwh": float(daily["charge_energy_kwh"].sum()),
         "discharge_energy_kwh": float(daily["discharge_energy_kwh"].sum()),
         "expected_spill_energy_kwh": float(daily["expected_spill_energy_kwh"].sum()),
@@ -382,7 +443,10 @@ def _aggregate_summary(daily: pd.DataFrame, intervals: pd.DataFrame) -> dict[str
         "maximum_soc_residual_kwh": float(daily["maximum_soc_residual_kwh"].max()),
         "total_solver_runtime_seconds": float(daily["runtime_seconds"].sum()),
         "daily_reset_to_6000": False,
-        "terminal_treatment": "linear L1 penalty around carried initial energy",
+        "terminal_treatment": (
+            "decreasing piecewise-linear continuation value; "
+            "no daily terminal target or reset"
+        ),
     }
 
 
@@ -396,7 +460,15 @@ def main() -> None:
         else pd.date_range(FORMAL_START, FORMAL_END, freq="D")
     )
     protected_before = {str(path): _sha256(path) for path in PROTECTED_FORECAST_PATHS}
-    daily, intervals, emergency, spill, source_dates = run_chronological(
+    (
+        daily,
+        intervals,
+        emergency,
+        spill,
+        planned_grid_used,
+        unused_planned_grid,
+        source_dates,
+    ) = run_chronological(
         pd.DatetimeIndex(dates), progress=True
     )
     daily, intervals = attach_realized_outcomes(daily, intervals)
@@ -429,6 +501,8 @@ def main() -> None:
         source_residual_dates=source_dates.astype("datetime64[D]"),
         emergency_kw=emergency,
         spill_kw=spill,
+        planned_grid_used_kw=planned_grid_used,
+        unused_planned_grid_kw=unused_planned_grid,
     )
     summary = _aggregate_summary(daily, intervals)
     (TABLE_DIR / "table_p2_summary.json").write_text(

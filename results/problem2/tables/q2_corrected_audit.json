@@ -1,0 +1,32 @@
+{
+  "scenario_emergency_positive_rate": 0.16817781104457752,
+  "scenario_emergency_mean_count_per_interval": 8.408890552228875,
+  "actual_emergency_positive_rate": 0.22856370592149036,
+  "actual_emergency_days": 333,
+  "cross_day_max_gap_kwh": 0.0,
+  "daily_energy_neutral_days": 4,
+  "distinct_final_energy_rounded": 287,
+  "minimum_daily_final_kwh": 6833.884266,
+  "maximum_daily_final_kwh": 10594.90664,
+  "planned_use_max_excess_kw": 4.999999873689376e-06,
+  "unused_identity_max_residual_kw": 4.999999873689376e-06,
+  "actual_pv_spill_max_excess_kw": 0.0,
+  "unabsorbed_discharge_intervals": 138,
+  "unabsorbed_discharge_energy_kwh": 2688.6036846053303,
+  "result2_shapes": {
+    "计划购电量": [
+      335,
+      147
+    ],
+    "充放电量": [
+      2005,
+      6
+    ],
+    "紧急购电量": [
+      48097,
+      3
+    ]
+  },
+  "first_emergency_label": "0:10-0:20",
+  "last_first_day_emergency_label": "0:00-0:10+1"
+}
