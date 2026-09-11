@@ -77,3 +77,39 @@ def create_q1_figures(dispatch: pd.DataFrame) -> dict[str, dict[str, Path]]:
     for saved in (saved_power, saved_storage):
         shutil.copy2(saved["pdf"], paper_dir / saved["pdf"].name)
     return {"dispatch_power": saved_power, "storage_price": saved_storage}
+
+
+def create_q1_sensitivity_figure(table: pd.DataFrame) -> dict[str, Path]:
+    """One three-panel quantitative grid, all four cases per physical factor."""
+    configure_plots()
+    figure, axes = plt.subplots(1, 3, figsize=(7.2, 3.05), sharey=True)
+    names = ("efficiency", "capacity", "power")
+    labels = ("单程充、放电效率", "容量倍数（基准12000 kWh）", "功率倍数（基准5000 kW）")
+    colors = (CUMCM_PALETTE["primary"], CUMCM_PALETTE["pv"], CUMCM_PALETTE["price"])
+    lower = np.floor(table["optimal_cost_yuan"].min() / 2000) * 2000 / 10000 - 0.1
+    upper = float(table["baseline_cost_yuan"].iloc[0]) / 10000 + 0.2
+    for index, (axis, name, label, color) in enumerate(zip(axes, names, labels, colors)):
+        rows = table.loc[table["sweep"].eq(name)].sort_values("parameter_value")
+        x = rows["parameter_value"].to_numpy(float)
+        y = rows["optimal_cost_yuan"].to_numpy(float) / 10000
+        axis.plot(x, y, marker="o", markersize=4, linewidth=1.5, color=color)
+        axis.scatter([x[2]], [y[2]], marker="s", s=45, facecolors="white", edgecolors=color, zorder=4, label="原始储能配置")
+        axis.axhline(rows["baseline_cost_yuan"].iloc[0] / 10000, color=CUMCM_PALETTE["neutral"], linestyle="--", linewidth=1, label="无储能对照")
+        for value, cost in zip(x, y):
+            axis.annotate(f"{cost:.3f}", (value, cost), xytext=(0, 8), textcoords="offset points", ha="center", fontsize=8)
+        axis.set_xticks(x, [f"{value:.2f}" for value in x])
+        axis.set_xlabel(label, fontsize=8)
+        axis.set_ylim(lower, upper)
+        axis.margins(x=0.17)
+        axis.text(0.02, 0.97, chr(97 + index), transform=axis.transAxes, va="top", fontweight="bold")
+        style_academic_axes(axis)
+    axes[0].set_ylabel("全天购电成本（万元）")
+    handles, legends = axes[0].get_legend_handles_labels()
+    figure.legend(handles, legends, loc="upper center", ncol=2, frameon=False, fontsize=9)
+    figure.tight_layout(rect=(0, 0, 1, 0.90), w_pad=0.7)
+    output_dir = problem_figures_dir(1)
+    saved = save_figure(figure, output_dir, "fig_p1_sensitivity", dpi=600)
+    saved["tiff"] = output_dir / "fig_p1_sensitivity.tiff"
+    figure.savefig(saved["tiff"], dpi=600, bbox_inches="tight", pil_kwargs={"compression": "tiff_lzw"})
+    plt.close(figure)
+    return saved

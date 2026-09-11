@@ -1,0 +1,4 @@
+sweep,cases,baseline_cost_yuan,lowest_setting_cost_yuan,highest_setting_cost_yuan,full_range_cost_reduction_yuan,full_range_cost_reduction_percent,gain_step1_yuan,gain_step2_yuan,gain_step3_yuan,baseline_to_upper_cost_saving_percent,baseline_to_upper_normalized_cost_sensitivity,cost_nonincreasing,diminishing_return_observed
+efficiency,4,35126.94859,38223.65162,33767.03263,4456.61899,11.65932296,1620.245141,1476.457887,1359.915962,3.871432096,0.6968577774,True,True
+capacity,4,35126.94859,40020.40435,33556.75045,6463.653898,16.15089603,2850.815624,2042.640135,1570.19814,4.470067007,0.1788026803,True,True
+power,4,35126.94859,36390.83897,35073.01432,1317.824655,3.621308803,1043.972215,219.9181639,53.93427582,0.1535410219,0.006141640875,True,True

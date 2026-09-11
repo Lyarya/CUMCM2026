@@ -117,3 +117,30 @@ $48052.047$ 元。优化后节约 $12925.098$ 元，降幅为 $26.898\%$，并�
 $6247.963\ \mathrm{kWh}$ 的富余光伏全部消纳。逐时段复核得到最大功率平衡残差
 $4.0\times10^{-5}\ \mathrm{kW}$、最大电量递推残差 $4.7\times10^{-4}\ \mathrm{kWh}$，
 均处于求解器数值精度范围内，且无同时充放电或负购电情形。
+
+\subsection{储能物理参数灵敏度}
+\input{../results/problem1/tables/q1_sensitivity_numbers.tex}
+
+采用单因素分析分别改变充、放电效率、额定容量及功率上限，其余条件保持不变。
+效率取$\eta_c=\eta_d\in\{0.80,0.85,0.90,0.95\}$，对应往返效率为$\eta_c\eta_d$；
+容量与功率分别取基准值的$0.50$、$0.75$、$1.00$和$1.25$倍。
+容量变化时，电量上下限及首末电量同步保持为额定容量的$10\%$、$90\%$和$50\%$。
+12个情形均达到最优状态，并通过功率平衡、电量递推、边界及互斥约束核验。
+图\ref{fig:p1-sensitivity}显示，单程效率由0.80提高至0.95时，购电成本由
+\QOneEffLowCost{}元降至\QOneEffHighCost{}元，降幅为\QOneEffReduction{}\%。
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{../results/problem1/figures/fig_p1_sensitivity.pdf}
+  \caption{问题一储能物理参数的单因素灵敏度：连线仅连接已求解情形，方形标记为原始配置，虚线为无储能对照}
+  \label{fig:p1-sensitivity}
+\end{figure}
+
+容量每增加3000 kWh，成本依次下降\QOneCapacityGainFirst{}、\QOneCapacityGainSecond{}和
+\QOneCapacityGainThird{}元；功率上限每增加1250 kW，相应下降
+\QOnePowerGainFirst{}、\QOnePowerGainSecond{}和\QOnePowerGainThird{}元，均呈边际收益递减。
+从基准配置提高到相邻较高设定，以成本相对降幅除以参数相对增幅，
+效率、容量、功率的归一化敏感度分别为\QOneEffElasticity{}、\QOneCapacityElasticity{}和
+\QOnePowerElasticity{}。在该有限步长比较下，效率损耗的经济影响最强，容量次之；
+5000 kW以上继续提高功率上限的收益已很小。这一判断只适用于附件1的确定性单日输入与所测区间，
+不代表其他日期或设备投资的最优选择。
