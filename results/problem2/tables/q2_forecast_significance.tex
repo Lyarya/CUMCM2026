@@ -1,0 +1,24 @@
+\begin{table}[H]
+  \centering
+  \caption{正式评价期新能源预测的日级配对比较}
+  \label{tab:q2-forecast-significance}
+  \scriptsize
+  \setlength{\tabcolsep}{3.2pt}
+  \begin{tabular}{lrrrrrrc}
+    \toprule
+    比较模型 & 日数 & 参考MAE & 比较MAE & 差值中位数 & 参考胜率 & FDR $p$ & 显著 \\
+    \midrule
+    昨日同刻 & 334 & 153.40 & 185.35 & -32.02 & 76.6\% & 3.43e-23 & 是 \\
+    上周同刻 & 334 & 153.40 & 214.69 & -51.47 & 89.5\% & 1.50e-47 & 是 \\
+    SSA & 334 & 153.40 & 260.83 & -106.43 & 95.5\% & 1.59e-52 & 是 \\
+    DLinear & 334 & 153.40 & 423.40 & -259.09 & 100.0\% & 8.37e-56 & 是 \\
+    相位--结构融合 & 334 & 153.40 & 170.57 & -13.81 & 70.4\% & 1.03e-17 & 是 \\
+    \bottomrule
+  \end{tabular}
+  \vspace{2pt}
+  \begin{minipage}{0.97\textwidth}
+    \footnotesize 注：参考模型为近7日同刻均值，MAE 与差值单位均为 kW。差值定义为
+    参考模型日MAE减比较模型日MAE，负值表示参考模型误差更小；显著性为双侧
+    Wilcoxon符号秩检验经Benjamini--Hochberg校正后的结果。
+  \end{minipage}
+\end{table}

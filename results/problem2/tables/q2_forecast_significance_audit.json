@@ -1,0 +1,54 @@
+{
+  "source_prediction_file": "results/tables/forecasting/forecast_model_final_predictions.csv",
+  "source_prediction_sha256": "355cd6f21d323e42faab0c87b3a918ce1a201c1b59f60c5c14f7e69ef4ff4cbe",
+  "selection_audit_file": "results/tables/forecasting/forecast_final_leakage_audit.json",
+  "selection_audit_sha256": "d599894fc58a2953c4f04d530dea09401315a9ac7bdec346b01c29a1667ec96d",
+  "reference_model": "7-day same-slot mean",
+  "comparators": [
+    "Yesterday",
+    "Last Week",
+    "SSA best config",
+    "DLinear",
+    "PhaseStructuralFusion"
+  ],
+  "candidate_exclusions": {
+    "Polynomial analytical-only teacher": "仅作为解析教师诊断，不是预先指定的可选正式预测器。",
+    "StructuralResidualHybrid": "同一复杂候选族中验证表现弱于已纳入的 PhaseStructuralFusion。",
+    "Seasonal/Phase": "PhaseStructuralFusion 的已保存预测与其完全一致，避免重复检验同一序列。"
+  },
+  "oos_date_range": [
+    "2025-02-01",
+    "2025-12-31"
+  ],
+  "formal_days": 334,
+  "intervals_per_day": 144,
+  "paired_unit": "operating day",
+  "metric": "daily MAE over 144 ten-minute intervals",
+  "paired_difference": "reference daily MAE minus comparator daily MAE",
+  "wilcoxon": {
+    "alternative": "two-sided",
+    "zero_method": "wilcox (discard exact zero differences)",
+    "continuity_correction": false,
+    "scipy_method": "auto"
+  },
+  "multiple_testing": {
+    "method": "Benjamini-Hochberg FDR",
+    "alpha": 0.05,
+    "family_size": 5
+  },
+  "forecast_retuning_on_feb_dec_actuals": false,
+  "saved_forecasts_only": true,
+  "causal_audit_passed": true,
+  "outputs": {
+    "daily_mae": "results/problem2/tables/q2_forecast_daily_mae.csv",
+    "significance": "results/problem2/tables/q2_forecast_significance.csv",
+    "latex_table": "results/problem2/tables/q2_forecast_significance.tex",
+    "figure": {
+      "svg": "results/problem2/figures/fig_p2_forecast_significance.svg",
+      "pdf": "results/problem2/figures/fig_p2_forecast_significance.pdf",
+      "png": "results/problem2/figures/fig_p2_forecast_significance.png",
+      "jpg": "results/problem2/figures/fig_p2_forecast_significance.jpg",
+      "tiff": "results/problem2/figures/fig_p2_forecast_significance.tiff"
+    }
+  }
+}
