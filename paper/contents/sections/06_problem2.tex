@@ -169,6 +169,53 @@ $2.86\times10^{-11}\ \mathrm{kW}$，最大实际功率平衡残差为 $1.00\time
 实际 SOC 递推最大残差为 $9.84\times10^{-6}\ \mathrm{kWh}$。实际 SOC 范围为
 $1200$--$10800\ \mathrm{kWh}$，最终为 $7834.330\ \mathrm{kWh}$。
 
+\subsection{CVaR 风险敏感性扩展}
+
+\input{../results/problem2/tables/q2_cvar_numbers.tex}
+
+为考察尾部紧急购电风险，在不改变预测器、50 个配对场景、延续价值和实际结算规则的条件下，
+仅对场景紧急购电费用加入 CVaR 项。记
+\begin{equation}
+ C_{d,s}^{\rm emg}=\sum_{t=1}^{144}5\lambda_t e_{d,t,s}\Delta t,
+\end{equation}
+并取置信水平 $\alpha=0.90$。对每日引入 $\zeta_d$ 和 $\xi_{d,s}$，满足
+\begin{equation}
+ \xi_{d,s}\ge C_{d,s}^{\rm emg}-\zeta_d,\qquad \xi_{d,s}\ge0,
+\end{equation}
+则
+\begin{equation}
+ \operatorname{CVaR}_{\alpha,d}=\zeta_d+
+ \frac{1}{(1-\alpha)50}\sum_{s=1}^{50}\xi_{d,s}.
+\end{equation}
+风险调整后的日目标为
+\begin{equation}
+ C_d^{\rm plan}+\mathbb E(C_d^{\rm emg})
+ +\lambda_{\rm r}\operatorname{CVaR}_{\alpha,d}-V_d(E_{145}).
+\end{equation}
+其中风险权重 $\lambda_{\rm r}$ 只乘场景紧急购电费用的 CVaR；计划购电费不进入场景损失，
+延续价值也不进入场景损失或实际结算费用。$\lambda_{\rm r}=0$ 时完整复现前述锁定基准。
+
+表~\ref{tab:p2-cvar-sweep} 给出预先设定风险权重的完整因果回测结果。表中 CVaR 为
+334 个日模型对应指标之和，费用单位均为万元。五个风险点均得到 334/334 个最优解。
+随风险权重增大，场景期望紧急费用、尾部 CVaR 与附件 2 回测紧急电量均下降，但计划购电费用
+上升；实际总费用并不保证下降。由已保存的风险扫描结果计算，$\lambda_{\rm r}=0.05$ 相对
+$\lambda_{\rm r}=0$ 仅使期望运行成本增加 \QTwoMildExpectedCostChange\%，却使实际紧急购电量
+减少 \QTwoMildEmergencyEnergyReduction\%，紧急购电费用 CVaR 减少
+\QTwoMildCvarReduction\%。其实际总费用在本次事后回测中下降
+\QTwoMildRealizedCostReduction\%，该值只作为事后评价，不能据此把 $\lambda_{\rm r}=0.05$
+解释为事前最优参数。本文仍以 $\lambda_{\rm r}=0$ 为问题二主结果，仅将 $0.05$ 作为温和风险
+厌恶的示例点；更大的风险权重则清楚反映出增加日前安全裕度与降低尾部紧急暴露之间的权衡。
+
+\input{../results/problem2/tables/q2_cvar_sensitivity.tex}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.98\textwidth]{../results/problem2/figures/fig_p2_cvar_risk_tradeoff.pdf}
+  \caption{CVaR 风险权重下的期望成本与紧急购电风险权衡。CVaR 的场景损失仅包含紧急购电
+  费用；空心点表示温和风险厌恶示例 $\lambda_{\rm r}=0.05$，事后紧急购电量不参与权重选择。}
+  \label{fig:p2-cvar-risk-tradeoff}
+\end{figure}
+
 实际执行先在可消纳功率和 SOC 下界内尽量保持计划放电，再调用已付费计划电，最后以紧急购电
 补足缺口；计划充电只在 SOC 上界处裁剪。按照题面表 3 的日期、分组表头和“时间段--购电量”
 列结构，完整结果保留每个指定日期

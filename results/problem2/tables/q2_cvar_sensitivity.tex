@@ -1,0 +1,23 @@
+\begin{table}[H]
+  \centering
+  \caption{Q2 的 CVaR 风险权重敏感性结果}
+  \label{tab:p2-cvar-sweep}
+  \small
+  \setlength{\tabcolsep}{5pt}
+  \begin{tabular}{crrrr}
+    \toprule
+    $\lambda_{\rm r}$ & 期望运行成本 & 紧急购电CVaR & 实际紧急电量$^{*}$ & 实际总费用 \\
+    \midrule
+    0 & 1437.435 & 539.436 & 39.816 & 1483.946 \\
+    0.05 & 1438.778 & 467.188 & 34.342 & 1482.186 \\
+    0.1 & 1443.146 & 403.691 & 30.693 & 1485.235 \\
+    0.2 & 1459.022 & 287.480 & 24.278 & 1498.135 \\
+    0.5 & 1514.391 & 111.498 & 15.338 & 1548.582 \\
+    \bottomrule
+  \end{tabular}
+  \vspace{2pt}
+  \begin{minipage}{0.96\textwidth}
+    \footnotesize 注：费用单位为万元；$^{*}$实际紧急电量单位为万 kWh。CVaR 的场景损失仅为
+    紧急购电费用，计划购电费不在 CVaR 内。风险权重代表事前偏好，实际回测结果不参与权重选择。
+  \end{minipage}
+\end{table}

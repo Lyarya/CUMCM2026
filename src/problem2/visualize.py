@@ -274,6 +274,73 @@ def plot_risk_cost_tradeoff(
     return _save_and_close(fig, output_dir, name)
 
 
+def plot_cvar_risk_tradeoff(
+    risk_sweep: pd.DataFrame,
+    *,
+    output_dir: str | Path | None = None,
+    name: str = "fig_p2_cvar_risk_tradeoff",
+) -> dict[str, Path]:
+    """Plot the finalized CVaR sweep without conflating ex-ante and ex-post metrics."""
+    required = {
+        "lambda", "expected_operating_cost_yuan", "cvar_cost_yuan",
+        "realized_emergency_energy_kwh",
+    }
+    _require_columns(risk_sweep, required, "risk_sweep")
+    frame = risk_sweep.sort_values("lambda", kind="stable")
+    x = frame["lambda"].to_numpy(dtype=float)
+    if x.tolist() != [0.0, 0.05, 0.1, 0.2, 0.5]:
+        raise ValueError("the finalized CVaR figure requires the five predeclared lambda values")
+
+    _configure_q2_plots()
+    fig, axes = plt.subplots(1, 3, figsize=(7.2, 2.75), facecolor="white")
+    panels = (
+        ("expected_operating_cost_yuan", 1e6, "期望运行成本（百万元）", CUMCM_PALETTE["primary"]),
+        ("cvar_cost_yuan", 1e6, "紧急购电CVaR（百万元）", CUMCM_PALETTE["bad"]),
+        ("realized_emergency_energy_kwh", 1e4, "事后紧急购电量（万kWh）", CUMCM_PALETTE["price"]),
+    )
+    for label, (column, scale, ylabel, color), axis in zip("abc", panels, axes):
+        y = frame[column].to_numpy(dtype=float) / scale
+        axis.plot(x, y, marker="o", color=color, linewidth=1.7, markersize=4.2)
+        mild = int(np.flatnonzero(np.isclose(x, 0.05))[0])
+        axis.scatter(
+            [x[mild]], [y[mild]], s=42, facecolor="white", edgecolor=color,
+            linewidth=1.4, zorder=5,
+        )
+        axis.set_xticks(x, [f"{value:g}" for value in x])
+        axis.tick_params(axis="x", labelrotation=35, labelsize=7.5)
+        for tick in axis.get_xticklabels():
+            tick.set_horizontalalignment("right")
+        axis.set_xlabel(r"风险权重 $\lambda_{\rm r}$")
+        axis.set_ylabel(ylabel)
+        axis.set_title(f"{label}  {ylabel.split('（')[0]}", loc="left", fontsize=9.5)
+        style_academic_axes(axis)
+    fig.text(
+        0.5, 0.01,
+        r"空心点为 $\lambda_{\rm r}=0.05$；事后指标仅用于评价，不参与风险权重选择。",
+        ha="center", fontsize=7.5, color=CUMCM_PALETTE["observed"],
+    )
+    fig.tight_layout(rect=(0, 0.055, 1, 1), w_pad=1.2)
+
+    target = Path(output_dir or problem_figures_dir(2))
+    target.mkdir(parents=True, exist_ok=True)
+    paths = {suffix: target / f"{name}.{suffix}" for suffix in ("svg", "pdf", "jpg", "png", "tiff")}
+    common = {"bbox_inches": "tight", "facecolor": "white", "transparent": False}
+    fig.savefig(paths["svg"], **common)
+    fig.savefig(paths["pdf"], **common)
+    fig.savefig(paths["jpg"], dpi=600, **common)
+    fig.savefig(paths["png"], dpi=600, **common)
+    fig.savefig(paths["tiff"], dpi=600, **common)
+    plt.close(fig)
+    # Matplotlib writes harmless spaces before SVG line breaks; remove them so
+    # repository whitespace checks remain meaningful.
+    svg_text = paths["svg"].read_text(encoding="utf-8")
+    paths["svg"].write_text(
+        "\n".join(line.rstrip() for line in svg_text.splitlines()) + "\n",
+        encoding="utf-8",
+    )
+    return paths
+
+
 def plot_soc_emergency_diagnostic(
     result: DailyOptimizerResult,
     *,
@@ -322,6 +389,7 @@ __all__ = [
     "plot_daily_cost_decomposition",
     "plot_daily_economic_performance",
     "plot_hankel_singular_spectrum",
+    "plot_cvar_risk_tradeoff",
     "plot_risk_cost_tradeoff",
     "plot_soc_emergency_diagnostic",
 ]

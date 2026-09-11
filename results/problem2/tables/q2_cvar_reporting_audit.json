@@ -1,0 +1,35 @@
+{
+  "source_sweep": "results/problem2/q2_risk_sweep.csv",
+  "source_sweep_sha256": "bfafc8ee7c26ac99fbaad1a6a8c329d631904cb268f6d9bde5742190114a2ff0",
+  "source_metadata": "results/problem2/q2_risk_metadata.json",
+  "source_metadata_sha256": "3495256811cadc2121a9ba8e8b2577316e361fce12f94dac5ed19e760bb429ed",
+  "cvar_definition": "emergency procurement cost only",
+  "alpha": 0.9,
+  "lambda_values": [
+    0.0,
+    0.05,
+    0.1,
+    0.2,
+    0.5
+  ],
+  "all_solver_points": "334/334 Optimal",
+  "all_physical_audits_passed": true,
+  "changes_lambda_005_vs_0": {
+    "expected_operating_cost_change_pct": 0.09346367552671805,
+    "emergency_energy_reduction_pct": 13.74805717142789,
+    "emergency_cvar_reduction_pct": 13.393153748164252,
+    "realized_total_cost_change_pct": -0.11864145679372722
+  },
+  "interpretation": "lambda=0 remains the main expected-cost solution; lambda=0.05 is an illustrative mild-risk point, and realized cost is ex-post evidence only",
+  "outputs": {
+    "latex_numbers": "results/problem2/tables/q2_cvar_numbers.tex",
+    "latex_table": "results/problem2/tables/q2_cvar_sensitivity.tex",
+    "figure": {
+      "svg": "results/problem2/figures/fig_p2_cvar_risk_tradeoff.svg",
+      "pdf": "results/problem2/figures/fig_p2_cvar_risk_tradeoff.pdf",
+      "jpg": "results/problem2/figures/fig_p2_cvar_risk_tradeoff.jpg",
+      "png": "results/problem2/figures/fig_p2_cvar_risk_tradeoff.png",
+      "tiff": "results/problem2/figures/fig_p2_cvar_risk_tradeoff.tiff"
+    }
+  }
+}
