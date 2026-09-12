@@ -1,0 +1,41 @@
+{
+  "visual_qa": "PASS",
+  "figures": [
+    {
+      "name": "fig_p4_price_volatility_robustness",
+      "paths": {
+        "pdf": "results/problem4/robustness/figures/fig_p4_price_volatility_robustness.pdf",
+        "svg": "results/problem4/robustness/figures/fig_p4_price_volatility_robustness.svg",
+        "jpg": "results/problem4/robustness/figures/fig_p4_price_volatility_robustness.jpg",
+        "png": "results/problem4/robustness/figures/fig_p4_price_volatility_robustness.png"
+      },
+      "source_hashes": {
+        "results/problem4/robustness/tables/q4_price_volatility_sensitivity.csv": "f48d4729d7368bf73c4cf31dff50d1d6d1fd939019fe62d4065c69d5a889841f"
+      },
+      "contract": "Five controlled gamma cases; lines are deterministic annual outcomes, not means; no error bars.",
+      "error_bars": false,
+      "fabricated_data": false,
+      "text_outside_canvas": [],
+      "visual_encodings": "color + marker + line style"
+    },
+    {
+      "name": "fig_p4_forecast_uncertainty_robustness",
+      "paths": {
+        "pdf": "results/problem4/robustness/figures/fig_p4_forecast_uncertainty_robustness.pdf",
+        "svg": "results/problem4/robustness/figures/fig_p4_forecast_uncertainty_robustness.svg",
+        "jpg": "results/problem4/robustness/figures/fig_p4_forecast_uncertainty_robustness.jpg",
+        "png": "results/problem4/robustness/figures/fig_p4_forecast_uncertainty_robustness.png"
+      },
+      "source_hashes": {
+        "results/problem4/robustness/tables/q4_uncertainty_sensitivity.csv": "b86d14bcf74b1ddb02dbb76b209a9d3044465ff9d3bb5212eba25946ff3a92ff"
+      },
+      "contract": "Four controlled kappa cases with fixed paired scenario indices; deterministic annual outcomes; no error bars.",
+      "error_bars": false,
+      "fabricated_data": false,
+      "text_outside_canvas": [],
+      "visual_encodings": "color + marker + line style"
+    }
+  ],
+  "error_bars_used": false,
+  "reason_no_error_bars": "Each parameter point is one controlled full-year trajectory, not a repeated-sample distribution."
+}
