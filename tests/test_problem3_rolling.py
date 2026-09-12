@@ -21,6 +21,7 @@ from src.problem3.rolling_dispatch import (
     run_schedule,
 )
 from src.problem3.rolling_model import solve_remaining_dispatch
+from src.problem3.visualize import summarize_economic_results
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -211,3 +212,21 @@ def test_formal_result3_emergency_cost_uses_five_times_fixed_tariff() -> None:
         + comparison["adjustment_cost_yuan"]
         + recomputed
     ) == pytest.approx(comparison["realized_total_cost_yuan"], abs=1e-4)
+
+
+def test_final_economic_reporting_is_derived_from_canonical_tables() -> None:
+    table_dir = PROJECT_ROOT / "results/problem3/tables"
+    schedule = pd.read_csv(table_dir / "q3_schedule_comparison.csv")
+    voi = pd.read_csv(table_dir / "q3_voi.csv")
+    settlement = pd.read_csv(table_dir / "q3_settlement_mode_sensitivity.csv")
+    summary = summarize_economic_results(schedule, voi, settlement)
+
+    assert summary["best_schedule"] == "S2"
+    assert summary["savings_vs_s0_yuan"] == pytest.approx(222469.864818, abs=1e-6)
+    assert summary["savings_vs_s0_pct"] == pytest.approx(1.51052626946)
+    assert summary["emergency_reduction_vs_s0_pct"] == pytest.approx(17.4946354238)
+    assert summary["incremental_voi_yuan"]["S3"] == pytest.approx(-2217.412836, abs=1e-6)
+    assert summary["settlement_ranking_stable"] is True
+    assert set(map(tuple, summary["settlement_rankings"].values())) == {
+        ("S2", "S3", "S1", "S0")
+    }

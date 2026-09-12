@@ -1,5 +1,9 @@
 \section{问题三的模型与求解}
 
+全文技术链条由因果预测、不确定性量化、随机优化决策和滚动重优化构成。问题二通过50条因果成对残差场景
+建立两阶段随机MILP，并开展CVaR风险敏感性分析；问题三在提前期分段融合的基础上，实现多时点滚动重优化
+与非对称购电调整结算。
+
 \subsection{附件3的预测质量与信息到达}
 
 附件3每日在 0:00、6:00、12:00 和 18:00 发布未来24个整点的光伏功率预测。令发布时间为 $\tau$，第 $h$ 个预测值的目标时刻定义为
@@ -78,21 +82,55 @@ E_{t+1}^{\mathrm{act}}=E_t^{\mathrm{act}}
 
 \subsection{年度经济结果与信息价值}
 
+\input{../results/problem3/tables/q3_economic_numbers.tex}
+
 对2025年2月1日至12月31日共334天进行逐日滚动回测，四种信息安排的全部日模型均获得Optimal解。表\ref{tab:q3-schedule-comparison}区分了00:00计划费用、调整费用、实际紧急购电费用和实际总费用；模型内部的场景期望成本不作为实际结算费用。
+其中，$S_0$ 是问题三信息结构下仅在00:00更新的比较基线，使用附件3及提前期分段融合预测，因而不等同于问题二的主结果。
 
 \input{../results/problem3/tables/q3_schedule_comparison.tex}
 
-随着6:00和12:00预测加入，紧急购电量由$36.635$万kWh依次降至$33.229$万kWh和$30.225$万kWh，总费用由$1472.797$万元降至$1450.550$万元。18:00更新后总费用为$1450.772$万元，略高于$S_2$。这说明更晚的信息仍会改变承诺，但其减少紧急购电的收益不足以覆盖调整成本及调度变化，故没有必要机械地使用每一次发布。
+四种时间表的年度实际总费用为
+\[
+\begin{aligned}
+C(S_0)&=\QThreeSZeroCostYuan, & C(S_1)&=\QThreeSOneCostYuan,\\
+C(S_2)&=\QThreeSTwoCostYuan, & C(S_3)&=\QThreeSThreeCostYuan,
+\end{aligned}
+\qquad (\text{元}).
+\]
+$S_2=\{0,6,12\}$ 的年度实际成本最低，相对 $S_0$ 节省 $\QThreeSavingsYuan$ 元，
+约为 $S_0$ 成本的 $\QThreeSavingsPercent\%$。
+
+实际紧急购电量由 $\QThreeSZeroEmergencyKWh\ \mathrm{kWh}$ 降至
+$\QThreeSTwoEmergencyKWh\ \mathrm{kWh}$，降幅为 $\QThreeEmergencyReductionPercent\%$。加入18:00更新后，
+$S_3$ 总费用略高于 $S_2$，表明更新频率与经济价值并非单调关系。
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.88\textwidth]{../results/problem3/figures/fig_p3_schedule_total_cost.pdf}
+  \caption{不同信息更新时间表的年度实际总成本。纵轴从零起算，$S_2$ 为四种时间表中的最低成本方案。}
+  \label{fig:q3-schedule-total-cost}
+\end{figure}
 
 定义实际经济意义下的信息价值为
 \[
 \mathrm{VOI}(S_i)=C(S_0)-C(S_i),
 \]
-而相邻安排的增量价值为$C(S_{i-1})-C(S_i)$。结果见表\ref{tab:q3-voi}。6:00和12:00信息分别贡献$95120.802$元和$127349.063$元的增量价值，18:00信息的增量价值为$-2217.413$元。负值未经截断，反映其在本次事后回测中的真实经济表现；本文不把这一结果表述为事前参数选择。
+而相邻安排的增量价值为$C(S_{i-1})-C(S_i)$。结果见表\ref{tab:q3-voi}。06:00和12:00信息分别贡献
+$\QThreeIncrementSixYuan$ 元和 $\QThreeIncrementTwelveYuan$ 元的增量价值，18:00信息的增量价值为
+$\QThreeIncrementEighteenYuan$ 元。负值未经截断，仅说明额外信息的边际经济价值略为负，不意味着18:00预测本身更差；
+本文也不把事后回测结果表述为事前参数选择。
 
 \input{../results/problem3/tables/q3_voi.tex}
 
-表\ref{tab:q3-settlement-sensitivity}给出两种结算解释。二者只改变会计口径，不改变计划、实际电池动作、紧急购电量或SOC轨迹。对于$S_2$和$S_3$，两种口径下年度总费用差异均不足600元，信息时刻选择的主要结论保持不变。
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.86\textwidth]{../results/problem3/figures/fig_p3_incremental_voi.pdf}
+  \caption{新增发布时刻的增量信息价值。水平线为零基线；18:00的负值保持原样，表明更多更新不保证经济价值单调提高。}
+  \label{fig:q3-incremental-voi}
+\end{figure}
+
+表\ref{tab:q3-settlement-sensitivity}给出两种结算解释。两种口径均保持 $S_2<S_3<S_1<S_0$ 的成本排序，并且同一时间表的年度总费用差异最大仅为
+$\QThreeSettlementMaxDifferenceYuan$ 元；因此，结算口径的替代解释不改变 $S_2$ 最优和18:00边际价值略为负的主要结论。
 
 \input{../results/problem3/tables/q3_settlement_mode_sensitivity.tex}
 
