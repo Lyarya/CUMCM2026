@@ -1,0 +1,3 @@
+formulation,solver_status,objective_cost_yuan,total_grid_purchase_kwh,total_charge_kwh,total_discharge_kwh,total_curtailment_kwh,minimum_soc_energy_kwh,maximum_soc_energy_kwh,maximum_simultaneous_charge_discharge_kw,simultaneous_interval_count_above_1e_6,maximum_power_balance_residual_kw,maximum_soc_recurrence_residual_kwh,solver_runtime_seconds,objective_recalculation_error_yuan,common_physical_invariants_pass
+MILP,Optimal,35126.9485912,59482.699,20740.6661267,16799.9395667,0,1200,10800,0,0,4.00000000127e-05,0.00047000000086,0.210641417012,7.27595761418e-12,True
+LP relaxation,Optimal,35126.9485912,59482.699,20740.6661267,16799.9395667,0,1200,10800,0,0,4.00000000127e-05,0.00047000000086,0.0668784590089,7.27595761418e-12,True
