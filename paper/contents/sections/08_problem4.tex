@@ -7,7 +7,7 @@
 
 \input{../results/problem4/tables/q4_price_summary.tex}
 
-全年平均电价为\QFourPriceMean{}元/kWh，标准差为\QFourPriceStd{}元/kWh，最小值和最大值分别为\QFourPriceMin{}元/kWh和\QFourPriceMax{}元/kWh，表明外网购电成本具有明显的时变性。图\ref{fig:q4-price-annual-monthly}显示，不同月份的电价位置与离散程度均有差异；全年日内价格极差的平均值为\QFourDailyRange{}元/kWh，同一运营日内相邻10 min区间的最大绝对价格变化为\QFourMaxChange{}元/kWh。
+表\ref{tab:q4-price-summary}汇总了附件4的描述性统计。全年平均电价为\QFourPriceMean{}元/kWh，标准差为\QFourPriceStd{}元/kWh，最小值和最大值分别为\QFourPriceMin{}元/kWh和\QFourPriceMax{}元/kWh，表明外网购电成本具有明显的时变性。图\ref{fig:q4-price-annual-monthly}显示，不同月份的电价位置与离散程度均有差异；全年日内价格极差的平均值为\QFourDailyRange{}元/kWh，同一运营日内相邻10 min区间的最大绝对价格变化为\QFourMaxChange{}元/kWh。
 
 \begin{figure}[H]
   \centering
@@ -31,7 +31,7 @@
 
 \input{../results/problem4/tables/q4_price_correlations.tex}
 
-电价与实际负荷的Pearson和Spearman系数分别为\QFourLoadPearson{}和\QFourLoadSpearman{}，呈中等程度正相关；电价与净负荷的两类系数分别为\QFourNetPearson{}和\QFourNetSpearman{}，正相关程度较弱；电价与实际光伏的线性相关性接近于零。上述结果用于描述变量关联，不作因果解释。图\ref{fig:q4-price-system}给出了相关系数和全部52560个区间的电价--净负荷联合分布。
+表\ref{tab:q4-price-correlation}给出电价与系统状态的相关系数。电价与实际负荷的Pearson和Spearman系数分别为\QFourLoadPearson{}和\QFourLoadSpearman{}，呈中等程度正相关；电价与净负荷的两类系数分别为\QFourNetPearson{}和\QFourNetSpearman{}，正相关程度较弱；电价与实际光伏的线性相关性接近于零。上述结果用于描述变量关联，不作因果解释。图\ref{fig:q4-price-system}给出了相关系数和全部52560个区间的电价--净负荷联合分布。
 
 \begin{figure}[H]
   \centering
@@ -45,6 +45,7 @@
 题面指出外网电价“实时波动”，并要求使用附件4在波动电价下重新计算问题二和问题三，但没有说明每天0:00制定计划时是否能够提前获知全天价格。因此，本文将未来电价可用性判定为不明确，并建立两种互斥的信息模式：完美信息模式直接使用附件4的未来价格，作为理论基准；严格因果模式只允许使用当前时刻之前已经实现的价格和冻结的价格预测。
 
 在因果模式下，比较前一日同刻、前一周同刻、近7日同刻均值和岭回归四种轻量方法。岭回归的输入仅包含历史价格滞后及已知日历周期特征。模型使用1月8日至16日数据拟合，1月17日至30日按RMSE最小、MAE并列判据完成选择，2月1日至12月31日只作冻结样本外评价。最终选择的因果岭回归在验证期的MAE和RMSE分别为\QFourValMAE{}元/kWh和\QFourValRMSE{}元/kWh，在正式评价期分别为\QFourOOSMAE{}元/kWh和\QFourOOSRMSE{}元/kWh。
+图\ref{fig:q4-price-forecast}给出各轻量候选方法的验证期与冻结样本外误差，仅用于确定未来价格输入接口，不据此计算问题四的年度调度费用。
 
 \begin{figure}[H]
   \centering

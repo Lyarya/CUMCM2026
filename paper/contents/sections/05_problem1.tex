@@ -9,15 +9,15 @@
 \subsection{混合整数线性规划模型}
 
 对区间 $t=1,\ldots,144$，定义外网购电功率 $g_t$、储能充电功率 $c_t$、放电功率
-$d_t$、弃光功率 $s_t$，并以 $E_t$ 表示第 $t$ 个区间起点的储能电量。负荷功率与光伏发电功率分别记为
-$L_t$ 和 $P_t^{\mathrm{pv}}$，购电价为 $\lambda_t$。以全天购电成本最小为目标：
+$d_t$、弃光功率 $w_t$，并以 $E_t$ 表示第 $t$ 个区间起点的储能电量。负荷功率与光伏发电功率分别记为
+$L_t$ 和 $P_t$，购电价为 $p_t$。以全天购电成本最小为目标：
 \begin{equation}
-  \min \ C=\sum_{t=1}^{144}\lambda_t g_t\Delta t .
+  \min \ C=\sum_{t=1}^{144}p_t g_t\Delta t .
   \label{eq:p1-objective}
 \end{equation}
 各区间的功率平衡和储能电量递推为
 \begin{align}
-  g_t+P_t^{\mathrm{pv}}+d_t &= L_t+c_t+s_t,
+  g_t+P_t+d_t &= L_t+c_t+w_t,
   &&t=1,\ldots,144, \\
   E_{t+1} &= E_t+\eta_c c_t\Delta t-\frac{d_t\Delta t}{\eta_d} .
   &&t=1,\ldots,144.
@@ -25,19 +25,20 @@ $L_t$ 和 $P_t^{\mathrm{pv}}$，购电价为 $\lambda_t$。以全天购电成本
 \end{align}
 其中 $\eta_c=\eta_d=0.9$。由题设，储能额定容量为 $12000\ \mathrm{kWh}$，允许运行区间为
 \begin{equation}
-  1200\le E_t\le10800\ \mathrm{kWh},\qquad t=1,\ldots,145,
+  E_{\min}=1200\le E_t\le10800=E_{\max}\ \mathrm{kWh},\qquad t=1,\ldots,145,
   \label{eq:p1-energy-bound}
 \end{equation}
-且 $E_1=E_{145}=6000\ \mathrm{kWh}$。储能最大充、放电功率均为 $5000\ \mathrm{kW}$。
+且 $E_1=E_{145}=6000\ \mathrm{kWh}$。记储能最大充、放电功率为
+$P_{\max}=5000\ \mathrm{kW}$。
 引入二元变量 $u_t$ 排除同时充放电：
 \begin{equation}
-  0\le c_t\le5000u_t,\qquad
-  0\le d_t\le5000(1-u_t),\qquad u_t\in\{0,1\}.
+  0\le c_t\le P_{\max}u_t,\qquad
+  0\le d_t\le P_{\max}(1-u_t),\qquad u_t\in\{0,1\}.
   \label{eq:p1-mode}
 \end{equation}
 其中 $t=1,\ldots,144$。此外，购电功率非负，弃光功率不得超过该区间的光伏发电功率：
 \begin{equation}
-  g_t\ge0,\qquad 0\le s_t\le P_t^{\mathrm{pv}},\qquad t=1,\ldots,144.
+  g_t\ge0,\qquad 0\le w_t\le P_t,\qquad t=1,\ldots,144.
   \label{eq:p1-spill-bound}
 \end{equation}
 由此得到含连续变量与二元变量的混合整数线性规划模型，采用 PuLP 建模并调用 CBC 求解器求解。
@@ -111,7 +112,7 @@ $20740.666\ \mathrm{kWh}$，累计放电 $16799.940\ \mathrm{kWh}$；二者差�
 \end{figure}
 }{}
 
-最优计划的全天购电量为 $59482.699\ \mathrm{kWh}$，购电成本为 $35126.949$ 元。
+最优计划的全天购电量为 $59482.699\ \mathrm{kWh}$，购电成本为 $35126.948591$ 元。
 作为对照，不配置储能时直接以光伏抵扣负荷，全天需购电 $61789.935\ \mathrm{kWh}$，成本为
 $48052.047$ 元。优化后节约 $12925.098$ 元，降幅为 $26.898\%$，并将原本
 $6247.963\ \mathrm{kWh}$ 的富余光伏全部消纳。逐时段复核得到最大功率平衡残差
@@ -124,10 +125,10 @@ $4.0\times10^{-5}\ \mathrm{kW}$、最大电量递推残差 $4.7\times10^{-4}\ \m
 \input{../results/problem1/tables/q1_lp_relaxation_comparison.tex}
 
 LP松弛与正式MILP的目标值之差在数值容差内为零，且LP最优解的最大同时充放电量不超过
-$10^{-6}\ \mathrm{kW}$。因此，Q1的LP松弛在附件1这一确定性单日算例上取得零松弛间隙，
+$10^{-6}\ \mathrm{kW}$。因此，LP松弛在附件1该确定性单日算例上取得零松弛间隙，
 最优解自然满足充放电互斥。由于线性目标存在等价最优解，两者在少数等价时段的充电与购电
-分配并不完全相同，但全天能量汇总及目标值一致。该结论仅用于验证本算例的整数约束作用，不意味着Q2--Q4的
-随机、多阶段或滚动模型也具有相同性质。
+分配并不完全相同，但全天能量汇总及目标值一致。该现象仅为本算例的经验精确松弛，不推广至
+Q2--Q4的随机、多阶段或滚动模型；后续问题仍保留各自正式模型中的整数约束。
 
 \subsection{储能物理参数灵敏度}
 \input{../results/problem1/tables/q1_sensitivity_numbers.tex}
