@@ -144,6 +144,12 @@ def _audit_realized_dispatch(daily: pd.DataFrame, intervals: pd.DataFrame) -> di
             .max()
             <= 10800.0 + tolerance
         ),
+        "no_simultaneous_charge_discharge": bool(
+            ~(
+                (intervals["actual_charge_kw"] > tolerance)
+                & (intervals["actual_discharge_kw"] > tolerance)
+            ).any()
+        ),
         "phantom_discharge": bool(
             (intervals["actual_discharge_kw"] <= absorbable + tolerance).all()
         ),
@@ -165,6 +171,8 @@ def run_q42_sample(
     *,
     mode: str,
     checkpoint_path: Path | None = None,
+    progress: bool = False,
+    progress_log_path: Path | None = None,
 ) -> Q42SampleResult:
     """Run a short Q4-2 sample without copying or changing the locked Q2 model."""
 
@@ -213,15 +221,42 @@ def run_q42_sample(
                 "planned_final_energy_kwh": solved.final_energy_kwh,
                 "actual_final_energy_kwh": carried_soc,
                 "planned_purchase_cost_yuan": planned_cost,
+                "planned_purchase_energy_kwh": float(settled["planned_grid_kwh"].sum()),
                 "decision_price_planned_cost_yuan": solved.planned_purchase_cost_yuan,
                 "expected_scenario_emergency_cost_yuan": solved.expected_emergency_cost_yuan,
+                "realized_emergency_energy_kwh": float(
+                    settled["realized_emergency_kwh"].sum()
+                ),
                 "realized_emergency_cost_yuan": emergency_cost,
                 "realized_total_cost_yuan": planned_cost + emergency_cost,
                 "maximum_scenario_power_balance_residual_kw": validation.maximum_power_balance_residual_kw,
             }
         )
         interval_frames.append(settled)
-        if checkpoint_path is not None:
+        month_boundary = bool(
+            index == len(dates)
+            or pd.Timestamp(dates[index - 1]).month
+            != pd.Timestamp(dates[index]).month
+        )
+        if progress and (index == 1 or index % 10 == 0 or month_boundary):
+            print(f"Q4-2 {mode}: {index}/{len(dates)} days Optimal", flush=True)
+        if progress_log_path is not None and month_boundary:
+            progress_frame = pd.DataFrame(daily_rows)
+            progress_frame["month"] = pd.to_datetime(progress_frame["date"]).dt.to_period("M").astype(str)
+            monthly = progress_frame.groupby("month", sort=True).agg(
+                days_solved=("date", "size"),
+                optimal_days=("solver_status", lambda values: int(values.eq("Optimal").sum())),
+                planned_cost_yuan=("planned_purchase_cost_yuan", "sum"),
+                realized_cost_yuan=("realized_total_cost_yuan", "sum"),
+                emergency_energy_kwh=("realized_emergency_energy_kwh", "sum"),
+                emergency_cost_yuan=("realized_emergency_cost_yuan", "sum"),
+                ending_realized_soc_kwh=("actual_final_energy_kwh", "last"),
+            ).reset_index()
+            progress_log_path.parent.mkdir(parents=True, exist_ok=True)
+            temporary_log = progress_log_path.with_suffix(".tmp")
+            monthly.to_csv(temporary_log, index=False, float_format="%.10f")
+            temporary_log.replace(progress_log_path)
+        if checkpoint_path is not None and (index % 10 == 0 or month_boundary):
             checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
             temporary = checkpoint_path.with_suffix(".tmp")
             with temporary.open("wb") as stream:
@@ -250,6 +285,7 @@ def run_q43_sample(
     *,
     mode: str,
     checkpoint_path: Path | None = None,
+    progress: bool = False,
 ) -> Q3ScheduleResult:
     """Run the locked Q3 rolling pipeline with only the price provider replaced."""
 
@@ -257,7 +293,7 @@ def run_q43_sample(
     return run_schedule(
         schedule,
         dates,
-        progress=False,
+        progress=progress,
         checkpoint_path=checkpoint_path,
         price_provider=q43_price_provider(mode),
         price_information_mode=f"{mode}:{signature}",

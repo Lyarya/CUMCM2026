@@ -1,0 +1,66 @@
+{
+  "mode": "GIVEN_PRICE",
+  "formal_days": 334,
+  "optimal_days": 334,
+  "planned_purchase_energy_kwh": 21846098.780653037,
+  "planned_purchase_cost_yuan": 13926450.778072981,
+  "expected_scenario_emergency_cost_yuan": 1090095.3576059607,
+  "realized_emergency_energy_kwh": 396204.27279594826,
+  "realized_emergency_cost_yuan": 1621505.5782882967,
+  "realized_total_cost_yuan": 15547956.356361277,
+  "final_soc_kwh": 7834.33049197523,
+  "solver_runtime_seconds": 1140.582409299881,
+  "audit": {
+    "optimal": true,
+    "dynamic_price_alignment": true,
+    "maximum_price_alignment_residual_yuan": 0.0,
+    "realized_power_balance": true,
+    "maximum_power_balance_residual_kw": 1.8189894035458565e-12,
+    "soc_recurrence": true,
+    "maximum_soc_recurrence_residual_kwh": 2.2737367544323206e-13,
+    "cross_day_soc": true,
+    "maximum_cross_day_soc_residual_kwh": 0.0,
+    "soc_bounds": true,
+    "no_simultaneous_charge_discharge": true,
+    "phantom_discharge": true,
+    "unabsorbed_discharge_energy_kwh": 0.0,
+    "settlement_reconciliation": true,
+    "maximum_settlement_residual_yuan": 7.275957614183426e-12,
+    "time_alignment": true
+  },
+  "economic_diagnostics": {
+    "charge_weighted_price_yuan_per_kwh": 0.46642320933153814,
+    "discharge_weighted_price_yuan_per_kwh": 1.1216009366976436,
+    "high_price_discharge_spread_yuan_per_kwh": 0.6551777273661055,
+    "daily_cost_outlier_threshold_yuan": 156829.11332520313,
+    "daily_cost_outlier_count": 0,
+    "top_daily_costs": [
+      {
+        "date": "2025-07-06",
+        "realized_total_cost_yuan": 103442.042548992
+      },
+      {
+        "date": "2025-06-01",
+        "realized_total_cost_yuan": 101850.16614221472
+      },
+      {
+        "date": "2025-07-03",
+        "realized_total_cost_yuan": 96812.01203891204
+      },
+      {
+        "date": "2025-12-02",
+        "realized_total_cost_yuan": 93343.06260197167
+      },
+      {
+        "date": "2025-06-02",
+        "realized_total_cost_yuan": 92949.52153172833
+      }
+    ]
+  },
+  "price_alignment": {
+    "one_to_one": true,
+    "maximum_price_residual_yuan_per_kwh": 0.0,
+    "maximum_emergency_cost_residual_yuan": 0.0,
+    "pass": true
+  }
+}

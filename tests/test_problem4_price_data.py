@@ -49,11 +49,19 @@ def test_price_net_load_correlations_are_reproducible() -> None:
     assert net.loc["Spearman", "coefficient"] == pytest.approx(0.262375795603, abs=1e-12)
 
 
-def test_no_result4_workbook_is_generated() -> None:
-    # Attachment 5 contains the official empty submission templates; no model
-    # output workbook may be created outside that read-only source directory.
+def test_formal_result4_workbooks_are_separate_from_source_templates() -> None:
+    # The formal run writes only to results/problem4; Attachment-5 templates
+    # remain the immutable source workbooks.
     generated = [
         path for path in Path(".").rglob("result4*.xlsx")
         if "data/raw/C题/附件/附件5" not in path.as_posix()
     ]
-    assert not generated
+    assert sorted(path.as_posix() for path in generated) == [
+        "results/problem4/result4-2.xlsx",
+        "results/problem4/result4-3.xlsx",
+    ]
+    for name in ("result4-2.xlsx", "result4-3.xlsx"):
+        template = Path("data/raw/C题/附件/附件5") / name
+        output = Path("results/problem4") / name
+        assert template.exists() and output.exists()
+        assert file_sha256(template) != file_sha256(output)
