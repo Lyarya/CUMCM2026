@@ -1,14 +1,26 @@
+% Source: results/problem1/tables/q1_lp_relaxation_comparison.csv
 \begin{table}[htbp]
 \centering\small
-\caption{附件1单日算例的MILP与LP数值对照}\label{tab:p1-lp-relaxation}
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{lrrr}
+\caption{附件1单日算例的MILP与LP松弛同口径对照}
+\label{tab:p1-lp-relaxation}
+\setlength{\tabcolsep}{7pt}
+\begin{tabular}{lrr}
 \toprule
-模型 & 目标值/元 & 最大同时充放电/kW & 单次用时/s \\
+指标 & 正式MILP & LP松弛 \\
 \midrule
-MILP & 35126.948591 & 0 & 0.211 \\
-LP relaxation & 35126.948591 & 0 & 0.067 \\
+目标值/元 & 35126.948591 & 35126.948591 \\
+外网购电量/kWh & 59482.699 & 59482.699 \\
+充电量/kWh & 20740.666 & 20740.666 \\
+放电量/kWh & 16799.940 & 16799.940 \\
+弃光量/kWh & 0 & 0 \\
+储能电量范围/kWh & 1200--10800 & 1200--10800 \\
+最大同时充放电功率/kW & 0 & 0 \\
+同时充放电区间数 & 0 & 0 \\
+单次求解用时/s & 0.211 & 0.067 \\
 \bottomrule
 \end{tabular}
-\par\vspace{3pt}\begin{minipage}{0.97\textwidth}\footnotesize 两次求解使用相同输入，间隙为0元；用时为已保存的单次测量，不表示重复实验平均值。\end{minipage}
+\par\vspace{3pt}\begin{minipage}{0.94\textwidth}\footnotesize
+两次求解使用相同输入和物理约束；绝对松弛间隙为0元。用时为已保存的单次测量，
+不表示重复实验的均值或置信区间。
+\end{minipage}
 \end{table}

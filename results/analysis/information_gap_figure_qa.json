@@ -1,0 +1,16 @@
+{
+  "core_conclusion": "Q3 narrows but does not eliminate the observable cost gap to the offline perfect-information benchmark.",
+  "archetype": "single-panel horizontal lollipop gap plot",
+  "backend": "Python/matplotlib",
+  "source_data": "results/analysis/theory_strengthening_summary.json",
+  "annual_error_bars": "none; each point is one audited annual total",
+  "axis_origin": 0,
+  "outputs": [
+    "paper/figures/redesign/fig_information_gap.pdf",
+    "paper/figures/redesign/fig_information_gap.svg",
+    "paper/figures/redesign/fig_information_gap.jpg",
+    "paper/figures/redesign/fig_information_gap.png",
+    "paper/figures/redesign/fig_information_gap.tiff"
+  ],
+  "reviewer_risk": "offline benchmark is non-deployable and has finite-horizon terminal optimism"
+}

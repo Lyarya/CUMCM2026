@@ -53,10 +53,25 @@ $\Delta g_t^\pm\ge0$。0:00采用问题二随机MILP；后续仅在$t>\tau$上�
 并不等于问题二主结果。
 \input{contents/generated/q3_results.tex}
 
-定义
+先区分理论信息价值与本文的事后运营信息价值。令
+$\mathcal I_0\subseteq\mathcal I_6\subseteq\mathcal I_{12}\subseteq\mathcal I_{18}$为嵌套信息集，
+$\Pi(\mathcal I)$为可依据信息$\mathcal I$制定的策略集合，并定义事前最优期望费用
+$V(\mathcal I)=\inf_{\pi\in\Pi(\mathcal I)}\mathbb E[C(\pi)]$。若新增信息可以被忽略，且使用
+真实条件分布作事前优化，则$\mathcal I_a\subseteq\mathcal I_b$蕴含
+$\Pi(\mathcal I_a)\subseteq\Pi(\mathcal I_b)$，从而
+\begin{equation}
+ V(\mathcal I_b)\le V(\mathcal I_a),\qquad
+ \operatorname{VOI}^{\rm th}(\mathcal I_b\mid\mathcal I_a)
+ =V(\mathcal I_a)-V(\mathcal I_b)\ge0.
+ \label{eq:q3-theoretical-voi}
+\end{equation}
+证明只需注意：拥有较大信息集的决策者可以忽略新增信息并复用原策略，因此其可行策略集不缩小。
+
+本文实际计算的不是式\eqref{eq:q3-theoretical-voi}中的完美信息期望值，而是固定预测器、有限年度
+真实路径、滚动承诺与非对称结算共同作用下的运营信息价值，定义为
 \[
-\operatorname{VOI}(S_i)=C(S_0)-C(S_i),\qquad
-\Delta\operatorname{VOI}_i=C(S_{i-1})-C(S_i).
+\operatorname{VOI}^{\rm op}(S_i)=C^{\rm real}(S_0)-C^{\rm real}(S_i),\qquad
+\Delta\operatorname{VOI}^{\rm op}_i=C^{\rm real}(S_{i-1})-C^{\rm real}(S_i).
 \]
 四种安排的实际总费用依次为14727970.596431、14632849.794731、
 14505500.731613、14507718.144450元。$S_2=\{0,6,12\}$最低，
@@ -74,10 +89,18 @@ c，新增发布时间的增量信息价值，水平线为零。三者均读取�
 
 06:00与12:00的增量VOI分别为$+95120.801699$、$+127349.063118$元，
 18:00为$-2217.412836$元且未截断。这只表明在既定预测、结算和储能约束下，
-该次额外信息的边际经济价值略为负，不表示18:00预测本身更差；
+该年度路径上额外的不完美预测更新未产生正的边际运营收益，不表示更多信息本身有害，也不表示
+18:00预测本身更差；
 更多更新不保证经济价值单调增加。两种结算解释都保持
 $S_2<S_3<S_1<S_0$，同一安排的年度费用最大差异仅516.002078元，
 故主要排序不受该歧义影响，无需另图。
+
+为检验年度节省是否由少数极端日期驱动，进一步以运营日为配对单位比较$S_0$与$S_2$，结果见
+表\ref{tab:q3-daily-value}。334个日差的均值和中位数分别为666.077元和376.660元，84.13\%的
+日期取得正节省；日均节省的95\%非参数bootstrap区间为$[546.361,792.543]$元。双侧Wilcoxon
+符号秩检验统计量为3911，$p=2.865\times10^{-42}$。该结果与效应量共同说明优势并非仅由少数
+日期贡献；但相邻日期可能存在序列相关，推断结果仍应结合年度总量和日差分布解释。
+\input{contents/generated/q3_daily_value.tex}
 
 物理审计中，最大实际功率平衡和电量递推残差分别不超过
 $1.82\times10^{-12}$ kW与$2.28\times10^{-13}$ kWh；跨日电量、已执行区间冻结误差和

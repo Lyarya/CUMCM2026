@@ -1,3 +1,55 @@
-\section{代码与补充材料说明}
+\section{补充证明与代码说明}
 
 完整代码保存在仓库的 \texttt{src/} 目录；本附录仅列出理解算法所必需的关键流程或补充结果。
+
+\subsection{问题一条件性互补化的交换证明}
+\label{app:p1-relaxation-proof}
+\begingroup\small
+设$(g_t,c_t,d_t,w_t,E_t)$是命题1所述LP的一个最优解，且某时段$t$满足
+$c_t>0,d_t>0$。记$\alpha=\eta_c\eta_d$，并定义
+\[
+ \delta_t=\min\left\{c_t,\frac{d_t}{\alpha}\right\},\qquad
+ r_t=(1-\alpha)\delta_t.
+\]
+由于$\delta_t>0$，令
+\[
+ c'_t=c_t-\delta_t,\qquad d'_t=d_t-\alpha\delta_t
+\]
+后，$c'_t,d'_t\ge0$且至少一个等于0；两个变量只减不增，故原充、放电功率上限仍成立。
+该变换对储能增量的影响为
+\[
+ \eta_c(c'_t-c_t)\Delta t-
+ \frac{(d'_t-d_t)\Delta t}{\eta_d}
+ =-\eta_c\delta_t\Delta t+
+ \frac{\alpha\delta_t\Delta t}{\eta_d}=0.
+\]
+因此$E_{t+1}$不变，继而全部后续储能状态、SOC上下界及终端条件均保持不变。
+
+在母线功率平衡中，上述动作产生$r_t$的供给余量。取
+\[
+ a_t=\min\{g_t,r_t\},\qquad b_t=r_t-a_t.
+\]
+由条件\eqref{eq:p1-exchange-condition}可得$0\le b_t\le P_t-w_t$。再令
+\[
+ g'_t=g_t-a_t,\qquad w'_t=w_t+b_t,
+\]
+则$g'_t\ge0$且$0\le w'_t\le P_t$。代入式\eqref{eq:p1-balance}，有
+\[
+ (g'_t+P_t+d'_t)-(L_t+c'_t+w'_t)
+ =r_t-a_t-b_t=0,
+\]
+故功率平衡仍成立。其他时段变量保持不变，因而得到一个消除了时段$t$同时充放电的LP可行解。
+目标函数的变化量为
+\[
+ \Delta z=-p_ta_t\Delta t\le0.
+\]
+对所有同时充放电时段重复该交换，得到满足$c_td_t=0$的LP可行解。由于原解已经最优，新解的
+目标值不可能低于LP最优值，故交换后的目标值与原值相同。为该解补充二元变量：充电时取
+$u_t=1$，放电时取$u_t=0$，两者均为0时任取，即得到同目标值的MILP可行解。因此
+$z_{\mathrm{MILP}}\le z_{\mathrm{LP}}$；又因LP是MILP的松弛，
+$z_{\mathrm{LP}}\le z_{\mathrm{MILP}}$，从而$z_{\mathrm{LP}}=z_{\mathrm{MILP}}$。
+
+需要强调的是，条件\eqref{eq:p1-exchange-condition}保证消去有损循环后产生的供给余量能够通过
+减少购电或增加弃光吸收。若不能验证这一条件，上述局部交换并不自动构成一般性的精确松弛证明；
+附件1实例的零间隙结论仍以表\ref{tab:p1-lp-relaxation}的独立数值交叉验证为准。
+\endgroup
