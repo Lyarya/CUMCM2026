@@ -1,0 +1,14 @@
+\begin{table}[htbp]
+\centering\small
+\caption{附件1单日算例的MILP与LP数值对照}\label{tab:p1-lp-relaxation}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lrrr}
+\toprule
+模型 & 目标值/元 & 最大同时充放电/kW & 单次用时/s \\
+\midrule
+MILP & 35126.948591 & 0 & 0.211 \\
+LP relaxation & 35126.948591 & 0 & 0.067 \\
+\bottomrule
+\end{tabular}
+\par\vspace{3pt}\begin{minipage}{0.97\textwidth}\footnotesize 两次求解使用相同输入，间隙为0元；用时为已保存的单次测量，不表示重复实验平均值。\end{minipage}
+\end{table}

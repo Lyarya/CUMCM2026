@@ -1,74 +1,35 @@
 \section{符号说明}
 
-全文以小写 $p$ 表示电价，以大写 $P$ 表示光伏功率；$E$ 表示SOC对应的储能电量而非无量纲
-比例。跨章节反复使用的主要符号见表~\ref{tab:symbols}，局部辅助变量均在相应公式处另行说明。
-
-\begingroup
-\small
-\setlength{\tabcolsep}{3pt}
-\renewcommand{\arraystretch}{1.16}
-\begin{longtable}{@{}p{0.19\textwidth}p{0.62\textwidth}p{0.13\textwidth}@{}}
-  \caption{主要符号及单位}\label{tab:symbols}\\
-  \toprule
-  符号 & 含义 & 单位 \\
-  \midrule
-  \endfirsthead
-  \multicolumn{3}{c}{续表~\thetable\quad 主要符号及单位}\\
-  \toprule
-  符号 & 含义 & 单位 \\
-  \midrule
-  \endhead
-  \midrule
-  \multicolumn{3}{r}{接下页}\\
-  \endfoot
-  \bottomrule
-  \endlastfoot
-
-  \multicolumn{3}{@{}l}{\textbf{索引与时间}}\\*
-  $t$ & 运营日内的10分钟时间步索引 & -- \\
-  $d$ & 运营日索引 & -- \\
-  $s$ & 成对负荷--光伏随机场景索引 & -- \\
-  $\tau$ & 问题三的预报发布与滚动更新时间 & h \\
-  $h$ & 光伏预测提前期 & h \\
-  $\Delta t$ & 单个运行区间长度，$\Delta t=1/6$ & h \\
-
-  \addlinespace[2pt]
-  \multicolumn{3}{@{}l}{\textbf{外生量与预测量}}\\*
-  $L_t,\ \widehat L_t$ & 实际负荷功率与负荷预测功率 & kW \\
-  $P_t,\ \widehat P_t$ & 实际光伏功率与光伏预测功率 & kW \\
-  $L_{t,s},\ P_{t,s}$ & 场景 $s$ 下的负荷功率与光伏功率 & kW \\
-  $p_t$ & 外网交易电价 & 元/kWh \\
-
-  \addlinespace[2pt]
-  \multicolumn{3}{@{}l}{\textbf{储能状态与动作}}\\*
-  $E_t,\ E_t^{\mathrm{act}}$ & 计划储能电量与实际储能电量 & kWh \\
-  $E_{\min},\ E_{\max}$ & 储能电量下界与上界 & kWh \\
-  $c_t,\ d_t$ & 计划充电功率与计划放电功率 & kW \\
-  $c_t^{\mathrm{act}},\ d_t^{\mathrm{act}}$ & 实际充电功率与实际放电功率 & kW \\
-  $P_{\max}$ & 最大充电功率与最大放电功率 & kW \\
-  $\eta_c,\ \eta_d$ & 充电效率与放电效率 & -- \\
-  $u_t$ & 充、放电互斥的二元状态变量 & -- \\
-
-  \addlinespace[2pt]
-  \multicolumn{3}{@{}l}{\textbf{购电、弃光与调整}}\\*
-  $g_t$ & 日前计划或当前承诺的外网购电功率 & kW \\
-  $x_{t,s},\ e_{t,s}$ & 场景中调用的计划购电功率与紧急购电功率 & kW \\
-  $w_t,\ w_{t,s}$ & 确定性情形与场景 $s$ 下的弃光功率 & kW \\
-  $\Delta g_t^+,\ \Delta g_t^-$ & 问题三相对当前承诺的增购功率与减购功率 & kW \\
-
-  \addlinespace[2pt]
-  \multicolumn{3}{@{}l}{\textbf{风险与跨日价值}}\\*
-  $V_d(E)$ & 运营日 $d$ 末端储能电量的延续价值 & 元 \\
-  $\lambda_{\mathrm r}$ & CVaR风险权重；$\lambda_{\mathrm r}=0$ 为问题二主结果 & -- \\
-  $\alpha$ & CVaR置信水平，本文取 $0.90$ & -- \\
-  $\zeta_d$ & 运营日 $d$ 的VaR辅助阈值 & 元 \\
-  $\operatorname{CVaR}_{\alpha,d}$ & 运营日 $d$ 的紧急购电费用条件风险价值 & 元 \\
-
-  \addlinespace[2pt]
-  \multicolumn{3}{@{}l}{\textbf{问题三信息价值}}\\*
-  $S_0,S_1,S_2,S_3$ & 更新时间表，依次为 $\{0\}$、$\{0,6\}$、$\{0,6,12\}$、$\{0,6,12,18\}$ & h \\
-  $C(S_i)$ & 更新时间表 $S_i$ 下的年度实际总费用 & 元 \\
-  $\operatorname{VOI}(S_i)$ & $S_i$ 相对 $S_0$ 的信息价值 & 元 \\
-  $\Delta\operatorname{VOI}_i$ & 相邻更新时间表之间的增量信息价值 & 元 \\
-\end{longtable}
-\endgroup
+功率、能量和费用分别采用kW、kWh和元。$E_t$始终表示储能电量而非比例SOC；
+下标$d$为运营日，$d_t$为放电功率，二者由下标区分。上标act表示实际执行量。
+主要符号见表\ref{tab:symbols}，局部辅助变量随公式定义。
+\begin{table}[htbp]
+\centering\small
+\caption{主要符号及单位}\label{tab:symbols}
+\renewcommand{\arraystretch}{1.07}
+\begin{tabularx}{\textwidth}{lXl}
+\toprule 符号 & 含义 & 单位\\\midrule
+$t,d,s$ & 日内时段、运营日、成对场景索引 & --\\
+$\tau,h$ & 日内发布时间及预测提前期 & h\\
+$\Delta t$ & 10分钟时间步长，$\Delta t=1/6$ & h\\
+$L_t,\widehat L_t$ & 实际负荷与负荷预测 & kW\\
+$P_t,\widehat P_t$ & 实际光伏与光伏预测 & kW\\
+$N_t,\widehat N_t$ & 实际净负荷与净负荷预测 & kW\\
+$L_{t,s},P_{t,s}$ & 场景$s$的负荷与光伏 & kW\\
+$p_t$ & 外网普通购电价格 & 元/kWh\\
+$E_t,E_t^{\rm act}$ & 计划与实际储能电量 & kWh\\
+$E_{\min},E_{\max}$ & 储能电量上下界 & kWh\\
+$c_t,d_t,P_{\max}$ & 充电功率、放电功率及其上限 & kW\\
+$\eta_c,\eta_d,u_t$ & 充电效率、放电效率、二元充电模式 & --\\
+$g_t,x_{t,s},e_{t,s}$ & 计划购电、场景调用计划电、场景紧急购电功率 & kW\\
+$w_t,w_{t,s}$ & 确定性与场景弃光功率 & kW\\
+$g_t^{(0)},\Delta g_t^+,\Delta g_t^-$ & 零点购电承诺、增购功率、减购功率 & kW\\
+$V_d(E)$ & 日末储能的跨日延续价值 & 元\\
+$\lambda_{\rm r},\alpha$ & 风险权重（主方案为0）、CVaR置信水平（0.90） & --\\
+$\zeta_d,\operatorname{CVaR}_{\alpha,d}$ & VaR辅助阈值、日紧急购电费用CVaR & 元\\
+$S_0,S_1,S_2,S_3$ & 更新时间表：$\{0\},\{0,6\},\{0,6,12\},\{0,6,12,18\}$ & h\\
+$C(S_i),\operatorname{VOI}(S_i)$ & 实际总费用、相对$S_0$的信息价值 & 元\\
+$\Delta\operatorname{VOI}_i$ & 相邻更新时间表的增量信息价值 & 元\\
+\bottomrule
+\end{tabularx}
+\end{table}

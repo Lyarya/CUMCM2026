@@ -1,65 +1,47 @@
-\section{问题一的模型与求解}
+\section{问题一：确定性最优调度}
 
-\subsection{数据与确定性调度边界}
-
-本问直接读取第一阶段形成的单日标准表，将附件给出的负荷功率、光伏发电功率和分时购电价统一到
-144个10分钟区间。记时间步长为 $\Delta t=1/6\ \mathrm{h}$。本问将题设给定数据视为已知量，
-只讨论日前确定性调度，不引入预测模型和预测误差。
-
-\subsection{混合整数线性规划模型}
-
-对区间 $t=1,\ldots,144$，定义外网购电功率 $g_t$、储能充电功率 $c_t$、放电功率
-$d_t$、弃光功率 $w_t$，并以 $E_t$ 表示第 $t$ 个区间起点的储能电量。负荷功率与光伏发电功率分别记为
-$L_t$ 和 $P_t$，购电价为 $p_t$。以全天购电成本最小为目标：
+\subsection{统一混合整数线性规划}
+附件1给出完整单日的负荷、光伏及电价，故本问不引入预测误差。将全天分为144个区间，
+$\Delta t=1/6\ \mathrm{h}$；$E_t$为区间起点的储能电量，而非比例SOC。
+购电、充电、放电与弃光功率分别为$g_t,c_t,d_t,w_t$，二元变量$u_t$控制充放电互斥。
+正式模型统一写为
 \begin{equation}
-  \min \ C=\sum_{t=1}^{144}p_t g_t\Delta t .
-  \label{eq:p1-objective}
+\begin{aligned}
+\min\quad &\sum_{t=1}^{144}p_tg_t\Delta t\\[-2pt]
+\text{s.t.}\quad&
+\left\{\begin{aligned}
+ g_t+P_t+d_t&=L_t+c_t+w_t,\\
+ E_{t+1}&=E_t+\eta_c c_t\Delta t-d_t\Delta t/\eta_d,\\
+ E_{\min}\le E_t&\le E_{\max} &&(t=1,\ldots,145),\\
+ 0\le c_t&\le P_{\max}u_t,\\
+ 0\le d_t&\le P_{\max}(1-u_t),\quad u_t\in\{0,1\},\\
+ g_t&\ge0,\quad 0\le w_t\le P_t,\\
+ E_1&=E_{145}=6000.
+\end{aligned}\right.
+\end{aligned}
+\label{eq:p1-model}
 \end{equation}
-各区间的功率平衡和储能电量递推为
-\begin{align}
-  g_t+P_t+d_t &= L_t+c_t+w_t,
-  &&t=1,\ldots,144, \\
-  E_{t+1} &= E_t+\eta_c c_t\Delta t-\frac{d_t\Delta t}{\eta_d} .
-  &&t=1,\ldots,144.
-  \label{eq:p1-dynamics}
-\end{align}
-其中 $\eta_c=\eta_d=0.9$。由题设，储能额定容量为 $12000\ \mathrm{kWh}$，允许运行区间为
-\begin{equation}
-  E_{\min}=1200\le E_t\le10800=E_{\max}\ \mathrm{kWh},\qquad t=1,\ldots,145,
-  \label{eq:p1-energy-bound}
-\end{equation}
-且 $E_1=E_{145}=6000\ \mathrm{kWh}$。记储能最大充、放电功率为
-$P_{\max}=5000\ \mathrm{kW}$。
-引入二元变量 $u_t$ 排除同时充放电：
-\begin{equation}
-  0\le c_t\le P_{\max}u_t,\qquad
-  0\le d_t\le P_{\max}(1-u_t),\qquad u_t\in\{0,1\}.
-  \label{eq:p1-mode}
-\end{equation}
-其中 $t=1,\ldots,144$。此外，购电功率非负，弃光功率不得超过该区间的光伏发电功率：
-\begin{equation}
-  g_t\ge0,\qquad 0\le w_t\le P_t,\qquad t=1,\ldots,144.
-  \label{eq:p1-spill-bound}
-\end{equation}
-由此得到含连续变量与二元变量的混合整数线性规划模型，采用 PuLP 建模并调用 CBC 求解器求解。
+除电量边界外，各约束均对$t=1,\ldots,144$成立。其中$\eta_c=\eta_d=0.9$，
+$P_{\max}=5000\ \mathrm{kW}$，$E_{\min}=1200$、$E_{\max}=10800\ \mathrm{kWh}$。
+目标仅计购电支出，不计反向售电收益；弃光仅能来自当期光伏。首末电量相等使方案不能
+通过透支储能降低当日费用。采用CBC求解该MILP。
 
-\subsection{调度结果}
+\subsection{求解结果与核验}
+无储能对照按$g_t=(L_t-P_t)_+$购电、$w_t=(P_t-L_t)_+$弃光。
+表\ref{tab:p1-summary}在相同负荷、光伏和电价下比较经济收益与物理可行性。
+储能在低价或光伏富余时吸收电量，在高价或供电缺口时释放，最优轨迹见图\ref{fig:p1-dispatch}。
+\input{contents/generated/q1_summary.tex}
 
-图~\ref{fig:p1-dispatch} 给出负荷、光伏、购电及储能功率。低价时段外网购电除满足负荷外还为
-储能充电；光伏高出负荷以及高价时段则优先放电，因而将电量转移到购电成本较高的时段。
-
-\IfFileExists{figures/problem1/fig_p1_dispatch_power.pdf}{
 \begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.98\textwidth]{figures/problem1/fig_p1_dispatch_power.pdf}
-  \caption{问题一确定性调度的供需功率与储能功率}
-  \label{fig:p1-dispatch}
+\centering
+\includegraphics[width=.94\textwidth]{figures/redesign/fig_q1_dispatch.pdf}
+\caption{附件1确定性最优轨迹：供需功率、充放电、储能电量与电价。放电以负向展示以区分动作；
+虚线为电量边界，嵌图放大21--24时的原轨迹；各曲线均为单次确定性解，无误差带。}
+\label{fig:p1-dispatch}
 \end{figure}
-}{}
 
-表~\ref{tab:p1-purchase-samples} 列出题目指定的六个代表区间。购电量按
-$q_t=g_t\Delta t$ 计算，单位为千瓦时。
-
+题目指定区间购电量$q_t=g_t\Delta t$见表\ref{tab:p1-purchase-samples}，
+六个4小时区间的充放电量见表\ref{tab:p1-storage-blocks}，所有电量单位均为kWh。
 \begin{table}[htbp]
   \centering
   \caption{微网在指定时间段的购电量及全天的购电量和购电费}
@@ -100,59 +82,34 @@ $20740.666\ \mathrm{kWh}$，累计放电 $16799.940\ \mathrm{kWh}$；二者差�
   \end{tabular}
 \end{table}
 
-图~\ref{fig:p1-storage} 显示储能电量始终处于 $1200$--$10800\ \mathrm{kWh}$ 允许区间，
-且日末回到 $6000\ \mathrm{kWh}$，因此没有通过透支日末电量人为降低成本。
 
-\IfFileExists{figures/problem1/fig_p1_storage_price.pdf}{
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.98\textwidth]{figures/problem1/fig_p1_storage_price.pdf}
-  \caption{储能电量轨迹与分时购电价}
-  \label{fig:p1-storage}
-\end{figure}
-}{}
+\subsection{LP松弛的单算例验证}
+仅删除二元变量及充放电互斥约束，保留$c_t,d_t\le5000$及其他全部条件，
+得到对应的LP松弛。表\ref{tab:p1-lp-relaxation}显示MILP与LP目标值均为
+35126.948591元，松弛间隙及LP最大同时充放电功率均为0。
+\input{contents/generated/q1_lp.tex}
+两解在少数等价时段的充电分配有所不同，但目标值和全天能量汇总一致。
+因此只能确认附件1该确定性单日算例的数值零间隙，且求得的LP解自然满足互斥；
+这不是一般性精确松弛定理，也不推广至问题二至四。正式主模型仍为MILP，
+互补约束精确松弛的充分条件与证明需另作数学审计。
 
-最优计划的全天购电量为 $59482.699\ \mathrm{kWh}$，购电成本为 $35126.948591$ 元。
-作为对照，不配置储能时直接以光伏抵扣负荷，全天需购电 $61789.935\ \mathrm{kWh}$，成本为
-$48052.047$ 元。优化后节约 $12925.098$ 元，降幅为 $26.898\%$，并将原本
-$6247.963\ \mathrm{kWh}$ 的富余光伏全部消纳。逐时段复核得到最大功率平衡残差
-$4.0\times10^{-5}\ \mathrm{kW}$、最大电量递推残差 $4.7\times10^{-4}\ \mathrm{kWh}$，
-均处于求解器数值精度范围内，且无同时充放电或负购电情形。
-
-为检验二元互斥约束在本算例中的实际作用，进一步构造与上述模型同口径的LP松弛：仅删除
-二元变量$u_t$及式\eqref{eq:p1-mode}中的互斥整数约束，其余目标、边界与首末电量条件均保持不变。
-表~\ref{tab:p1-lp-relaxation} 的数值由两类模型的独立求解结果直接生成。
-\input{../results/problem1/tables/q1_lp_relaxation_comparison.tex}
-
-LP松弛与正式MILP的目标值之差在数值容差内为零，且LP最优解的最大同时充放电量不超过
-$10^{-6}\ \mathrm{kW}$。因此，LP松弛在附件1该确定性单日算例上取得零松弛间隙，
-最优解自然满足充放电互斥。由于线性目标存在等价最优解，两者在少数等价时段的充电与购电
-分配并不完全相同，但全天能量汇总及目标值一致。该现象仅为本算例的经验精确松弛，不推广至
-Q2--Q4的随机、多阶段或滚动模型；后续问题仍保留各自正式模型中的整数约束。
-
-\subsection{储能物理参数灵敏度}
+\subsection{储能参数灵敏度}
 \input{../results/problem1/tables/q1_sensitivity_numbers.tex}
-
-采用单因素分析分别改变充、放电效率、额定容量及功率上限，其余条件保持不变。
-效率取$\eta_c=\eta_d\in\{0.80,0.85,0.90,0.95\}$，对应往返效率为$\eta_c\eta_d$；
-容量与功率分别取基准值的$0.50$、$0.75$、$1.00$和$1.25$倍。
-容量变化时，电量上下限及首末电量同步保持为额定容量的$10\%$、$90\%$和$50\%$。
-12个情形均达到最优状态，并通过功率平衡、电量递推、边界及互斥约束核验。
-图\ref{fig:p1-sensitivity}显示，单程效率由0.80提高至0.95时，购电成本由
-\QOneEffLowCost{}元降至\QOneEffHighCost{}元，降幅为\QOneEffReduction{}\%。
-
+采用单因素分析，效率取$\eta_c=\eta_d\in\{0.80,0.85,0.90,0.95\}$，
+容量及功率上限各取基准的$0.50,0.75,1.00,1.25$倍；其余条件不变。
+容量变化时，电量下界、上界和首末值分别保持为容量的10\%、90\%、50\%。
+12个情形均最优并通过物理核验，图\ref{fig:p1-sensitivity}给出结果。
 \begin{figure}[htbp]
-  \centering
-  \includegraphics[width=\textwidth]{../results/problem1/figures/fig_p1_sensitivity.pdf}
-  \caption{问题一储能物理参数的单因素灵敏度：连线仅连接已求解情形，方形标记为原始配置，虚线为无储能对照}
-  \label{fig:p1-sensitivity}
+\centering
+\includegraphics[width=.98\textwidth]{figures/redesign/fig_q1_sensitivity.pdf}
+\caption{单因素灵敏度。圆点为已求解的确定性情形，空心方框为基准配置，连线仅辅助比较；
+纵轴为明示的局部费用尺度，不设误差棒。}
+\label{fig:p1-sensitivity}
 \end{figure}
-
-容量每增加3000 kWh，成本依次下降\QOneCapacityGainFirst{}、\QOneCapacityGainSecond{}和
-\QOneCapacityGainThird{}元；功率上限每增加1250 kW，相应下降
-\QOnePowerGainFirst{}、\QOnePowerGainSecond{}和\QOnePowerGainThird{}元，均呈边际收益递减。
-从基准配置提高到相邻较高设定，以成本相对降幅除以参数相对增幅，
-效率、容量、功率的归一化敏感度分别为\QOneEffElasticity{}、\QOneCapacityElasticity{}和
-\QOnePowerElasticity{}。在该有限步长比较下，效率损耗的经济影响最强，容量次之；
-5000 kW以上继续提高功率上限的收益已很小。这一判断只适用于附件1的确定性单日输入与所测区间，
-不代表其他日期或设备投资的最优选择。
+单程效率从0.80增至0.95，费用下降\QOneEffReduction{}\%。
+容量每增加3000 kWh，费用依次减少\QOneCapacityGainFirst{}、
+\QOneCapacityGainSecond{}、\QOneCapacityGainThird{}元；
+功率每增加1250 kW，依次减少\QOnePowerGainFirst{}、
+\QOnePowerGainSecond{}、\QOnePowerGainThird{}元，均呈边际收益递减。
+从基准向相邻较高设定的有限步长归一化敏感度看，效率损耗影响最大、容量次之，
+5000 kW以上增加功率的收益已很小。该判断限于本日输入和所测参数区间，不等价于投资最优结论。

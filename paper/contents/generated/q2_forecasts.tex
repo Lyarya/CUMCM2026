@@ -1,0 +1,20 @@
+\begin{table}[htbp]
+\centering\small
+\caption{光伏预测的因果比较：一月选型，2--12月检验}\label{tab:q2-forecast-comparison}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lrrrr}
+\toprule
+模型 & 验证MAE & 验证RMSE & 正式期MAE & 正式期RMSE \\
+\midrule
+昨日同刻 & 125.244 & 272.937 & 185.346 & 375.175 \\
+上周同刻 & 143.422 & 291.266 & 214.688 & 419.948 \\
+近7日同刻均值 & 101.382 & 213.551 & 153.400 & 303.858 \\
+相位模型 & 116.045 & 242.959 & 170.571 & 341.373 \\
+SSA & 219.383 & 334.147 & 260.834 & 393.833 \\
+DLinear & 151.795 & 261.481 & 423.397 & 692.692 \\
+结构/残差混合 & 872.672 & 1397.551 & 1400.663 & 1993.198 \\
+相位/结构融合 & 116.045 & 242.959 & 170.571 & 341.373 \\
+\bottomrule
+\end{tabular}
+\par\vspace{3pt}\begin{minipage}{0.97\textwidth}\footnotesize 误差单位均为kW。验证期为1月18--31日；模型仅按验证RMSE最小、MAE并列判据选择。\end{minipage}
+\end{table}

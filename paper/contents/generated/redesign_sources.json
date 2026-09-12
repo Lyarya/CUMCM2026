@@ -1,0 +1,176 @@
+{
+  "source_hashes": {
+    "data/processed/C题/actual_10min.csv": "7a936f137e7c4b4744fde0214cb5312dfcad2efbea40ccd5d6be3ab150db114e",
+    "results/tables/data_diagnostics/diagnostics_summary.json": "b44644f59a5c6db5300ed243981cbf2714c57ef4f4b6a8a738b0fc155ead2e4e",
+    "results/problem1/tables/table_p1_dispatch.csv": "7d44a351d8b93033c11409311fa94a725e71060d608ad235eec04cf47f834508",
+    "results/problem1/tables/table_p1_summary.json": "5ff525e2bee6bda1b09a961fcf86185e9107ddf3b8e46456468a57c1b85ee9b1",
+    "results/problem1/tables/q1_lp_relaxation_comparison.csv": "3de87d7731bc197a48a5e626b6627755706b9ec799a928ca62e902be20854adf",
+    "results/problem1/tables/q1_efficiency_sensitivity.csv": "e0f6f5ac6ae598f5a88ffba88dd1466eded4545e9535b912439e432ee85ff9fa",
+    "results/problem1/tables/q1_capacity_sensitivity.csv": "38f73e23d22b8b62b44141319bfe444c6cdf795d2503fc9b2a7035215ebd13fc",
+    "results/problem1/tables/q1_power_sensitivity.csv": "8142cc99ab50ed5e14be9d79d7e08ba699b990062630d133824c8c4adcc95edd",
+    "results/tables/forecasting/forecast_model_final_comparison.csv": "b6a608af95c93289ac3350067d35cafb6788ec5b3a52596249dee81ad01924d5",
+    "results/problem2/tables/q2_forecast_daily_mae.csv": "a2de31a0545283c15dcbf73b95668c4283236f34260971c80d3e2313c735ba00",
+    "results/problem2/tables/table_p2_summary.json": "360dbd05ce3fe316e9f5b04cebcd2a19f0008a4692afb490596d456f2459b322",
+    "results/problem2/q2_risk_sweep.csv": "bfafc8ee7c26ac99fbaad1a6a8c329d631904cb268f6d9bde5742190114a2ff0",
+    "results/problem3/tables/q3_official_forecast_by_lead.csv": "326c0b5c67653396e63f6bd782887d0891a4100f016598856ec8eb6f80d8d57c",
+    "results/problem3/tables/q3_forecast_method_comparison.csv": "e753735e8d2e9f0154bac728e046cb85760c96c32852e9171867fe37b4a9a843",
+    "results/problem3/tables/q3_schedule_comparison.csv": "6e0e2c5e673bc309868170bf3c4dd27eba4f22db1e50f5d35f490edea4b8d281",
+    "results/problem3/tables/q3_voi.csv": "03708890a3d7f64443ad2987c8641f1b12f3392968a9131ecb72cc494ebf6b47",
+    "results/problem3/tables/q3_settlement_mode_sensitivity.csv": "1d756f6a6cd36bd5516ea4ee44b08f298b26c7b1ed291206bd474d1ec2e8a369",
+    "results/problem3/tables/q3_forecast_selection.json": "019cfdf7e256130299726fb617a7adc0f655e405058df800acf72fbca03af18b",
+    "results/problem3/tables/q3_daily_economic_results.csv": "d06102d1e012e9edd647d4b72fab95eb0b7e794d5b361cf9ef7b7e60b4fd0527"
+  },
+  "figures": {
+    "fig_data_profiles": {
+      "contract": "Representative date fixed by saved audit; all 365 days; median and IQR across days, not CI.",
+      "size_inches": [
+        7.1,
+        2.8
+      ],
+      "text_outside_canvas": [],
+      "source_data": [
+        "data/processed/C题/actual_10min.csv",
+        "results/tables/data_diagnostics/diagnostics_summary.json"
+      ]
+    },
+    "fig_periodicity": {
+      "contract": "Full correlation range retained; gaps only where paired daylight samples do not exist; no diagnostic model rerun.",
+      "size_inches": [
+        7.1,
+        2.6
+      ],
+      "text_outside_canvas": [],
+      "source_data": [
+        "data/processed/C题/actual_10min.csv",
+        "results/tables/data_diagnostics/diagnostics_summary.json"
+      ]
+    },
+    "fig_q1_dispatch": {
+      "contract": "144 immutable intervals plus 145 energy boundaries; no uncertainty; 21–24 h inset from identical state trajectory.",
+      "size_inches": [
+        7.1,
+        5.8
+      ],
+      "text_outside_canvas": [],
+      "source_data": [
+        "data/processed/C题/actual_10min.csv",
+        "results/tables/data_diagnostics/diagnostics_summary.json",
+        "results/problem1/tables/table_p1_dispatch.csv",
+        "results/problem1/tables/table_p1_summary.json"
+      ]
+    },
+    "fig_q1_sensitivity": {
+      "contract": "Four deterministic cases per panel; explicit local cost scale; no error bars; hollow square baseline.",
+      "size_inches": [
+        7.1,
+        2.4
+      ],
+      "text_outside_canvas": [],
+      "source_data": [
+        "data/processed/C题/actual_10min.csv",
+        "results/tables/data_diagnostics/diagnostics_summary.json",
+        "results/problem1/tables/table_p1_dispatch.csv",
+        "results/problem1/tables/table_p1_summary.json",
+        "results/problem1/tables/q1_lp_relaxation_comparison.csv",
+        "results/problem1/tables/q1_efficiency_sensitivity.csv",
+        "results/problem1/tables/q1_capacity_sensitivity.csv",
+        "results/problem1/tables/q1_power_sensitivity.csv"
+      ]
+    },
+    "fig_q2_daily_difference": {
+      "contract": "Point=median daily paired MAE difference; bars=25th–75th percentiles of 334 days, NOT CI/SE. Full comparisons in table.",
+      "size_inches": [
+        7.1,
+        2.4
+      ],
+      "text_outside_canvas": [],
+      "source_data": [
+        "data/processed/C题/actual_10min.csv",
+        "results/tables/data_diagnostics/diagnostics_summary.json",
+        "results/problem1/tables/table_p1_dispatch.csv",
+        "results/problem1/tables/table_p1_summary.json",
+        "results/problem1/tables/q1_lp_relaxation_comparison.csv",
+        "results/problem1/tables/q1_efficiency_sensitivity.csv",
+        "results/problem1/tables/q1_capacity_sensitivity.csv",
+        "results/problem1/tables/q1_power_sensitivity.csv",
+        "results/tables/forecasting/forecast_model_final_comparison.csv",
+        "results/problem2/tables/q2_forecast_daily_mae.csv"
+      ]
+    },
+    "fig_q2_risk": {
+      "contract": "Five fixed lambda preferences; daily CVaR summed across 334 days, not CVaR of annual total; no uncertainty bars.",
+      "size_inches": [
+        7.1,
+        2.55
+      ],
+      "text_outside_canvas": [],
+      "source_data": [
+        "data/processed/C题/actual_10min.csv",
+        "results/tables/data_diagnostics/diagnostics_summary.json",
+        "results/problem1/tables/table_p1_dispatch.csv",
+        "results/problem1/tables/table_p1_summary.json",
+        "results/problem1/tables/q1_lp_relaxation_comparison.csv",
+        "results/problem1/tables/q1_efficiency_sensitivity.csv",
+        "results/problem1/tables/q1_capacity_sensitivity.csv",
+        "results/problem1/tables/q1_power_sensitivity.csv",
+        "results/tables/forecasting/forecast_model_final_comparison.csv",
+        "results/problem2/tables/q2_forecast_daily_mae.csv",
+        "results/problem2/tables/table_p2_summary.json",
+        "results/problem2/q2_risk_sweep.csv"
+      ]
+    },
+    "fig_q3_lead": {
+      "contract": "Left all 35004 matched hourly targets; right same saved OOS samples for both methods; aggregated errors, not replicate intervals.",
+      "size_inches": [
+        7.1,
+        2.65
+      ],
+      "text_outside_canvas": [],
+      "source_data": [
+        "data/processed/C题/actual_10min.csv",
+        "results/tables/data_diagnostics/diagnostics_summary.json",
+        "results/problem1/tables/table_p1_dispatch.csv",
+        "results/problem1/tables/table_p1_summary.json",
+        "results/problem1/tables/q1_lp_relaxation_comparison.csv",
+        "results/problem1/tables/q1_efficiency_sensitivity.csv",
+        "results/problem1/tables/q1_capacity_sensitivity.csv",
+        "results/problem1/tables/q1_power_sensitivity.csv",
+        "results/tables/forecasting/forecast_model_final_comparison.csv",
+        "results/problem2/tables/q2_forecast_daily_mae.csv",
+        "results/problem2/tables/table_p2_summary.json",
+        "results/problem2/q2_risk_sweep.csv",
+        "results/problem3/tables/q3_official_forecast_by_lead.csv",
+        "results/problem3/tables/q3_forecast_method_comparison.csv"
+      ]
+    },
+    "fig_q3_economics": {
+      "contract": "Identical four audited schedules; zero-origin overview plus explicit detail; negative VOI not clipped; no errorbars.",
+      "size_inches": [
+        7.1,
+        2.75
+      ],
+      "text_outside_canvas": [],
+      "source_data": [
+        "data/processed/C题/actual_10min.csv",
+        "results/tables/data_diagnostics/diagnostics_summary.json",
+        "results/problem1/tables/table_p1_dispatch.csv",
+        "results/problem1/tables/table_p1_summary.json",
+        "results/problem1/tables/q1_lp_relaxation_comparison.csv",
+        "results/problem1/tables/q1_efficiency_sensitivity.csv",
+        "results/problem1/tables/q1_capacity_sensitivity.csv",
+        "results/problem1/tables/q1_power_sensitivity.csv",
+        "results/tables/forecasting/forecast_model_final_comparison.csv",
+        "results/problem2/tables/q2_forecast_daily_mae.csv",
+        "results/problem2/tables/table_p2_summary.json",
+        "results/problem2/q2_risk_sweep.csv",
+        "results/problem3/tables/q3_official_forecast_by_lead.csv",
+        "results/problem3/tables/q3_forecast_method_comparison.csv",
+        "results/problem3/tables/q3_schedule_comparison.csv",
+        "results/problem3/tables/q3_voi.csv",
+        "results/problem3/tables/q3_settlement_mode_sensitivity.csv",
+        "results/problem3/tables/q3_forecast_selection.json",
+        "results/problem3/tables/q3_daily_economic_results.csv"
+      ]
+    }
+  }
+}

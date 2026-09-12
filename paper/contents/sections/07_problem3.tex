@@ -1,140 +1,85 @@
-\section{问题三的模型与求解}
+\section{问题三：信息逐步到达下的滚动调度}
 
-全文技术链条由因果预测、不确定性量化、随机优化决策和滚动重优化构成。问题二通过50条因果成对残差场景
-建立两阶段随机MILP，并开展CVaR风险敏感性分析；问题三在提前期分段融合的基础上，实现多时点滚动重优化
-与非对称购电调整结算。
+\subsection{多发布时间预测与因果融合}
+附件3每天在0:00、6:00、12:00、18:00发布未来24个整点光伏预测。若发布时间为$\tau$，
+第$h$个节点的目标时刻为$t^{\rm tar}=\tau+h$，$h=1,\ldots,24$。
+原始数据包含1460个完整批次、35040个节点；年末36个目标超出附件2实测范围，
+评价时记录为越界而不强行配对。每一批次独立用PCHIP映射到10分钟网格，
+保持小时节点、单调性和局部极值，不跨批次使用未来实测值\cite{fritsch1984}。
 
-\subsection{附件3的预测质量与信息到达}
-
-附件3每日在 0:00、6:00、12:00 和 18:00 发布未来24个整点的光伏功率预测。令发布时间为 $\tau$，第 $h$ 个预测值的目标时刻定义为
+图\ref{fig:q3-lead}a显示，官方预测MAE从1--3 h的34.52 kW增至19--24 h的319.51 kW。
+因此使用2025年1月8--16日拟合、1月17--30日选型，把官方预测与近7日同刻均值按提前期分箱融合：
 \[
-t^{\mathrm{tar}}=\tau+h,\qquad h=1,\ldots,24.
+\widehat P_{\tau,h}=\theta_b\widehat P_{\tau,h}^{\rm off}
+ +(1-\theta_b)\widehat P_{\tau,h}^{\rm sea},\qquad0\le\theta_b\le1.
 \]
-原始数据共包含1460个发布批次和35040个小时预测节点，所有批次均具有完整的24个提前期，且不存在重复键、负预测值和非整点目标。年末36个目标时刻超出附件2的实测范围，评价时保留其来源记录但不强行匹配。
-
-为适配10分钟运行网格，本文在每个发布批次内部采用PCHIP插值，原始小时节点保持不变，且不跨批次借用信息。表\ref{tab:q3-official-lead}与图\ref{fig:q3-official-lead}表明，官方预测误差随提前期显著扩大：1--3 h的MAE为34.52 kW，而19--24 h增至319.51 kW。因此，后续预测融合需要显式区分提前期。
-
-\input{../results/problem3/tables/q3_official_forecast_by_lead.tex}
-
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.78\textwidth]{../results/problem3/figures/fig_p3_official_error_by_lead.pdf}
-  \caption{附件3官方光伏预测误差随提前期的变化}
-  \label{fig:q3-official-lead}
+五个分箱的官方权重依次为0.871、0.450、0.232、0.033、0.089。
+短提前期偏重最新官方信息，长提前期偏重稳定季节项。冻结后在2--12月样本外评价，
+融合MAE、RMSE为121.73、252.99 kW；图\ref{fig:q3-lead}b按相同样本比较官方与融合RMSE。
+权重只由已经获得真值的目标更新，未来实测扰动不会改变已发布预测。
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.92\textwidth]{figures/redesign/fig_q3_lead.pdf}
+\caption{官方光伏预测误差与提前期分箱融合。a，35004个可匹配小时目标的全年汇总；
+b，2--12月共同样本的RMSE。各点为分箱汇总指标，不是独立重复，故不添加误差棒。}
+\label{fig:q3-lead}
 \end{figure}
 
-\subsection{因果预测融合}
-
-候选预测包括官方预测、昨日同刻、上周同刻和七日同刻均值。先用2025年1月8日至16日拟合融合权重，再用1月17日至30日完成模型选择，2月1日至12月31日作为正式样本外评价期。该划分以发布时间归属运营日，确保正式评价开始前已完成全部模型选择。
-
-验证结果选择七日同刻均值作为季节性专家。进一步令 $w_b$ 表示提前期分箱 $b$ 内官方预测的权重，则融合预测为
+\subsection{滚动重优化与结算}
+定义
 \[
-\widehat P_{\tau,h}=w_b\widehat P^{\mathrm{off}}_{\tau,h}+(1-w_b)\widehat P^{\mathrm{sea}}_{\tau,h},
-\qquad 0\le w_b\le1.
+S_0=\{0\},\quad S_1=\{0,6\},\quad S_2=\{0,6,12\},\quad
+S_3=\{0,6,12,18\}.
 \]
-五个分箱的官方权重依次为0.871、0.450、0.232、0.033和0.089。短提前期主要依赖新发布的官方预测，长提前期则主要依赖较稳定的季节性估计。表\ref{tab:q3-method-comparison}显示，提前期分箱融合的样本外MAE与RMSE分别为121.73 kW和252.99 kW，优于静态融合、按发布时间分组融合和因果在线融合。
+时刻$\tau$获得新预测后，已经执行的区间冻结，只开放未来区间。
+实际储能电量作为下一次优化的必需状态，不能以计划电量或固定6000 kWh替代。
+每次更新仍使用50条因果成对整日残差场景，并围绕新融合预测重新定中心；
+风险权重固定$\lambda_{\rm r}=0$，使四种安排仅因信息时刻不同。
 
-\input{../results/problem3/tables/q3_forecast_method_comparison.tex}
-
-所有预测权重只使用已经完成并获得真值的历史目标更新。改变任一发布时间之后的实际光伏序列，不会改变该时刻已发布的预测。现有结构化预测专家未覆盖四个发布批次的同一整点协议，无法进行公平比较，因此未纳入正式模型。
-
-\subsection{多发布时间更新接口}
-
-本文定义四种信息时间表
+设更新前后承诺为$g_t^{\rm old},g_t^{\rm new}$，
+$g_t^{\rm new}-g_t^{\rm old}=\Delta g_t^+-\Delta g_t^-$，
+$\Delta g_t^\pm\ge0$。0:00采用问题二随机MILP；后续仅在$t>\tau$上最小化
 \[
-S_0=\{0\},\quad S_1=\{0,6\},\quad
-S_2=\{0,6,12\},\quad S_3=\{0,6,12,18\}.
+ \sum_{t>\tau}p_t\Delta t(1.5\Delta g_t^+-0.5\Delta g_t^-)
+ +\frac1{50}\sum_s\sum_{t>\tau}5p_te_{t,s}\Delta t-V_d(E_{145}).
 \]
-在时刻 $\tau$ 到达新预测后，$[0,\tau]$ 内已经执行的区间保持冻结，仅对 $(\tau,24]$ 内的未来区间开放修订。当前实际储能电量作为必需的外部状态传入，不能用计划储能电量或固定6000 kWh替代。
+增购按$1.5p_t$支付，减购只返还$0.5p_t$；已经支付的承诺为沉没成本。
+每次只执行到下一发布时间，实际动作、功率平衡、SOC递推及跨日传递完全沿用问题二的
+物理执行规则。主结果按“相对上一承诺”逐次结算；“均相对0:00承诺”仅作歧义敏感性分析。
 
-每次更新均沿用问题二的50条成对负荷--光伏残差场景，并在新的融合光伏预测附近重新居中；场景数、残差来源日和负荷预测机制保持不变。风险参数固定为$\lambda_{\mathrm r}=0$，从而四种安排的差异只来自信息到达时刻。
+\subsection{经济结果与信息价值}
+334天的全部滚动日模型均返回最优状态。表\ref{tab:q3-schedule-comparison}区分实际总费用、
+紧急购电量和相对$S_0$的信息价值；$S_0$使用问题三的官方--季节融合预测，
+并不等于问题二主结果。
+\input{contents/generated/q3_results.tex}
 
-\subsection{滚动优化、物理执行与调整结算}
-
-设时刻$\tau$以前的当前承诺为$g_t^{\mathrm{old}}$，更新后的承诺为$g_t^{\mathrm{new}}$。对尚未执行的区间定义
-\[
-g_t^{\mathrm{new}}-g_t^{\mathrm{old}}=\Delta g_t^+-\Delta g_t^- ,
-\qquad \Delta g_t^+,\Delta g_t^-\ge 0.
-\]
-00:00的完整计划仍按问题二的期望成本模型制定。其后的更新把已经支付的原承诺视为沉没成本，在剩余时域最小化
-\[
- \sum_{t>\tau}p_t\Delta t
- \left(1.5\Delta g_t^+-0.5\Delta g_t^-\right)
- +\frac1{50}\sum_{s=1}^{50}\sum_{t>\tau}5p_te_{t,s}\Delta t
- -V_d(E_{145}),
-\]
-其中$V_d(E_{145})$是问题二已锁定的分段线性延续价值。该目标与题设结算一致：增购按$1.5p_t$支付，减购仅返还$0.5p_t$。
-
-每次求解后只执行至下一个信息发布时间。实际充、放电动作以计划动作为上限，并调用问题二相同的物理结算：
-\[
-0\le c_t^{\mathrm{act}}\le c_t^{\mathrm{plan}},\qquad
-0\le d_t^{\mathrm{act}}\le d_t^{\mathrm{plan}},
-\]
-\[
-E_{t+1}^{\mathrm{act}}=E_t^{\mathrm{act}}
-+0.9c_t^{\mathrm{act}}\Delta t
--\frac{d_t^{\mathrm{act}}\Delta t}{0.9}.
-\]
-实际放电不超过负荷缺口，未使用的计划电与光伏弃电分别核算，不设置隐藏上网或未吸收放电通道。下一时刻优化使用当前实际储能电量，下一日初值等于上一日实际终值。
-
-多次调整的主结果采用“相对上一承诺”逐次结算。由于题目文字也可能理解为所有调整均相对00:00原计划，本文另给出该口径的敏感性结果；两种方式不混合使用。
-结果表中的调整购电量是各次增购量与减购量绝对值之和，即gross adjustment；调整费用则是$1.5p_t$增购支出与$0.5p_t$减购返还相抵后的净结算额。因此，调整电量较大而净调整费用较小并不矛盾。
-
-\subsection{年度经济结果与信息价值}
-
-\input{../results/problem3/tables/q3_economic_numbers.tex}
-
-对2025年2月1日至12月31日共334天进行逐日滚动回测，四种信息安排的全部日模型均获得Optimal解。表\ref{tab:q3-schedule-comparison}区分了00:00计划费用、调整费用、实际紧急购电费用和实际总费用；模型内部的场景期望成本不作为实际结算费用。
-其中，$S_0$ 是问题三信息结构下仅在00:00更新的比较基线，使用附件3及提前期分段融合预测，因而不等同于问题二的主结果。
-
-\input{../results/problem3/tables/q3_schedule_comparison.tex}
-
-四种时间表的年度实际总费用为
-\[
-\begin{aligned}
-C(S_0)&=\QThreeSZeroCostYuan, & C(S_1)&=\QThreeSOneCostYuan,\\
-C(S_2)&=\QThreeSTwoCostYuan, & C(S_3)&=\QThreeSThreeCostYuan,
-\end{aligned}
-\qquad (\text{元}).
-\]
-$S_2=\{0,6,12\}$ 的年度实际成本最低，相对 $S_0$ 节省 $\QThreeSavingsYuan$ 元，
-约为 $S_0$ 成本的 $\QThreeSavingsPercent\%$。图~\ref{fig:q3-schedule-total-cost} 以从零起算的
-同一纵轴展示四种时间表的年度实际总成本。
-
-实际紧急购电量由 $\QThreeSZeroEmergencyKWh\ \mathrm{kWh}$ 降至
-$\QThreeSTwoEmergencyKWh\ \mathrm{kWh}$，降幅为 $\QThreeEmergencyReductionPercent\%$。加入18:00更新后，
-$S_3$ 总费用略高于 $S_2$，表明更新频率与经济价值并非单调关系。
-
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.88\textwidth]{../results/problem3/figures/fig_p3_schedule_total_cost.pdf}
-  \caption{不同信息更新时间表的年度实际总成本。纵轴从零起算，$S_2$ 为四种时间表中的最低成本方案。}
-  \label{fig:q3-schedule-total-cost}
-\end{figure}
-
-定义实际经济意义下的信息价值为
+定义
 \[
 \operatorname{VOI}(S_i)=C(S_0)-C(S_i),\qquad
-\Delta\operatorname{VOI}_i=C(S_{i-1})-C(S_i),
+\Delta\operatorname{VOI}_i=C(S_{i-1})-C(S_i).
 \]
-而相邻安排的增量价值为$C(S_{i-1})-C(S_i)$。结果见表\ref{tab:q3-voi}。06:00和12:00信息分别贡献
-$\QThreeIncrementSixYuan$ 元和 $\QThreeIncrementTwelveYuan$ 元的增量价值，18:00信息的增量价值为
-$\QThreeIncrementEighteenYuan$ 元。负值未经截断，仅说明额外信息的边际经济价值略为负，不意味着18:00预测本身更差；
-本文也不把事后回测结果表述为事前参数选择。图~\ref{fig:q3-incremental-voi} 保留零基线并直接
-显示三个新增发布时刻的增量信息价值。
-
-\input{../results/problem3/tables/q3_voi.tex}
-
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.86\textwidth]{../results/problem3/figures/fig_p3_incremental_voi.pdf}
-  \caption{新增发布时刻的增量信息价值。水平线为零基线；18:00的负值保持原样，表明更多更新不保证经济价值单调提高。}
-  \label{fig:q3-incremental-voi}
+四种安排的实际总费用依次为14727970.596431、14632849.794731、
+14505500.731613、14507718.144450元。$S_2=\{0,6,12\}$最低，
+相对$S_0$节省222469.864818元（1.5105\%）；紧急购电量由
+366345.312534降至302254.535714 kWh，下降17.4946\%。
+图\ref{fig:q3-economics}同时保留费用从零起算的全尺度图和标明“局部放大”的细节图，
+避免用截断坐标夸大微小差异。
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.98\textwidth]{figures/redesign/fig_q3_economics.pdf}
+\caption{问题三经济结果。a，年度实际费用零起点全尺度；b，同一数据的明示局部放大；
+c，新增发布时间的增量信息价值，水平线为零。三者均读取正式结果表，无误差棒。}
+\label{fig:q3-economics}
 \end{figure}
 
-表\ref{tab:q3-settlement-sensitivity}给出两种结算解释。两种口径均保持 $S_2<S_3<S_1<S_0$ 的成本排序，并且同一时间表的年度总费用差异最大仅为
-$\QThreeSettlementMaxDifferenceYuan$ 元；因此，结算口径的替代解释不改变 $S_2$ 最优和18:00边际价值略为负的主要结论。
+06:00与12:00的增量VOI分别为$+95120.801699$、$+127349.063118$元，
+18:00为$-2217.412836$元且未截断。这只表明在既定预测、结算和储能约束下，
+该次额外信息的边际经济价值略为负，不表示18:00预测本身更差；
+更多更新不保证经济价值单调增加。两种结算解释都保持
+$S_2<S_3<S_1<S_0$，同一安排的年度费用最大差异仅516.002078元，
+故主要排序不受该歧义影响，无需另图。
 
-\input{../results/problem3/tables/q3_settlement_mode_sensitivity.tex}
-
-逐时审计表明，四种安排的实际功率平衡和储能电量递推最大残差分别不超过$1.82\times10^{-12}$ kW与$2.28\times10^{-13}$ kWh；跨日储能电量残差为0，未吸收放电为0，已执行区间冻结残差为0。正式附件\texttt{result3.xlsx}采用$S_3$，完整保存00:00计划、各更新后的最终承诺、实际充放电与全部10分钟紧急购电记录；是否采用18:00更新的经济判断由上述VOI分析单独给出。
+物理审计中，最大实际功率平衡和电量递推残差分别不超过
+$1.82\times10^{-12}$ kW与$2.28\times10^{-13}$ kWh；跨日电量、已执行区间冻结误差和
+未吸收放电均为0。按题意提交的\texttt{result3.xlsx}采用包含全部四次发布的$S_3$，
+而$S_2$的经济优势作为信息频率比较结论单独报告。
