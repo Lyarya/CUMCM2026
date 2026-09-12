@@ -6,6 +6,7 @@ from dataclasses import dataclass, replace
 import pickle
 from pathlib import Path
 from time import perf_counter
+from typing import Callable
 
 import numpy as np
 import pandas as pd
@@ -53,12 +54,35 @@ class Q3ScheduleResult:
     audit: dict[str, object]
 
 
+PriceProvider = Callable[[object], tuple[np.ndarray, np.ndarray]]
+
+
+def _validated_full_day_price(
+    values: np.ndarray | None,
+    fallback: np.ndarray,
+    *,
+    label: str,
+) -> np.ndarray:
+    price = np.asarray(fallback if values is None else values, dtype=float)
+    if price.shape != (144,) or not np.isfinite(price).all() or (price < 0.0).any():
+        raise ValueError(f"{label} must contain 144 finite nonnegative yuan/kWh values")
+    return np.array(price, copy=True)
+
+
 def build_release_inputs(
-    date: object, release_hour: int, current_realized_soc: float
+    date: object,
+    release_hour: int,
+    current_realized_soc: float,
+    price_yuan_per_kwh: np.ndarray | None = None,
 ) -> tuple[Q2DayInputs, object]:
     """Build the locked 50-scenario remaining horizon around Arya's forecast."""
 
     base = get_q2_day_inputs(date, initial_energy=current_realized_soc)
+    full_day_price = _validated_full_day_price(
+        price_yuan_per_kwh,
+        base.price,
+        label="Q3 decision price",
+    )
     update = get_q3_forecast_update(date, release_hour, current_realized_soc)
     start = int(release_hour) * 6
     expected_future = np.arange(144) >= start
@@ -74,7 +98,7 @@ def build_release_inputs(
         pv_forecast=np.array(center[start:], copy=True),
         load_scenarios=np.array(base.load_scenarios[:, start:], copy=True),
         pv_scenarios=pv_scenarios,
-        price=np.array(base.price[start:], copy=True),
+        price=np.array(full_day_price[start:], copy=True),
         initial_energy=float(current_realized_soc),
         timestamps=np.array(base.timestamps[start:], copy=True),
         scenario_source_dates=np.array(base.scenario_source_dates, copy=True),
@@ -88,8 +112,14 @@ def _solve_release(
     release_hour: int,
     current_realized_soc: float,
     prior_commitment_kw: np.ndarray | None = None,
+    price_yuan_per_kwh: np.ndarray | None = None,
 ) -> tuple[Q3RollingPlanResult, object]:
-    inputs, update = build_release_inputs(date, release_hour, current_realized_soc)
+    inputs, update = build_release_inputs(
+        date,
+        release_hour,
+        current_realized_soc,
+        price_yuan_per_kwh=price_yuan_per_kwh,
+    )
     result = solve_remaining_dispatch(
         inputs,
         Q2DispatchParameters(),
@@ -197,6 +227,9 @@ def run_schedule_day(
     schedule: str,
     initial_energy_kwh: float,
     actual_day: pd.DataFrame,
+    *,
+    decision_price_yuan_per_kwh: np.ndarray | None = None,
+    settlement_price_yuan_per_kwh: np.ndarray | None = None,
 ) -> tuple[pd.DataFrame, list[dict[str, object]], float, dict[str, float]]:
     releases = schedule_releases(schedule)
     current_soc = float(initial_energy_kwh)
@@ -210,7 +243,21 @@ def run_schedule_day(
     initial_expected_cost = np.nan
     maximum_scenario_balance = 0.0
     optimized_adjustment_cost = 0.0
-    price = get_q2_day_inputs(date, initial_energy=initial_energy_kwh).price
+    fixed_q2_price = get_q2_day_inputs(date, initial_energy=initial_energy_kwh).price
+    decision_price = _validated_full_day_price(
+        decision_price_yuan_per_kwh,
+        fixed_q2_price,
+        label="Q3 decision price",
+    )
+    price = _validated_full_day_price(
+        settlement_price_yuan_per_kwh,
+        decision_price,
+        label="Q3 settlement price",
+    )
+    dynamic_price_override = (
+        decision_price_yuan_per_kwh is not None
+        or settlement_price_yuan_per_kwh is not None
+    )
     for release_index, release_hour in enumerate(releases):
         start = release_hour * 6
         prior_future = (
@@ -219,7 +266,11 @@ def run_schedule_day(
             else np.array(current_commitment_kw[start:], copy=True)
         )
         result, update = _solve_release(
-            date, release_hour, current_soc, prior_commitment_kw=prior_future
+            date,
+            release_hour,
+            current_soc,
+            prior_commitment_kw=prior_future,
+            price_yuan_per_kwh=decision_price,
         )
         total_solver_runtime += result.runtime_seconds
         maximum_scenario_balance = max(
@@ -253,6 +304,9 @@ def run_schedule_day(
         )
         end = releases[release_index + 1] * 6 if release_index + 1 < len(releases) else 144
         segment = plan.iloc[: end - start].copy()
+        if dynamic_price_override:
+            segment["decision_price_yuan_per_kwh"] = segment["price_yuan_per_kwh"]
+            segment["price_yuan_per_kwh"] = price[start:end]
         actual_segment = actual_day.iloc[start:end].copy()
         settled, current_soc = settle_segment_with_locked_q2(
             segment, actual_segment, current_soc
@@ -266,10 +320,20 @@ def run_schedule_day(
         raise AssertionError("Q3 rolling execution did not freeze exactly 144 unique intervals")
     assert original_grid_kwh is not None
     settlement = _settlement_rows(original_grid_kwh, revisions_kwh, price)
+    decision_settlement = _settlement_rows(
+        original_grid_kwh,
+        revisions_kwh,
+        decision_price,
+    )
     main_adjustment_cost = settlement[
         SettlementMode.SEQUENTIAL_PREVIOUS_COMMITMENT
     ]["adjustment_cost_yuan"]
-    adjustment_objective_residual = abs(main_adjustment_cost - optimized_adjustment_cost)
+    adjustment_objective_residual = abs(
+        decision_settlement[SettlementMode.SEQUENTIAL_PREVIOUS_COMMITMENT][
+            "adjustment_cost_yuan"
+        ]
+        - optimized_adjustment_cost
+    )
     if adjustment_objective_residual > 2e-3:
         raise AssertionError(
             "Q3 optimized adjustment cost does not match sequential settlement"
@@ -410,6 +474,8 @@ def run_schedule(
     *,
     progress: bool = False,
     checkpoint_path: Path | None = None,
+    price_provider: PriceProvider | None = None,
+    price_information_mode: str = "FIXED_Q2",
 ) -> Q3ScheduleResult:
     actual = pd.read_csv(
         FORMAL_FORECAST_PATH,
@@ -428,7 +494,12 @@ def run_schedule(
         with checkpoint_path.open("rb") as stream:
             checkpoint = pickle.load(stream)
         expected_dates = [str(pd.Timestamp(value).date()) for value in dates]
-        if checkpoint["schedule"] != schedule or checkpoint["dates"] != expected_dates:
+        if (
+            checkpoint["schedule"] != schedule
+            or checkpoint["dates"] != expected_dates
+            or checkpoint.get("price_information_mode", "FIXED_Q2")
+            != price_information_mode
+        ):
             raise AssertionError("Q3 checkpoint does not match the requested schedule/dates")
         start_index = int(checkpoint["next_index"])
         carried_soc = float(checkpoint["carried_soc"])
@@ -447,8 +518,18 @@ def run_schedule(
         ].sort_values("datetime", kind="stable")
         if len(actual_day) != 144:
             raise AssertionError(f"Appendix 2 actual day {date.date()} does not contain 144 intervals")
+        if price_provider is None:
+            decision_price = None
+            settlement_price = None
+        else:
+            decision_price, settlement_price = price_provider(date)
         intervals, day_rows, carried_soc, checks = run_schedule_day(
-            date, schedule, carried_soc, actual_day
+            date,
+            schedule,
+            carried_soc,
+            actual_day,
+            decision_price_yuan_per_kwh=decision_price,
+            settlement_price_yuan_per_kwh=settlement_price,
         )
         interval_frames.append(intervals)
         rows.extend(day_rows)
@@ -473,6 +554,7 @@ def run_schedule(
                 "max_freeze": max_freeze,
                 "causal": causal,
                 "max_adjustment_objective_residual": max_adjustment_objective_residual,
+                "price_information_mode": price_information_mode,
             }
             with temporary.open("wb") as stream:
                 pickle.dump(payload, stream, protocol=pickle.HIGHEST_PROTOCOL)
@@ -495,6 +577,7 @@ def run_schedule(
 
 __all__ = [
     "Q3ScheduleResult",
+    "PriceProvider",
     "audit_schedule",
     "build_release_inputs",
     "run_schedule",

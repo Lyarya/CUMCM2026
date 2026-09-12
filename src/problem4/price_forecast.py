@@ -54,7 +54,12 @@ def _add_causal_features(frame: pd.DataFrame) -> pd.DataFrame:
     if any(audit[key] for key in ("invalid_count", "duplicate_count", "non_frequency_count")):
         raise ValueError("Price lag construction requires a complete, unique 10min grid")
     metadata = interval_metadata(data["interval_end"])
-    if not metadata["operating_date"].equals(data["operating_date"]) or not metadata["slot"].equals(data["slot"]):
+    if not np.array_equal(
+        metadata["operating_date"].to_numpy(dtype="datetime64[ns]"),
+        data["operating_date"].to_numpy(dtype="datetime64[ns]"),
+    ) or not np.array_equal(
+        metadata["slot"].to_numpy(dtype=int), data["slot"].to_numpy(dtype=int)
+    ):
         raise ValueError("Price operating date/slot metadata does not match timestamps")
     price = data["price_yuan_per_kwh"].astype(float)
     data["previous_day_price_yuan_per_kwh"] = price.shift(144)

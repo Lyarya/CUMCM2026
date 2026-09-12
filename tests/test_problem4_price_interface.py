@@ -85,7 +85,11 @@ def test_oracle_matches_attachment4_and_causal_path_is_frozen_intraday() -> None
 
 def test_protected_raw_q2_q3_artifacts_match_checkpoint() -> None:
     from src.common.data_validation import file_sha256
-    audit = json.loads(Path("results/problem4/tables/q4_price_checkpoint.json").read_text())
+    audit = json.loads(
+        Path("results/problem4/tables/q4_price_checkpoint.json").read_text(
+            encoding="utf-8"
+        )
+    )
     assert audit["q2_q3_files_unchanged"]
     # The Q4 checkpoint proves no Q2/Q3 file changed during that run.  A later
     # reviewed Q2 milestone may legitimately update those files.
