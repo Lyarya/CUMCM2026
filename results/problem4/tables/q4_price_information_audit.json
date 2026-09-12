@@ -1,0 +1,8 @@
+{
+  "classification": "AMBIGUOUS",
+  "official_evidence": "问题4：外网的电价也是实时波动的；要求根据附件2、附件3和附件4的电价数据，在波动电价下重新计算问题2和问题3。题面未说明日初是否可知全天未来电价。",
+  "explicit_future_price_availability_statement_found": false,
+  "oracle_mode_supported": true,
+  "causal_forecast_mode_supported": true,
+  "dispatch_executed": false
+}

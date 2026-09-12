@@ -1,0 +1,2 @@
+n,mean_yuan_per_kwh,std_yuan_per_kwh,min_yuan_per_kwh,p01_yuan_per_kwh,p05_yuan_per_kwh,q1_yuan_per_kwh,median_yuan_per_kwh,q3_yuan_per_kwh,p95_yuan_per_kwh,p99_yuan_per_kwh,max_yuan_per_kwh
+52560,0.7661976046,0.3406733369,0.0076000000,0.2448180000,0.3388950000,0.4537000000,0.7384500000,1.0274000000,1.3419000000,1.5713460000,1.7936000000
