@@ -1,0 +1,42 @@
+\section{核心源程序}
+
+\lstset{
+  basicstyle=\fontspec{Microsoft YaHei}\scriptsize,
+  breaklines=true,
+  columns=fullflexible,
+  keepspaces=true,
+  numbers=left,
+  numberstyle=\tiny,
+  numbersep=5pt,
+  showstringspaces=false
+}
+
+\subsection{数据预处理与场景构造}
+
+\lstinputlisting[caption={\texttt{src/common/preprocessing.py}}]{../src/common/preprocessing.py}
+
+\lstinputlisting[caption={\texttt{src/forecasting/final\_models.py}}]{../src/forecasting/final_models.py}
+
+\lstinputlisting[caption={\texttt{src/forecasting/scenarios.py}}]{../src/forecasting/scenarios.py}
+
+\subsection{问题一与问题二优化模型}
+
+\lstinputlisting[caption={\texttt{src/problem1/model.py}}]{../src/problem1/model.py}
+
+\lstinputlisting[caption={\texttt{src/problem2/model.py}}]{../src/problem2/model.py}
+
+\lstinputlisting[caption={\texttt{src/problem2/forecast\_interface.py}}]{../src/problem2/forecast_interface.py}
+
+\subsection{问题三滚动优化}
+
+\lstinputlisting[caption={\texttt{src/problem3/forecast\_fusion.py}}]{../src/problem3/forecast_fusion.py}
+
+\lstinputlisting[caption={\texttt{src/problem3/rolling\_model.py}}]{../src/problem3/rolling_model.py}
+
+\lstinputlisting[caption={\texttt{src/problem3/rolling\_dispatch.py}}]{../src/problem3/rolling_dispatch.py}
+
+\subsection{问题四动态电价接口}
+
+\lstinputlisting[caption={\texttt{src/problem4/price\_interface.py}}]{../src/problem4/price_interface.py}
+
+\lstinputlisting[caption={\texttt{src/problem4/dispatch\_adapter.py}}]{../src/problem4/dispatch_adapter.py}
