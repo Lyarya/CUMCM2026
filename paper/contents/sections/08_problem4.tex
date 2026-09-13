@@ -8,41 +8,39 @@
 缺失、重复、负值或零值，并与负荷和光伏运行网格逐点一致。极端价格是实际市场信号，故仅作
 核验而不删除或缩尾。
 
+附件4的价格分布统计汇总于表\ref{tab:q4-price-summary}。
 \input{../results/problem4/tables/q4_price_summary.tex}
 全年电价均值、标准差及范围分别为\QFourPriceMean{}、\QFourPriceStd{}和
 $[\QFourPriceMin{},\QFourPriceMax{}]$元/kWh。图\ref{fig:q4-price-annual-monthly}表明价格水平
 和离散程度随月份变化；全年日内价格极差的日均值为\QFourDailyRange{}元/kWh，相邻10分钟
 价格最大绝对变化为\QFourMaxChange{}元/kWh。
-\begin{figure}[htbp]
+\begin{figure}[H]
   \centering
-  \includegraphics[width=0.86\textwidth]{../results/problem4/figures/fig_p4_price_annual_monthly.pdf}
-  \caption{附件4动态电价的全年变化与月度分布。上图为10分钟价格序列，下图为各月全部观测的
-  分布；极端值均保留。}
+  \includegraphics[width=0.74\textwidth]{figures/common/fig_09_price_annual_monthly_distribution.pdf}
+    \caption{附件4动态电价的全年变化与月度分布。}
   \label{fig:q4-price-annual-monthly}
 \end{figure}
 
 对144个日内时段计算中位数与四分位区间，见图\ref{fig:q4-price-intraday}。按24个小时均价的
 上下四分位数划分，0:00--4:00和22:00--24:00为样本低价小时，8:00--10:00和
 17:00--21:00为样本高价小时；该划分只是数据描述，不代表预设峰谷电价制度。
-\begin{figure}[htbp]
+\begin{figure}[H]
   \centering
-  \includegraphics[width=0.88\textwidth]{../results/problem4/figures/fig_p4_price_intraday_distribution.pdf}
-  \caption{动态电价的日内轮廓与全年分布。日内主线及阴影分别表示同刻中位数和四分位区间，
-  阴影不是置信区间。}
+  \includegraphics[width=0.88\textwidth]{figures/common/fig_10_price_intraday_distribution.pdf}
+    \caption{动态电价的日内轮廓与全年分布。}
   \label{fig:q4-price-intraday}
 \end{figure}
 
 净负荷仍定义为$N_t=L_t-P_t$且不截断。电价与负荷的Pearson、Spearman系数分别为
 \QFourLoadPearson{}和\QFourLoadSpearman{}，与净负荷的两类系数分别为
 \QFourNetPearson{}和\QFourNetSpearman{}；与光伏的线性相关接近于零。这说明价格与系统状态
-存在有限关联，但不能据此作因果解释。完整相关系数见表\ref{tab:q4-price-correlation}，联合分布见
-图\ref{fig:q4-price-system}。
+存在有限关联，但不能据此作因果解释。完整相关系数见表\ref{tab:q4-price-correlation}；
+图\ref{fig:q4-price-system}进一步以全年联合分布和线性趋势展示电价与净负荷的弱正相关。
 \input{../results/problem4/tables/q4_price_correlations.tex}
-\begin{figure}[htbp]
+\begin{figure}[H]
   \centering
-  \includegraphics[width=0.90\textwidth]{../results/problem4/figures/fig_p4_price_system_relation.pdf}
-  \caption{动态电价与实际负荷、光伏及净负荷的相关结构。相关系数与散点密度均使用全年
-  52560个同步区间，只描述关联。}
+  \includegraphics[width=0.82\textwidth]{figures/redesign/fig_q4_price_netload_relation.pdf}
+    \caption{动态电价与净负荷的联合分布及线性趋势。}
   \label{fig:q4-price-system}
 \end{figure}
 
@@ -51,11 +49,10 @@ $[\QFourPriceMin{},\QFourPriceMax{}]$元/kWh。图\ref{fig:q4-price-annual-month
 采用\texttt{GIVEN\_PRICE}，即把附件4当日144点价格作为题目给定输入；另保留严格因果价格预测
 接口，用于未来价格未知的解释。因果接口只用历史价格滞后和日历特征，经一月拟合、验证后冻结，
 样本外指标见图\ref{fig:q4-price-forecast}；该预测路径没有被混入下述正式费用。
-\begin{figure}[htbp]
+\begin{figure}[H]
   \centering
-  \includegraphics[width=0.76\textwidth]{../results/problem4/figures/fig_p4_price_forecast_comparison.pdf}
-  \caption{未来价格未知口径下的轻量因果预测比较。验证期用于选型，2--12月仅作冻结样本外
-  评价；该图不作为\texttt{GIVEN\_PRICE}年度费用的数据来源。}
+  \includegraphics[width=0.78\textwidth]{figures/redesign/fig_q4_causal_price_forecast.pdf}
+    \caption{未来价格未知口径下的轻量因果预测比较。}
   \label{fig:q4-price-forecast}
 \end{figure}
 
@@ -93,6 +90,9 @@ Q4-3完整复用问题三的因果融合预测、已执行区间冻结、实际S
 
 \input{contents/generated/q4_dispatch_results.tex}
 
+题面指定四个日期的完整逐时购电策略分别保存在\path{result4-2.xlsx}和
+\path{result4-3.xlsx}中；表\ref{tab:q4-dispatch-results}汇总两类动态电价模型的年度结果。
+
 Q4-3四种更新时间表的实际总费用依次为$15\,431\,293.173519$、$15\,332\,979.276497$、
 $15\,196\,922.472637$和$15\,200\,168.117470$元，仍以$S_2=\{0,6,12\}$最低。相对$S_0$，
 $S_2$节省$234\,370.700882$元（1.5188\%），紧急购电量由$365\,303.875194$降至
@@ -117,11 +117,10 @@ $+136\,056.803860$元，18:00为$-3\,245.644832$元；这仍表示特定年度�
 \ref{fig:q4-price-robustness}显示，$S_2$在全部$\gamma$点均低于Q4-2，节费率为
 2.04\%--2.26\%；但费用在$\gamma=0$至0.25间略升，随后下降，故不能声称波动越大费用必然
 越低。波动增强总体扩大了可利用价差信号，同时改变计划和紧急购电的时点配置。
-\begin{figure}[htbp]
+\begin{figure}[H]
   \centering
   \includegraphics[width=0.94\textwidth]{../results/problem4/robustness/figures/fig_p4_price_volatility_robustness.pdf}
-  \caption{价格波动强度鲁棒性。各点为固定输入下的一次334日时序回放；左为实际总费用，右为
-  紧急购电量。空心圈标记正式$\gamma=1$，不添加无重复样本依据的误差棒。}
+    \caption{价格波动强度对年度费用与紧急购电量的影响。}
   \label{fig:q4-price-robustness}
 \end{figure}
 
@@ -132,11 +131,10 @@ $\kappa$增大，更宽的规划场景促使计划提高预防性覆盖，两种
 放大残差会增加保守计划或调整代价，实际费用在正式$\kappa=1$附近较低而非严格单调。$S_2$在
 全部测试点仍低于Q4-2，节费率为1.62\%--2.71\%。该试验只比较Q4-2与既定$S_2$，没有在每个
 扰动点重新选择$S_0$--$S_3$，因而不据此宣称$S_2$对任意参数都全局最优。
-\begin{figure}[htbp]
+\begin{figure}[H]
   \centering
   \includegraphics[width=0.94\textwidth]{../results/problem4/robustness/figures/fig_p4_forecast_uncertainty_robustness.pdf}
-  \caption{预测残差幅度鲁棒性。固定随机种子及成对场景索引，只缩放残差幅度；各点为单次年度
-  轨迹，左为实际总费用，右为紧急购电量，不设置误差棒。}
+    \caption{预测残差幅度对年度费用与紧急购电量的影响。}
   \label{fig:q4-uncertainty-robustness}
 \end{figure}
 

@@ -68,7 +68,7 @@ def main() -> None:
             "pdf.fonttype": 42,
         }
     )
-    fig, ax = plt.subplots(figsize=(7.1, 2.25), layout="constrained")
+    fig, ax = plt.subplots(figsize=(7.1, 2.35), layout="constrained")
     y = np.arange(3)
     for yi, value, color, marker in zip(y, values, colors, markers):
         ax.hlines(yi, 0, value, color=color, lw=1.6, alpha=0.75)
@@ -81,30 +81,37 @@ def main() -> None:
             va="center",
             fontsize=7,
         )
-    ax.annotate(
+    q2_midpoint = (values[1] + values[2]) / 2
+    ax.plot([values[1], values[2]], [2.28, 2.28], color=PAL["primary_light"], lw=1.0)
+    ax.vlines([values[1], values[2]], 2.22, 2.34, color=PAL["primary_light"], lw=1.0)
+    ax.text(
+        q2_midpoint,
+        2.40,
         f"Q2→Q3 降低 {costs['q2_to_q3_cost_reduction_yuan']/1e4:.2f} 万元",
-        xy=(values[1], 1.45),
-        xytext=(values[2], 1.45),
-        arrowprops={"arrowstyle": "<->", "color": PAL["primary_light"], "lw": 1.0},
         ha="center",
         va="bottom",
         fontsize=7,
         color=PAL["load"],
     )
+    remaining_midpoint = (values[0] + values[1]) / 2
     ax.annotate(
-        f"剩余差距 {costs['q3_remaining_gap_yuan']/1e4:.2f} 万元",
-        xy=(values[0], 0.45),
-        xytext=(values[1], 0.45),
+        "",
+        xy=(values[0], 0.35),
+        xytext=(values[1], 0.35),
         arrowprops={"arrowstyle": "<->", "color": PAL["primary_light"], "lw": 1.0},
+    )
+    ax.text(
+        remaining_midpoint,
+        0.48,
+        f"剩余差距 {costs['q3_remaining_gap_yuan']/1e4:.2f} 万元",
         ha="center",
         va="bottom",
         fontsize=7,
         color=PAL["neutral"],
     )
     upper = float(np.ceil(values.max() / 100.0) * 100.0 + 100.0)
-    ax.set(xlim=(0, upper), ylim=(-0.45, 2.55), yticks=y, yticklabels=labels)
+    ax.set(xlim=(0, upper), ylim=(-0.45, 2.65), yticks=y, yticklabels=labels)
     ax.set_xlabel("实际或基准购电费用（万元）")
-    ax.set_title("因果调度与离线全信息基准的成本差距", loc="left", pad=8)
     ax.spines[["top", "right", "left"]].set_visible(False)
     ax.tick_params(axis="y", length=0)
     ax.grid(axis="x", color="#E2E6EA", lw=0.5)

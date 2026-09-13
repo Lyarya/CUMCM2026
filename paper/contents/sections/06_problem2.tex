@@ -45,11 +45,10 @@ $153.400$、$303.858\ \mathrm{kW}$。更复杂模型没有提高统一因果验�
 Benjamini--Hochberg校正\cite{wilcoxon1945,benjamini1995}。
 五项均在5\% FDR下显著；图\ref{fig:q2-daily-difference}给出效应方向和离散程度，
 点为日差值中位数，线段为四分位距，不是置信区间。
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \includegraphics[width=.88\textwidth]{figures/redesign/fig_q2_daily_difference.pdf}
-\caption{近7日同刻均值相对五种对照的配对日MAE差。负值表示本文正式预测较优；
-点为334日中位数，横线为第25--75百分位，统计单位为日。}
+    \caption{近7日同刻均值与五种对照的配对日MAE差。}
 \label{fig:q2-daily-difference}
 \end{figure}
 
@@ -65,6 +64,15 @@ $S=50$条等概率场景；同一$s$始终对应同一历史残差日，保留�
 场景构造不假设正态、时段独立或负荷与光伏独立。
 这一场景层正是将式\eqref{eq:q2-local-regret}所揭示的下行暴露传递至决策端：它不仅保留误差
 幅度，还保留整日时间依赖和负荷--光伏联合依赖，使优化器能够权衡计划购电与紧急补购风险。
+图\ref{fig:q2-paired-scenarios}展示代表日的负荷与光伏场景。深、浅阴影分别表示
+25\%--75\%和10\%--90\%场景区间，用于刻画联合预测不确定性的日内变化。
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=.30\textwidth]{../results/problem2/figures/fig_p2_joint_residual_scenarios.pdf}
+\caption{代表日负荷与光伏的成对整日残差场景。}
+\label{fig:q2-paired-scenarios}
+\end{figure}
 
 日前变量$g_t,c_t,d_t,E_t,u_t$在场景间共享；场景$s$的计划电调用、紧急购电和弃光分别为
 $x_{t,s},e_{t,s},w_{t,s}$。令$V_d(E_{145})$为日末延续价值，基础模型为
@@ -94,6 +102,15 @@ $g_t-x_{t,s}$是已经购买但场景中未调用的计划电，不是物理注�
 $\eta_dQ_{0.9}(p)$、$\eta_dQ_{0.5}(p)$、$\eta_dQ_{0.1}(p)$。
 该项只用于决策，不计入费用结算；问题二不强制每天回到6000 kWh。
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=.92\textwidth,trim=0 0 0 28pt,clip]{figures/flowcharts/flowchart_two_stage_stochastic_dispatch.pdf}
+\caption{问题二两阶段随机优化与实际执行流程。}
+\label{fig:q2-two-stage-dispatch-flow}
+\end{figure}
+
+图\ref{fig:q2-two-stage-dispatch-flow}进一步给出问题二从因果信息形成、联合场景构造到计划决策及事后物理执行的完整流程，其中未来真实负荷与光伏仅用于实际回放、结算及状态更新，不进入当期优化。
+
 \subsection{实际执行、费用与风险扩展}
 计划确定后，以附件2实测序列顺序回放。实际充放电不超过计划动作，并受当期可消纳功率、
 可用电量和容量边界限制；缺口最后由紧急购电补足。实际状态满足
@@ -105,8 +122,8 @@ E_{d+1,1}^{\rm act}=E_{d,145}^{\rm act}.
 首日初值为6000 kWh，后续传递上一日实际终值，不存在未吸收放电或隐藏能量汇。
 334/334个日模型均最优，期望口径与实际结算见表\ref{tab:q2-results}。
 \input{contents/generated/q2_results.tex}
-主方案$\lambda_{\rm r}=0$的实际紧急购电量为398161.900954 kWh，
-实际总费用为14839462.002357元。最大实际功率平衡残差为
+主方案$\lambda_{\rm r}=0$的实际紧急购电量为$398\,161.901$ kWh，
+实际总费用为$14\,839\,462.002$元；完整精度见表\ref{tab:q2-results}。最大实际功率平衡残差为
 $1.00\times10^{-6}$ kW，实际电量递推残差为$9.84\times10^{-6}$ kWh；
 实际$E_t$处于1200--10800 kWh，跨日衔接通过审计。
 
@@ -123,13 +140,19 @@ $\lambda_{\rm r}=0$仍为主结果。图\ref{fig:q2-risk}表明，提高风险�
 期望运行费用。作为温和示例，$\lambda_{\rm r}=0.05$使期望运行费用增加约0.093\%，
 紧急电量和CVaR分别下降约13.75\%、13.39\%；实际费用事后下降0.119\%，
 该事后结果不用于宣称其事前最优。CVaR线性化参照\cite{rockafellar2000}。
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \includegraphics[width=.84\textwidth]{figures/redesign/fig_q2_risk.pdf}
-\caption{预设风险偏好的成本--风险权衡。横轴为334个日模型紧急购电费用CVaR之和，
-纵轴为期望运行费用；方框标出温和示例$\lambda_{\rm r}=0.05$，无统计误差棒。}
+    \caption{风险权重下的期望运行费用与紧急购电CVaR权衡。}
 \label{fig:q2-risk}
 \end{figure}
 
-题面表3所需的指定日计划购电量与紧急购电量按144个10分钟区间完整输出；
-详见附件结果文件，正文不重复展开高频明细。
+\subsection{题目指定日期的调度结果}
+
+题面指定的2025年3月20日、6月21日、9月23日和12月21日结果见表
+\ref{tab:q2-specified-plan}--\ref{tab:q2-specified-emergency}。计划购电表列出题面指定的
+六个10分钟区间、全天购电量和购电费；储能表按六个4小时区间汇总充放电量，并给出
+0:00与24:00储电量；紧急购电表合并相邻非零区间。全部144点明细保存在
+\texttt{result2.xlsx}中。
+
+\input{contents/generated/q2_specified_dates.tex}

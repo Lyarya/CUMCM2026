@@ -97,7 +97,7 @@ def save(fig, name, contract):
 
 def table(name, caption, label, headers, rows, spec=None, note=""):
     spec = spec or ("l" + "r"*(len(headers)-1))
-    text = ("\\begin{table}[htbp]\n\\centering\\small\n"
+    text = ("\\begin{table}[H]\n\\centering\\small\n"
             + "\\caption{"+caption+"}\\label{"+label+"}\n"
             + "\\setlength{\\tabcolsep}{4pt}\n\\begin{tabular}{"+spec+"}\n\\toprule\n"
             + " & ".join(headers)+r" \\"+"\n\\midrule\n")
@@ -155,7 +155,7 @@ def profiles():
     save(f,"fig_periodicity","Full correlation range retained; gaps only where paired daylight samples do not exist; no diagnostic model rerun.")
 
 
-def q1():
+def q1_dispatch():
     a=csv("results/problem1/tables/table_p1_dispatch.csv")
     s=js("results/problem1/tables/table_p1_summary.json")
     assert len(a)==144 and abs(s['optimal_cost_yuan']-35126.948591)<1e-5
@@ -168,7 +168,8 @@ def q1():
     ax[1].stairs(a.charge_kw,x,color=PAL['charge'],label="充电（正）",lw=1.1)
     ax[1].stairs(-a.discharge_kw,x,color=PAL['discharge'],ls="--",label="放电（负向展示）",lw=1.1)
     ax[1].axhline(0,color="#555555",lw=.6); ax[1].set_ylim(-6500,7200)
-    ax[1].legend(ncol=2,loc="upper center",frameon=False)
+    ax[1].legend(ncol=2,loc="lower center",bbox_to_anchor=(0.5,1.01),
+                 borderaxespad=0,frameon=False)
     clean(ax[1],"b  储能充放电",ylabel="功率（kW）")
     e=np.r_[a.storage_start_kwh.iloc[0],a.storage_end_kwh]
     ax[2].plot(x,e,color=PAL['soc'],lw=1.4)
@@ -184,6 +185,11 @@ def q1():
     ax[3].set(ylim=(0,1.7),xlim=(0,24),xticks=[0,4,8,12,16,20,24])
     clean(ax[3],"d  题设分时电价","时刻（h）","电价（元/kWh）")
     save(f,"fig_q1_dispatch","144 immutable intervals plus 145 energy boundaries; no uncertainty; 21–24 h inset from identical state trajectory.")
+    return a, s
+
+
+def q1():
+    a, s = q1_dispatch()
     table("q1_summary","问题一经济收益与物理核验","tab:p1-summary",
           ["指标","无储能对照","正式MILP","改善或核验"],[
               ["购电费用/元",f"{s['baseline_cost_yuan']:.3f}",f"{s['optimal_cost_yuan']:.6f}",f"节省{s['cost_saving_yuan']:.3f}"],

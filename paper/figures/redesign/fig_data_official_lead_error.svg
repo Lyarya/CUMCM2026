@@ -1,0 +1,357 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="519.59952pt" height="199.19952pt" viewBox="0 0 519.59952 199.19952" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-09-13T09:02:06.294920</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.10.6, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 199.19952
+L 519.59952 199.19952
+L 519.59952 0
+L 0 0
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 39.324688 164.836083
+L 512.39952 164.836083
+L 512.39952 23.533594
+L 39.324688 23.533594
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g id="matplotlib.axis_1">
+    <g id="xtick_1">
+     <g id="line2d_1">
+      <defs>
+       <path id="me4ef6992bb" d="M 0 0
+L 0 3.5
+" style="stroke: #000000; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#me4ef6992bb" x="62.765332" y="164.836083" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_1">
+      <text style="font-size: 9px; font-family: 'Songti SC', 'SimSun', 'STSong', 'Arial Unicode MS', sans-serif; text-anchor: middle" x="62.765332" y="178.316083" transform="rotate(-0 62.765332 178.316083)">1-3 h</text>
+     </g>
+    </g>
+    <g id="xtick_2">
+     <g id="line2d_2">
+      <g>
+       <use xlink:href="#me4ef6992bb" x="169.313718" y="164.836083" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_2">
+      <text style="font-size: 9px; font-family: 'Songti SC', 'SimSun', 'STSong', 'Arial Unicode MS', sans-serif; text-anchor: middle" x="169.313718" y="178.316083" transform="rotate(-0 169.313718 178.316083)">4-6 h</text>
+     </g>
+    </g>
+    <g id="xtick_3">
+     <g id="line2d_3">
+      <g>
+       <use xlink:href="#me4ef6992bb" x="275.862104" y="164.836083" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_3">
+      <text style="font-size: 9px; font-family: 'Songti SC', 'SimSun', 'STSong', 'Arial Unicode MS', sans-serif; text-anchor: middle" x="275.862104" y="178.316083" transform="rotate(-0 275.862104 178.316083)">7-12 h</text>
+     </g>
+    </g>
+    <g id="xtick_4">
+     <g id="line2d_4">
+      <g>
+       <use xlink:href="#me4ef6992bb" x="382.410489" y="164.836083" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_4">
+      <text style="font-size: 9px; font-family: 'Songti SC', 'SimSun', 'STSong', 'Arial Unicode MS', sans-serif; text-anchor: middle" x="382.410489" y="178.316083" transform="rotate(-0 382.410489 178.316083)">13-18 h</text>
+     </g>
+    </g>
+    <g id="xtick_5">
+     <g id="line2d_5">
+      <g>
+       <use xlink:href="#me4ef6992bb" x="488.958875" y="164.836083" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_5">
+      <text style="font-size: 9px; font-family: 'Songti SC', 'SimSun', 'STSong', 'Arial Unicode MS', sans-serif; text-anchor: middle" x="488.958875" y="178.316083" transform="rotate(-0 488.958875 178.316083)">19-24 h</text>
+     </g>
+    </g>
+    <g id="text_6">
+     <text style="font-size: 9px; font-family: 'Songti SC', 'SimSun', 'STSong', 'Arial Unicode MS', sans-serif; text-anchor: middle" x="275.862104" y="190.747958" transform="rotate(-0 275.862104 190.747958)">预测提前期</text>
+    </g>
+   </g>
+   <g id="matplotlib.axis_2">
+    <g id="ytick_1">
+     <g id="line2d_6">
+      <path d="M 39.324688 164.836083
+L 512.39952 164.836083
+" clip-path="url(#p97f3b91c6a)" style="fill: none; stroke-dasharray: 2.22,0.96; stroke-dashoffset: 0; stroke: #e8ebf0; stroke-opacity: 0.8; stroke-width: 0.6"/>
+     </g>
+     <g id="line2d_7">
+      <defs>
+       <path id="m35f73ecc03" d="M 0 0
+L -3.5 0
+" style="stroke: #000000; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#m35f73ecc03" x="39.324688" y="164.836083" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_7">
+      <text style="font-size: 9px; font-family: 'Songti SC', 'SimSun', 'STSong', 'Arial Unicode MS', sans-serif; text-anchor: end" x="32.324688" y="168.076083" transform="rotate(-0 32.324688 168.076083)">0</text>
+     </g>
+    </g>
+    <g id="ytick_2">
+     <g id="line2d_8">
+      <path d="M 39.324688 145.210737
+L 512.39952 145.210737
+" clip-path="url(#p97f3b91c6a)" style="fill: none; stroke-dasharray: 2.22,0.96; stroke-dashoffset: 0; stroke: #e8ebf0; stroke-opacity: 0.8; stroke-width: 0.6"/>
+     </g>
+     <g id="line2d_9">
+      <g>
+       <use xlink:href="#m35f73ecc03" x="39.324688" y="145.210737" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_8">
+      <text style="font-size: 9px; font-family: 'Songti SC', 'SimSun', 'STSong', 'Arial Unicode MS', sans-serif; text-anchor: end" x="32.324688" y="148.450737" transform="rotate(-0 32.324688 148.450737)">100</text>
+     </g>
+    </g>
+    <g id="ytick_3">
+     <g id="line2d_10">
+      <path d="M 39.324688 125.585391
+L 512.39952 125.585391
+" clip-path="url(#p97f3b91c6a)" style="fill: none; stroke-dasharray: 2.22,0.96; stroke-dashoffset: 0; stroke: #e8ebf0; stroke-opacity: 0.8; stroke-width: 0.6"/>
+     </g>
+     <g id="line2d_11">
+      <g>
+       <use xlink:href="#m35f73ecc03" x="39.324688" y="125.585391" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_9">
+      <text style="font-size: 9px; font-family: 'Songti SC', 'SimSun', 'STSong', 'Arial Unicode MS', sans-serif; text-anchor: end" x="32.324688" y="128.825391" transform="rotate(-0 32.324688 128.825391)">200</text>
+     </g>
+    </g>
+    <g id="ytick_4">
+     <g id="line2d_12">
+      <path d="M 39.324688 105.960046
+L 512.39952 105.960046
+" clip-path="url(#p97f3b91c6a)" style="fill: none; stroke-dasharray: 2.22,0.96; stroke-dashoffset: 0; stroke: #e8ebf0; stroke-opacity: 0.8; stroke-width: 0.6"/>
+     </g>
+     <g id="line2d_13">
+      <g>
+       <use xlink:href="#m35f73ecc03" x="39.324688" y="105.960046" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_10">
+      <text style="font-size: 9px; font-family: 'Songti SC', 'SimSun', 'STSong', 'Arial Unicode MS', sans-serif; text-anchor: end" x="32.324688" y="109.200046" transform="rotate(-0 32.324688 109.200046)">300</text>
+     </g>
+    </g>
+    <g id="ytick_5">
+     <g id="line2d_14">
+      <path d="M 39.324688 86.3347
+L 512.39952 86.3347
+" clip-path="url(#p97f3b91c6a)" style="fill: none; stroke-dasharray: 2.22,0.96; stroke-dashoffset: 0; stroke: #e8ebf0; stroke-opacity: 0.8; stroke-width: 0.6"/>
+     </g>
+     <g id="line2d_15">
+      <g>
+       <use xlink:href="#m35f73ecc03" x="39.324688" y="86.3347" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_11">
+      <text style="font-size: 9px; font-family: 'Songti SC', 'SimSun', 'STSong', 'Arial Unicode MS', sans-serif; text-anchor: end" x="32.324688" y="89.5747" transform="rotate(-0 32.324688 89.5747)">400</text>
+     </g>
+    </g>
+    <g id="ytick_6">
+     <g id="line2d_16">
+      <path d="M 39.324688 66.709354
+L 512.39952 66.709354
+" clip-path="url(#p97f3b91c6a)" style="fill: none; stroke-dasharray: 2.22,0.96; stroke-dashoffset: 0; stroke: #e8ebf0; stroke-opacity: 0.8; stroke-width: 0.6"/>
+     </g>
+     <g id="line2d_17">
+      <g>
+       <use xlink:href="#m35f73ecc03" x="39.324688" y="66.709354" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_12">
+      <text style="font-size: 9px; font-family: 'Songti SC', 'SimSun', 'STSong', 'Arial Unicode MS', sans-serif; text-anchor: end" x="32.324688" y="69.949354" transform="rotate(-0 32.324688 69.949354)">500</text>
+     </g>
+    </g>
+    <g id="ytick_7">
+     <g id="line2d_18">
+      <path d="M 39.324688 47.084009
+L 512.39952 47.084009
+" clip-path="url(#p97f3b91c6a)" style="fill: none; stroke-dasharray: 2.22,0.96; stroke-dashoffset: 0; stroke: #e8ebf0; stroke-opacity: 0.8; stroke-width: 0.6"/>
+     </g>
+     <g id="line2d_19">
+      <g>
+       <use xlink:href="#m35f73ecc03" x="39.324688" y="47.084009" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_13">
+      <text style="font-size: 9px; font-family: 'Songti SC', 'SimSun', 'STSong', 'Arial Unicode MS', sans-serif; text-anchor: end" x="32.324688" y="50.324009" transform="rotate(-0 32.324688 50.324009)">600</text>
+     </g>
+    </g>
+    <g id="ytick_8">
+     <g id="line2d_20">
+      <path d="M 39.324688 27.458663
+L 512.39952 27.458663
+" clip-path="url(#p97f3b91c6a)" style="fill: none; stroke-dasharray: 2.22,0.96; stroke-dashoffset: 0; stroke: #e8ebf0; stroke-opacity: 0.8; stroke-width: 0.6"/>
+     </g>
+     <g id="line2d_21">
+      <g>
+       <use xlink:href="#m35f73ecc03" x="39.324688" y="27.458663" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_14">
+      <text style="font-size: 9px; font-family: 'Songti SC', 'SimSun', 'STSong', 'Arial Unicode MS', sans-serif; text-anchor: end" x="32.324688" y="30.698663" transform="rotate(-0 32.324688 30.698663)">700</text>
+     </g>
+    </g>
+    <g id="text_15">
+     <text style="font-size: 9px; font-family: 'Songti SC', 'SimSun', 'STSong', 'Arial Unicode MS', sans-serif; text-anchor: middle" x="14.408438" y="94.184838" transform="rotate(-90 14.408438 94.184838)">预测误差（kW）</text>
+    </g>
+   </g>
+   <g id="patch_3">
+    <path d="M 39.324688 164.836083
+L 39.324688 23.533594
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 39.324688 164.836083
+L 512.39952 164.836083
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_22">
+    <path d="M 62.765332 158.060486
+L 169.313718 149.572112
+L 275.862104 136.42073
+L 382.410489 120.426739
+L 488.958875 102.131117
+" clip-path="url(#p97f3b91c6a)" style="fill: none; stroke: #0d47a1; stroke-width: 1.6; stroke-linecap: square"/>
+    <defs>
+     <path id="m2463b28b24" d="M 0 2.5
+C 0.663008 2.5 1.29895 2.236584 1.767767 1.767767
+C 2.236584 1.29895 2.5 0.663008 2.5 0
+C 2.5 -0.663008 2.236584 -1.29895 1.767767 -1.767767
+C 1.29895 -2.236584 0.663008 -2.5 0 -2.5
+C -0.663008 -2.5 -1.29895 -2.236584 -1.767767 -1.767767
+C -2.236584 -1.29895 -2.5 -0.663008 -2.5 0
+C -2.5 0.663008 -2.236584 1.29895 -1.767767 1.767767
+C -1.29895 2.236584 -0.663008 2.5 0 2.5
+z
+" style="stroke: #ffffff; stroke-width: 0.7"/>
+    </defs>
+    <g clip-path="url(#p97f3b91c6a)">
+     <use xlink:href="#m2463b28b24" x="62.765332" y="158.060486" style="fill: #0d47a1; stroke: #ffffff; stroke-width: 0.7"/>
+     <use xlink:href="#m2463b28b24" x="169.313718" y="149.572112" style="fill: #0d47a1; stroke: #ffffff; stroke-width: 0.7"/>
+     <use xlink:href="#m2463b28b24" x="275.862104" y="136.42073" style="fill: #0d47a1; stroke: #ffffff; stroke-width: 0.7"/>
+     <use xlink:href="#m2463b28b24" x="382.410489" y="120.426739" style="fill: #0d47a1; stroke: #ffffff; stroke-width: 0.7"/>
+     <use xlink:href="#m2463b28b24" x="488.958875" y="102.131117" style="fill: #0d47a1; stroke: #ffffff; stroke-width: 0.7"/>
+    </g>
+   </g>
+   <g id="line2d_23">
+    <path d="M 62.765332 151.210732
+L 169.313718 131.385457
+L 275.862104 106.179016
+L 382.410489 74.773779
+L 488.958875 32.753445
+" clip-path="url(#p97f3b91c6a)" style="fill: none; stroke-dasharray: 5.92,2.56; stroke-dashoffset: 0; stroke: #e39b34; stroke-width: 1.6"/>
+    <defs>
+     <path id="m851e137971" d="M -2.6 2.6
+L 2.6 2.6
+L 2.6 -2.6
+L -2.6 -2.6
+z
+" style="stroke: #e39b34; stroke-width: 1.2; stroke-linejoin: miter"/>
+    </defs>
+    <g clip-path="url(#p97f3b91c6a)">
+     <use xlink:href="#m851e137971" x="62.765332" y="151.210732" style="fill: #ffffff; stroke: #e39b34; stroke-width: 1.2; stroke-linejoin: miter"/>
+     <use xlink:href="#m851e137971" x="169.313718" y="131.385457" style="fill: #ffffff; stroke: #e39b34; stroke-width: 1.2; stroke-linejoin: miter"/>
+     <use xlink:href="#m851e137971" x="275.862104" y="106.179016" style="fill: #ffffff; stroke: #e39b34; stroke-width: 1.2; stroke-linejoin: miter"/>
+     <use xlink:href="#m851e137971" x="382.410489" y="74.773779" style="fill: #ffffff; stroke: #e39b34; stroke-width: 1.2; stroke-linejoin: miter"/>
+     <use xlink:href="#m851e137971" x="488.958875" y="32.753445" style="fill: #ffffff; stroke: #e39b34; stroke-width: 1.2; stroke-linejoin: miter"/>
+    </g>
+   </g>
+   <g id="text_16">
+    <text style="font-size: 7px; font-family: 'Songti SC', 'SimSun', 'STSong', 'Arial Unicode MS', sans-serif; text-anchor: middle; fill: #0d47a1" x="62.765332" y="150.087048" transform="rotate(-0 62.765332 150.087048)">34.5</text>
+   </g>
+   <g id="text_17">
+    <text style="font-size: 7px; font-family: 'Songti SC', 'SimSun', 'STSong', 'Arial Unicode MS', sans-serif; text-anchor: middle; fill: #0d47a1" x="169.313718" y="141.598675" transform="rotate(-0 169.313718 141.598675)">77.8</text>
+   </g>
+   <g id="text_18">
+    <text style="font-size: 7px; font-family: 'Songti SC', 'SimSun', 'STSong', 'Arial Unicode MS', sans-serif; text-anchor: middle; fill: #0d47a1" x="275.862104" y="128.447292" transform="rotate(-0 275.862104 128.447292)">144.8</text>
+   </g>
+   <g id="text_19">
+    <text style="font-size: 7px; font-family: 'Songti SC', 'SimSun', 'STSong', 'Arial Unicode MS', sans-serif; text-anchor: middle; fill: #0d47a1" x="382.410489" y="112.453301" transform="rotate(-0 382.410489 112.453301)">226.3</text>
+   </g>
+   <g id="text_20">
+    <text style="font-size: 7px; font-family: 'Songti SC', 'SimSun', 'STSong', 'Arial Unicode MS', sans-serif; text-anchor: middle; fill: #0d47a1" x="488.958875" y="94.15768" transform="rotate(-0 488.958875 94.15768)">319.5</text>
+   </g>
+   <g id="text_21">
+    <text style="font-size: 7px; font-family: 'Songti SC', 'SimSun', 'STSong', 'Arial Unicode MS', sans-serif; text-anchor: middle; fill: #9a621d" x="62.765332" y="143.237294" transform="rotate(-0 62.765332 143.237294)">69.4</text>
+   </g>
+   <g id="text_22">
+    <text style="font-size: 7px; font-family: 'Songti SC', 'SimSun', 'STSong', 'Arial Unicode MS', sans-serif; text-anchor: middle; fill: #9a621d" x="169.313718" y="123.412019" transform="rotate(-0 169.313718 123.412019)">170.4</text>
+   </g>
+   <g id="text_23">
+    <text style="font-size: 7px; font-family: 'Songti SC', 'SimSun', 'STSong', 'Arial Unicode MS', sans-serif; text-anchor: middle; fill: #9a621d" x="275.862104" y="98.205578" transform="rotate(-0 275.862104 98.205578)">298.9</text>
+   </g>
+   <g id="text_24">
+    <text style="font-size: 7px; font-family: 'Songti SC', 'SimSun', 'STSong', 'Arial Unicode MS', sans-serif; text-anchor: middle; fill: #9a621d" x="382.410489" y="66.800341" transform="rotate(-0 382.410489 66.800341)">458.9</text>
+   </g>
+   <g id="text_25">
+    <text style="font-size: 7px; font-family: 'Songti SC', 'SimSun', 'STSong', 'Arial Unicode MS', sans-serif; text-anchor: middle; fill: #9a621d" x="488.958875" y="24.780008" transform="rotate(-0 488.958875 24.780008)">673.0</text>
+   </g>
+   <g id="text_26">
+    <text style="font-size: 9px; font-family: 'Songti SC', 'SimSun', 'STSong', 'Arial Unicode MS', sans-serif; text-anchor: start" x="39.324688" y="14.533594" transform="rotate(-0 39.324688 14.533594)">官方光伏预报误差的提前期效应</text>
+   </g>
+   <g id="legend_1">
+    <g id="line2d_24">
+     <path d="M 46.524688 33.693594
+L 56.524688 33.693594
+L 66.524688 33.693594
+" style="fill: none; stroke: #0d47a1; stroke-width: 1.6; stroke-linecap: square"/>
+     <g>
+      <use xlink:href="#m2463b28b24" x="56.524688" y="33.693594" style="fill: #0d47a1; stroke: #ffffff; stroke-width: 0.7"/>
+     </g>
+    </g>
+    <g id="text_27">
+     <text style="font-size: 8px; font-family: 'Songti SC', 'SimSun', 'STSong', 'Arial Unicode MS', sans-serif; text-anchor: start" x="72.924688" y="36.493594" transform="rotate(-0 72.924688 36.493594)">MAE</text>
+    </g>
+    <g id="line2d_25">
+     <path d="M 107.444688 33.693594
+L 117.444688 33.693594
+L 127.444688 33.693594
+" style="fill: none; stroke-dasharray: 5.92,2.56; stroke-dashoffset: 0; stroke: #e39b34; stroke-width: 1.6"/>
+     <g>
+      <use xlink:href="#m851e137971" x="117.444688" y="33.693594" style="fill: #ffffff; stroke: #e39b34; stroke-width: 1.2; stroke-linejoin: miter"/>
+     </g>
+    </g>
+    <g id="text_28">
+     <text style="font-size: 8px; font-family: 'Songti SC', 'SimSun', 'STSong', 'Arial Unicode MS', sans-serif; text-anchor: start" x="133.844688" y="36.493594" transform="rotate(-0 133.844688 36.493594)">RMSE</text>
+    </g>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p97f3b91c6a">
+   <rect x="39.324688" y="23.533594" width="473.074833" height="141.302489"/>
+  </clipPath>
+ </defs>
+</svg>

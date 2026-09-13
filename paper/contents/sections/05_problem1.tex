@@ -43,8 +43,8 @@ $E_0=E_{144}=6000\ \mathrm{kWh}$，以排除通过透支期末电量降低当日
 二元变量仅用于排除同一10分钟区间内的同时充、放电；正式结果采用CBC求解该MILP。
 
 \subsection{充放电互补约束的条件性精确松弛}
-为解释互补约束在本模型中的作用，考虑删除$u_t$并分别保留
-$0\le c_t,d_t\le P_{\max}$所得的LP松弛。记$\alpha=\eta_c\eta_d<1$。
+考虑删除$u_t$，分别保留$0\le c_t,d_t\le P_{\max}$所得的LP松弛。
+记$\alpha=\eta_c\eta_d<1$。
 
 \textbf{命题1（可行交换条件下的互补精确松弛）}
 若该LP存在一个最优解，使其中每个$c_t>0,d_t>0$的时段均满足
@@ -55,38 +55,34 @@ $0\le c_t,d_t\le P_{\max}$所得的LP松弛。记$\alpha=\eta_c\eta_d<1$。
 \end{equation}
 则至少存在一个满足$c_td_t=0$的LP最优解，因而该条件下MILP与LP的最优目标值相同。
 
-\begin{samepage}
 \textit{证明概要：}
 对任一同时充、放电时段，令
-$\delta=\min\{c_t,d_t/\alpha\}$、$r=(1-\alpha)\delta$。
-作如下变换：
+$\delta=\min\{c_t,d_t/\alpha\}$、$r=(1-\alpha)\delta$，作变换
 \begin{equation}
  c'_t=c_t-\delta,\qquad d'_t=d_t-\alpha\delta.
  \label{eq:p1-exchange}
 \end{equation}
-由于$\alpha/\eta_d=\eta_c$，式\eqref{eq:p1-exchange}保持该时段的储能增量不变，
-故全部后续$E_t$及终端条件均不变；同时至少有$c'_t,d'_t$之一为0。该变换在功率平衡中
-释放$r$的供给余量。由式\eqref{eq:p1-exchange-condition}，可将其分解为减少购电$a_t$
-和增加弃光$b_t$，其中$a_t+b_t=r$、$0\le a_t\le g_t$、
-$0\le b_t\le P_t-w_t$。于是功率平衡、变量边界和功率上限仍成立，而目标函数变化为
-$-p_ta_t\Delta t\le0$。逐时重复即可得到互斥可行解；再结合LP是MILP的松弛，得到两者
-最优值相等。完整交换论证见附录\ref{app:p1-relaxation-proof}。
-\end{samepage}
+由$\alpha/\eta_d=\eta_c$，式\eqref{eq:p1-exchange}保持该时段储能增量不变，故全部后续
+$E_t$及终端条件均不变；同时$c'_t,d'_t$至少有一个为0。该变换在功率平衡中释放$r$的
+供给余量，由式\eqref{eq:p1-exchange-condition}可分解为减少购电$a_t$和增加弃光$b_t$，其中
+$a_t+b_t=r$、$0\le a_t\le g_t$、$0\le b_t\le P_t-w_t$。功率平衡、变量边界与功率上限
+仍成立，目标函数变化为$-p_ta_t\Delta t\le0$。逐时重复即得互斥可行解；结合LP为MILP
+松弛，两者最优值相等。完整交换论证见附录\ref{app:p1-relaxation-proof}。
 
-非负电价、无售电收益和无循环补贴保证上述交换不会增加费用；式
-\eqref{eq:p1-exchange-condition}则是保持外网非负与弃光上界所需的可行性条件。因此，该命题是
-条件性结论，并不声称所有LP可行解或最优解都会自然互斥。
+式\eqref{eq:p1-exchange-condition}的作用是刻画购电裕度与弃光裕度是否足以吸收拆分同时
+充放电所释放的功率余量$r$，本质上是外网非负约束与弃光上界对互补松弛成立性的可行性条件。
+它表明充放电互斥性依赖于系统在该时段的调节空间：光伏充裕或电网接入宽裕时，松弛解天然互斥；
+两者趋紧时则需式\eqref{eq:p1-exchange-condition}作为保障。
 
 \subsection{LP--MILP数值交叉验证}
 对附件1实例，正式MILP与仅删除二元模式变量及两条互斥约束的LP使用完全相同的功率平衡、
-储能递推、功率与电量边界、弃光约束和首末电量。表\ref{tab:p1-lp-relaxation}中的数据直接
-来自同口径审计结果。
-\input{contents/generated/q1_lp.tex}
+储能递推、功率与电量边界、弃光约束和首末电量。
 两者目标值均为$35126.948591$元，绝对与相对松弛间隙均为0；LP最大同时充放电功率为0，
 求解用时由$0.211$ s降至$0.067$ s，单次计时比约为3.1。两解仅在5个等价时段的功率分配
 存在数值差异，其中3个时段的差异超过$10^{-3}$，但全天购电、充电、放电、弃光及SOC边界
-完全一致。由此，理论结构解释与数值证书共同表明：LP松弛在附件1这一确定性单日算例上精确，
-但该结论不推广至问题二至四的随机、多阶段或滚动模型；正式主模型仍为MILP。
+完全一致。由此，理论结构解释与数值证书共同表明：LP松弛在附件1这一确定性单日算例上精确。
+表\ref{tab:p1-lp-relaxation}汇总同口径审计结果。
+\input{contents/generated/q1_lp.tex}
 
 \subsection{效率修正的局部套利判据}
 考虑仅由价差驱动的两个理想化时段$i$和$j$。若时段$i$从外网额外购买$1\ \mathrm{kWh}$
@@ -112,17 +108,16 @@ $\eta_c\eta_d\ \mathrm{kWh}$。忽略功率和电量边界等耦合约束时，�
 $1200$--$10800\ \mathrm{kWh}$。
 \input{contents/generated/q1_summary.tex}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \includegraphics[width=.94\textwidth]{figures/redesign/fig_q1_dispatch.pdf}
-\caption{附件1确定性最优轨迹：供需功率、充放电、储能电量与电价。放电以负向展示以区分动作；
-虚线为电量边界，嵌图放大21--24时的原轨迹；各曲线均为单次确定性解，无误差带。}
+    \caption{附件1确定性最优调度轨迹。}
 \label{fig:p1-dispatch}
 \end{figure}
 
 题目指定区间购电量$q_t=g_t\Delta t$见表\ref{tab:p1-purchase-samples}，
 六个4小时区间的充放电量见表\ref{tab:p1-storage-blocks}，所有电量单位均为kWh。
-\begin{table}[htbp]
+\begin{table}[H]
   \centering
   \caption{微网在指定时间段的购电量及全天的购电量和购电费}
   \label{tab:p1-purchase-samples}
@@ -142,7 +137,7 @@ $1200$--$10800\ \mathrm{kWh}$。
 
 全天累计充电$20740.666\ \mathrm{kWh}$，累计放电$16799.940\ \mathrm{kWh}$；
 二者差异来自充、放电效率损耗。六个4小时区间的储能吞吐量如下。
-\begin{table}[htbp]
+\begin{table}[H]
   \centering
   \caption{储能设备在指定时间段的充放电量及0:00和24:00的储电量}
   \label{tab:p1-storage-blocks}
@@ -166,11 +161,10 @@ $1200$--$10800\ \mathrm{kWh}$。
 各取基准的$0.50,0.75,1.00,1.25$倍，其余条件不变；容量变化时，电量下界、上界和
 首末值分别保持为容量的10\%、90\%、50\%。12个情形均达到最优并通过物理核验，结果见
 图\ref{fig:p1-sensitivity}。
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \includegraphics[width=.98\textwidth]{figures/redesign/fig_q1_sensitivity.pdf}
-\caption{单因素灵敏度。圆点为已求解的确定性情形，空心方框为基准配置，连线仅辅助比较；
-纵轴为明示的局部费用尺度，不设误差棒。}
+    \caption{储能效率、容量与功率上限的单因素灵敏度。}
 \label{fig:p1-sensitivity}
 \end{figure}
 单程效率从0.80增至0.95，费用下降\QOneEffReduction{}\%。容量每增加3000 kWh，

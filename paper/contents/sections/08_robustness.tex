@@ -24,6 +24,7 @@ $p$值应与效应量和日胜率共同解释。残差自助场景也受历史�
 其他模型。其末端电量降至1200 kWh，而正式问题未规定全年末端回到初值，因此主下界不附加该
 条件；但这会带来有限视界末端乐观性，故该值只能作为信息放松下界，不能作为可实施策略。
 
+三种方案与离线基准的费用及成本差距汇总于表\ref{tab:information-bound}。
 \input{contents/generated/information_bound.tex}
 以$C_{\rm LB}$表示该基准，问题二实际费用、问题三$S_2$费用分别为
 $C_{\rm Q2}=14839462.002357$元和$C_{\rm Q3}=14505500.731613$元，满足
@@ -35,12 +36,10 @@ $C_{\rm LB}\le C_{\rm Q3}\le C_{\rm Q2}$。于是问题二相对下界的成本�
 \]
 的可观测成本差距。该比例同时包含预测更新、调整灵活性和滚动决策的共同作用，不能解释为恢复了
 同等比例的“纯预测信息价值”。图\ref{fig:information-gap}采用零起点费用轴展示三者关系。
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \includegraphics[width=.92\textwidth]{figures/redesign/fig_information_gap.pdf}
-\caption{因果策略与离线全信息基准的费用差距。三点均为2025年2月1日至12月31日的同口径年度
-费用，横轴从零开始；离线基准使用未来真实负荷和光伏，且无年末电量等式，不能实施。年度总量为
-单次确定性核算，不添加统计误差棒。}
+    \caption{因果策略与离线全信息基准的年度费用差距。}
 \label{fig:information-gap}
 \end{figure}
 
