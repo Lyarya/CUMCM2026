@@ -13,26 +13,26 @@
 编号 & 文件路径 & 类型 & 对应问题 & 功能 & 输入 & 输出 \\
 \midrule
 \endhead
-1 & {\raggedright data/\allowbreak{}raw/\allowbreak{}C题/\allowbreak{}附件/\allowbreak{}附件1.xlsx\par} & Excel & 问题一、二、三 & 固定电价、典型负荷与光伏 & 题目附件 & 确定性与固定价调度输入 \\
-2 & {\raggedright data/\allowbreak{}raw/\allowbreak{}C题/\allowbreak{}附件/\allowbreak{}附件2.xlsx\par} & Excel & 问题二、三、四 & 全年实际负荷与光伏 & 题目附件 & 实际回放输入 \\
-3 & {\raggedright data/\allowbreak{}raw/\allowbreak{}C题/\allowbreak{}附件/\allowbreak{}附件3.xlsx\par} & Excel & 问题三、四 & 多发布时间光伏预报 & 题目附件 & 滚动预测输入 \\
-4 & {\raggedright data/\allowbreak{}raw/\allowbreak{}C题/\allowbreak{}附件/\allowbreak{}附件4.xlsx\par} & Excel & 问题四 & 10分钟动态电价 & 题目附件 & 动态价格向量 \\
-5 & {\raggedright src/\allowbreak{}common/\allowbreak{}\par} & Python & 全部 & 数据校验、预处理、指标与绘图公共模块 & 附件1--4 & 规范化数据与诊断 \\
-6 & {\raggedright src/\allowbreak{}forecasting/\allowbreak{}\par} & Python & 问题二 & 因果预测、SSA、场景生成与冻结评价 & 规范化源荷数据 & 预测与联合场景 \\
-7 & {\raggedright src/\allowbreak{}problem1/\allowbreak{}\par} & Python & 问题一 & 确定性MILP、LP松弛与灵敏度 & 附件1 & result1及问题一图表 \\
-8 & {\raggedright src/\allowbreak{}problem2/\allowbreak{}\par} & Python & 问题二 & 两阶段随机MILP、物理结算与CVaR & 附件1、2及预测场景 & result2、审计与风险表 \\
-9 & {\raggedright src/\allowbreak{}problem3/\allowbreak{}\par} & Python & 问题三 & 预测融合、滚动重优化、结算与VOI & 附件1--3 & result3、S0--S3及VOI \\
-10 & {\raggedright src/\allowbreak{}problem4/\allowbreak{}\par} & Python & 问题四 & 动态价格接口、年度调度与鲁棒性 & 附件2--4 & result4-2、result4-3及鲁棒性结果 \\
-11 & {\raggedright src/\allowbreak{}analysis/\allowbreak{}information\_\allowbreak{}bound.py\par} & Python & 综合分析 & 离线全信息下界与信息差距 & 全年实际源荷 & 下界费用与审计 \\
-12 & {\raggedright src/\allowbreak{}paper\_\allowbreak{}figures/\allowbreak{}\par} & Python & 全部 & 论文正式图生成 & 各问题结果表 & paper/figures中的正式图 \\
-13 & {\raggedright results/\allowbreak{}problem1/\allowbreak{}result1.xlsx\par} & Excel & 问题一 & 题目格式的确定性调度结果 & 问题一模型 & 提交表1、表2 \\
-14 & {\raggedright results/\allowbreak{}problem2/\allowbreak{}result2.xlsx\par} & Excel & 问题二 & 334日计划、储能与紧急购电结果 & 问题二模型 & 提交表3 \\
-15 & {\raggedright results/\allowbreak{}problem3/\allowbreak{}result3.xlsx\par} & Excel & 问题三 & S3正式滚动购电与调整结果 & 问题三模型 & 问题三提交结果 \\
-16 & {\raggedright results/\allowbreak{}problem4/\allowbreak{}result4-2.xlsx\par} & Excel & 问题四 & 动态价格下问题二重算结果 & Q4-2模型 & 问题4-2提交结果 \\
-17 & {\raggedright results/\allowbreak{}problem4/\allowbreak{}result4-3.xlsx\par} & Excel & 问题四 & 动态价格下问题三重算结果 & Q4-3模型 & 问题4-3提交结果 \\
-18 & {\raggedright results/\allowbreak{}problem4/\allowbreak{}Q4\_\allowbreak{}GIVEN\_\allowbreak{}PRICE\_\allowbreak{}INDEPENDENT\_\allowbreak{}AUDIT.json\par} & JSON & 问题四 & 动态价格年度独立审计 & Q4年度结果 & 价格、物理与结算核验 \\
+1 & {\raggedright 附件1.xlsx\par} & Excel & 问题一、二、三 & 固定电价、典型负荷与光伏 & 题目附件 & 确定性与固定价调度输入 \\
+2 & {\raggedright 附件2.xlsx\par} & Excel & 问题二、三、四 & 全年实际负荷与光伏 & 题目附件 & 实际回放输入 \\
+3 & {\raggedright 附件3.xlsx\par} & Excel & 问题三、四 & 多发布时间光伏预报 & 题目附件 & 滚动预测输入 \\
+4 & {\raggedright 附件4.xlsx\par} & Excel & 问题四 & 10分钟动态电价 & 题目附件 & 动态价格向量 \\
+5 & {\raggedright common/\par} & Python & 全部 & 数据校验、预处理、指标与绘图公共模块 & 附件1--4 & 规范化数据与诊断 \\
+6 & {\raggedright forecasting/\par} & Python & 问题二 & 因果预测、SSA、场景生成与冻结评价 & 规范化源荷数据 & 预测与联合场景 \\
+7 & {\raggedright problem1/\par} & Python & 问题一 & 确定性MILP、LP松弛与灵敏度 & 附件1 & result1及问题一图表 \\
+8 & {\raggedright problem2/\par} & Python & 问题二 & 两阶段随机MILP、物理结算与CVaR & 附件1、2及预测场景 & result2、审计与风险表 \\
+9 & {\raggedright problem3/\par} & Python & 问题三 & 预测融合、滚动重优化、结算与VOI & 附件1--3 & result3、S0--S3及VOI \\
+10 & {\raggedright problem4/\par} & Python & 问题四 & 动态价格接口、年度调度与鲁棒性 & 附件2--4 & result4-2、result4-3及鲁棒性结果 \\
+11 & {\raggedright information\_\allowbreak{}bound.py\par} & Python & 综合分析 & 离线全信息下界与信息差距 & 全年实际源荷 & 下界费用与审计 \\
+12 & {\raggedright paper\_\allowbreak{}figures/\par} & Python & 全部 & 论文正式图生成 & 各问题结果表 & paper/figures中的正式图 \\
+13 & {\raggedright result1.xlsx\par} & Excel & 问题一 & 题目格式的确定性调度结果 & 问题一模型 & 提交表1、表2 \\
+14 & {\raggedright result2.xlsx\par} & Excel & 问题二 & 334日计划、储能与紧急购电结果 & 问题二模型 & 提交表3 \\
+15 & {\raggedright result3.xlsx\par} & Excel & 问题三 & S3正式滚动购电与调整结果 & 问题三模型 & 问题三提交结果 \\
+16 & {\raggedright result4-2.xlsx\par} & Excel & 问题四 & 动态价格下问题二重算结果 & Q4-2模型 & 问题4-2提交结果 \\
+17 & {\raggedright result4-3.xlsx\par} & Excel & 问题四 & 动态价格下问题三重算结果 & Q4-3模型 & 问题4-3提交结果 \\
+18 & {\raggedright Q4\_\allowbreak{}GIVEN\_\allowbreak{}PRICE\_\allowbreak{}INDEPENDENT\_\allowbreak{}AUDIT.json\par} & JSON & 问题四 & 动态价格年度独立审计 & Q4年度结果 & 价格、物理与结算核验 \\
 19 & {\raggedright requirements-lock.txt\par} & 文本 & 全部 & Python依赖精确版本 & 环境冻结 & 可复现安装清单 \\
-20 & {\raggedright paper/\allowbreak{}AI工具使用详情.pdf\par} & PDF & 支撑材料 & AI工具使用情况与人工核验记录 & 实际AI辅助记录 & 独立AI工具使用详情 \\
+20 & {\raggedright AI工具使用详情.pdf\par} & PDF & 支撑材料 & AI工具使用情况与人工核验记录 & 实际AI辅助记录 & 独立AI工具使用详情 \\
 \bottomrule
 \end{longtable}
 \endgroup
