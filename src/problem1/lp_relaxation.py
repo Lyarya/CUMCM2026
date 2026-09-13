@@ -375,7 +375,7 @@ def _write_paper_table(comparison: pd.DataFrame) -> None:
         )
     content = "\n".join(
         [
-            r"\begin{table}[htbp]",
+            r"\begin{table}[H]",
             r"  \centering",
             r"  \caption{问题一正式MILP与LP松弛的同口径求解对照}",
             r"  \label{tab:p1-lp-relaxation}",

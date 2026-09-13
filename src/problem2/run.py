@@ -80,8 +80,8 @@ def _apply_row_style(sheet, style, target_row: int) -> None:
 
 
 def _interval_label(slot: int) -> str:
-    start_minutes = int(slot) * 10
-    end_minutes = (int(slot) + 1) * 10
+    start_minutes = (int(slot) - 1) * 10
+    end_minutes = int(slot) * 10
     start_hour, start_minute = divmod(start_minutes % (24 * 60), 60)
     end_hour, end_minute = divmod(end_minutes % (24 * 60), 60)
     suffix = "+1" if end_minutes >= 24 * 60 else ""

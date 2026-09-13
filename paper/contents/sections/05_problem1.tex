@@ -81,23 +81,18 @@ $a_t+b_t=r$、$0\le a_t\le g_t$、$0\le b_t\le P_t-w_t$。功率平衡、变量�
 求解用时由$0.211$ s降至$0.067$ s，单次计时比约为3.1。两解仅在5个等价时段的功率分配
 存在数值差异，其中3个时段的差异超过$10^{-3}$，但全天购电、充电、放电、弃光及SOC边界
 完全一致。由此，理论结构解释与数值证书共同表明：LP松弛在附件1这一确定性单日算例上精确。
-表\ref{tab:p1-lp-relaxation}汇总同口径审计结果。
+同口径审计结果如表\ref{tab:p1-lp-relaxation}所示。
 \input{contents/generated/q1_lp.tex}
 
 \subsection{效率修正的局部套利判据}
-考虑仅由价差驱动的两个理想化时段$i$和$j$。若时段$i$从外网额外购买$1\ \mathrm{kWh}$
-用于充电，则进入储能$\eta_c\ \mathrm{kWh}$，未来能够向负荷释放
-$\eta_c\eta_d\ \mathrm{kWh}$。忽略功率和电量边界等耦合约束时，正的纯价格套利空间要求
+考虑仅由价差驱动的两个时段 $i$ 和 $j$。若时段 $i$ 从外网额外购买 $1\,\mathrm{kWh}$ 用于充电，则进入储能 $\eta_c\,\mathrm{kWh}$，未来可向负荷释放 $\eta_c\eta_d\,\mathrm{kWh}$。暂不考虑功率和电量边界时，储能通过跨时段转移获得正收益需要满足
 \begin{equation}
- p_j\eta_c\eta_d>p_i,
- \qquad\text{即}\qquad
- \frac{p_j}{p_i}>\frac{1}{\eta_c\eta_d}.
- \label{eq:p1-arbitrage-threshold}
+p_j\eta_c\eta_d>p_i,
+\qquad
+\frac{p_j}{p_i}>\frac{1}{\eta_c\eta_d}.
+\label{eq:p1-arbitrage-threshold}
 \end{equation}
-在$\eta_c=\eta_d=0.9$时，阈值为$1/0.9^2\approx1.235$。这是理想化、局部的效率修正
-套利判据，并非全局最优策略的充分必要条件；实际决策还同时受SOC边界、功率上限、光伏出力、
-负荷需求和终端SOC约束影响。图\ref{fig:p1-dispatch}显示充电主要位于低价或光伏富余时段，
-放电主要位于较高价格时段，实际轨迹与上述经济机制总体一致。
+当 $\eta_c=\eta_d=0.9$ 时，临界价格比约为 1.235。式\eqref{eq:p1-arbitrage-threshold}给出了考虑充放电损耗后的基本价差条件；在完整调度中，SOC、功率上限、光伏出力、负荷需求和终端电量约束还会共同影响储能的实际充放电时机。图\ref{fig:p1-dispatch}显示，储能主要在低价或光伏富余时段充电，并在较高电价时段释放电量，与上述价差机制相吻合。
 
 \subsection{求解结果与灵敏度}
 无储能对照按$g_t=(L_t-P_t)_+$购电、$w_t=(P_t-L_t)_+$弃光。
@@ -111,7 +106,7 @@ $1200$--$10800\ \mathrm{kWh}$。
 \begin{figure}[H]
 \centering
 \includegraphics[width=.94\textwidth]{figures/redesign/fig_q1_dispatch.pdf}
-    \caption{附件1确定性最优调度轨迹。}
+    \caption{附件1确定性最优调度轨迹}
 \label{fig:p1-dispatch}
 \end{figure}
 
@@ -124,10 +119,10 @@ $1200$--$10800\ \mathrm{kWh}$。
   \small
   \begin{tabular}{crcrcr}
     \toprule
-    时间段 & 购电量 & 时间段 & 购电量 & 时间段 & 购电量 \\
+    时间段 & 购电量/kWh & 时间段 & 购电量/kWh & 时间段 & 购电量/kWh \\
     \midrule
-    10:00--10:10 & 0.000   & 12:00--12:10 & 486.403 & 14:00--14:10 & 0.000 \\
-    16:00--16:10 & 394.931 & 18:00--18:10 & 636.983 & 20:00--20:10 & 0.000 \\
+    10:00--10:10 & 0.000   & 12:00--12:10 & 480.412 & 14:00--14:10 & 0.000 \\
+    16:00--16:10 & 445.432 & 18:00--18:10 & 531.894 & 20:00--20:10 & 0.000 \\
     \midrule
     全天购电量 & \multicolumn{2}{c}{59482.699 kWh}
       & 全天购电费 & \multicolumn{2}{c}{35126.949 元} \\
@@ -144,7 +139,7 @@ $1200$--$10800\ \mathrm{kWh}$。
   \small
   \begin{tabular}{crrcrr}
     \toprule
-    时间段 & 充电量 & 放电量 & 时间段 & 充电量 & 放电量 \\
+    时间段 & 充电量/kWh & 放电量/kWh & 时间段 & 充电量/kWh & 放电量/kWh \\
     \midrule
     0:00--4:00   & 4500.000 & 0.000    & 4:00--8:00   & 833.333  & 6365.841 \\
     8:00--12:00  & 4787.964 & 1702.997 & 12:00--16:00 & 5286.035 & 91.101 \\
@@ -157,22 +152,13 @@ $1200$--$10800\ \mathrm{kWh}$。
 \end{table}
 
 \input{../results/problem1/tables/q1_sensitivity_numbers.tex}
-采用单因素分析，效率取$\eta_c=\eta_d\in\{0.80,0.85,0.90,0.95\}$，容量及功率上限
-各取基准的$0.50,0.75,1.00,1.25$倍，其余条件不变；容量变化时，电量下界、上界和
-首末值分别保持为容量的10\%、90\%、50\%。12个情形均达到最优并通过物理核验，结果见
-图\ref{fig:p1-sensitivity}。
+为考察储能关键参数变化对调度结果的影响，我们采用单因素分析。令充、放电效率满足 $\eta_c=\eta_d\in\{0.80,0.85,0.90,0.95\}$，容量和功率上限分别取基准值的 $0.50,\allowbreak0.75,\allowbreak1.00,\allowbreak1.25$ 倍，其余条件保持不变。调整容量时，电量下界、上界及首末时刻储能电量分别设为容量的 10\%、90\% 和 50\%。共得到 12 组参数情形，均成功求得最优解并通过物理约束核验，结果如图\ref{fig:p1-sensitivity} 所示。
 \begin{figure}[H]
 \centering
 \includegraphics[width=.98\textwidth]{figures/redesign/fig_q1_sensitivity.pdf}
-    \caption{储能效率、容量与功率上限的单因素灵敏度。}
+    \caption{储能效率、容量与功率上限的单因素灵敏度}
 \label{fig:p1-sensitivity}
 \end{figure}
-单程效率从0.80增至0.95，费用下降\QOneEffReduction{}\%。容量每增加3000 kWh，
-费用依次减少\QOneCapacityGainFirst{}、\QOneCapacityGainSecond{}、
-\QOneCapacityGainThird{}元；功率每增加1250 kW，依次减少\QOnePowerGainFirst{}、
-\QOnePowerGainSecond{}、\QOnePowerGainThird{}元，均呈边际收益递减。从基准向相邻较高
-设定的有限步长归一化敏感度看，效率损耗影响最大、容量次之，5000 kW以上继续增加功率的
-收益已很小。该判断限于本日输入和所测参数区间，不等价于投资最优结论。
+结果表明，提高储能效率能够显著降低购电费用：单程效率由 $0.80$ 提高至 $0.95$ 时，全天购电费用下降 $11.66\%$。扩大储能容量同样能够降低费用，但节费效果逐渐减弱；容量每增加 $3000\,\mathrm{kWh}$，对应节费依次为 $2850.82$、$2042.64$ 和 $1570.20$ 元。相比之下，提高充放电功率上限的作用较快趋于饱和，每增加 $1250\,\mathrm{kW}$ 所带来的节费依次为 $1043.97$、$219.92$ 和 $53.93$ 元，在 $5000\,\mathrm{kW}$ 之后继续提高功率上限的改善已十分有限。综合来看，本算例中储能效率对运行费用的影响最明显，增加容量仍具有一定收益，而进一步提高功率上限的作用较小。
 
-问题一建立的变量--约束式储能调度骨架将在后续问题中保持不变，并通过增加不确定场景、
-多时点结算及动态价格机制逐级扩展。
+问题一建立的储能调度模型构成后续各问的基础，问题二至问题四将在此基础上依次引入预测不确定性、滚动调整和动态电价。

@@ -1,66 +1,57 @@
 \section{问题二：不确定条件下的日前调度}
 
 \subsection{预测为何必须服务于决策}
-令净负荷$N_t=L_t-P_t$，预测误差$e_t=\widehat N_t-N_t$。MAE、RMSE对误差方向近似
-对称，但本题结算并不对称：$e_t<0$可能造成购电不足，缺口须按$5p_t$紧急购电；
-$e_t>0$则主要造成偏保守的日前购电。因此
+令净负荷为
 \[
-  \text{预测误差小}\ \not\Rightarrow\ \text{实际购电成本低},\qquad
-  \ell(e_t)\ne\ell(-e_t).
+N_t=L_t-P_t,
 \]
-这与决策导向的Predict-then-Optimize观点一致：预测误差与预测所诱导的优化损失并不等价
-\cite{elmachtoub2022}。本文并未训练SPO+或端到端决策模型，而是采用
-“因果预测--残差场景--随机优化--实际回放”闭环，同时评价预测精度与经济后果。
+预测误差定义为
+\[
+e_t=\hat N_t-N_t.
+\]
+当 $e_t>0$ 时，预测净负荷偏高，主要表现为计划购电偏多；当 $e_t<0$ 时，计划购电不足，缺口需要按 $5p_t$ 紧急补购。因此，相同大小的正、负预测误差会产生不同的经济后果，单纯使用 MAE 或 RMSE 不能完整反映预测结果对调度费用的影响。
 
-上述不对称性可由一个单时段局部模型严格刻画。在净负荷与计划购电均非负的供电缺口区间，
-暂忽略储能的跨时段作用，令计划购电恰为
-$\widehat N_t$，未用完的计划电仍按$p_t$支付，供能缺口按$5p_t$补购。全信息费用为
-$C_t^*=p_tN_t$。若$e_t\ge0$，计划偏高，费用遗憾为$p_te_t$；若$e_t<0$，则
+为说明这种差异，考虑单个时段，并暂不计储能的跨时段调节作用。若按预测净负荷 $\hat N_t$ 制定购电计划，则在完全准确预测下，购电费用为
 \[
- p_t\widehat N_t+5p_t(N_t-\widehat N_t)-p_tN_t=4p_t(-e_t).
+C_t^*=p_tN_t.
 \]
-记$(x)_+=\max\{x,0\}$，得到局部决策遗憾
+当 $e_t\ge 0$ 时，计划购电偏多，额外费用为 $p_te_t$；当 $e_t<0$ 时，少购的 $-e_t$ 需要按 $5p_t$ 补足，相对于正常购电多支付
+\[
+4p_t(-e_t).
+\]
+因此，单时段的额外费用可写为
 \begin{equation}
- R_t(e_t)=p_t(e_t)_+ +4p_t(-e_t)_+ .
- \label{eq:q2-local-regret}
+R_t(e_t)
+=
+p_t(e_t)_+
++
+4p_t(-e_t)_+,
+\label{eq:q2-local-regret}
 \end{equation}
-因此，在绝对误差相同的情况下，低估净负荷的局部边际暴露是高估的4倍。式
-\eqref{eq:q2-local-regret}只解释题设结算规则的方向性：实际全年调度还受储能、SOC、场景对冲
-和跨时段耦合影响，不能把真实总费用逐时分解为该式。
+其中 $(x)_+=\max\{x,0\}$。
+
+由式\eqref{eq:q2-local-regret}可见，在误差绝对值相同的情况下，低估净负荷造成的额外费用约为高估的 $4$ 倍。这也说明，预测模型的优劣不能只由误差大小判断，还需要考察其进入实际调度后的经济效果\cite{elmachtoub2022}。在全年调度中，储能和跨时段能量转移会进一步改变这种成本关系。
 
 \subsection{严格因果预测与模型选择}
-问题二在0:00给出目标日144个光伏点预测。模型选择仅使用2025年1月18--31日：
-按验证RMSE最小、MAE并列判据确定模型；2025年2月1日至12月31日的334天只作冻结检验。
-任一预测日的输入、标准化量和残差均来自该日0:00以前，正式期实测值不反向调参。
-比较昨日同刻、上周同刻、近7日同刻均值、相位、SSA、DLinear\cite{zeng2023}及两种已有结构融合方法；
-表\ref{tab:q2-forecast-comparison}直接由保存结果生成。
+问题二要求每日 0:00 给出目标日 144 个时段的光伏预测。本小节结合第五节的数据分析所反映的数据特征，在 2025 年 1 月 18--31 日比较多种候选方法，以验证集 RMSE 为主要选型指标，并结合 MAE 确定最终模型；随后固定模型，在 2 月 1 日至 12 月 31 日的 334 个运营日上进行样本外评价。整个预测过程严格按照时间顺序进行，每日预测只使用此前已经获得的历史信息。候选方法及比较结果见表\ref{tab:q2-forecast-comparison}。
 \input{contents/generated/q2_forecasts.tex}
 
-近7日同刻均值
-$\widehat P_{d,t}=7^{-1}\sum_{j=1}^{7}P_{d-j,t}$
-以验证RMSE $213.551\ \mathrm{kW}$入选；正式期MAE、RMSE分别为
-$153.400$、$303.858\ \mathrm{kW}$。更复杂模型没有提高统一因果验证精度，
-故不将Hankel/Vandermonde或神经网络作为正式预测器。进一步以运营日为配对单位，
-对保存的334个日MAE差作双侧Wilcoxon符号秩检验，并对预先确定的5项比较作
-Benjamini--Hochberg校正\cite{wilcoxon1945,benjamini1995}。
-五项均在5\% FDR下显著；图\ref{fig:q2-daily-difference}给出效应方向和离散程度，
-点为日差值中位数，线段为四分位距，不是置信区间。
+为检验不同预测方法之间的差异是否稳定存在，以运营日为单位比较近 $7$ 日同刻均值与各对照模型的日 MAE，并采用双侧 Wilcoxon 符号秩检验；多重比较结果经 Benjamini--Hochberg 方法校正\cite{wilcoxon1945,benjamini1995}。五组比较在 $5\%$ 的 FDR 水平下均达到显著性。图\ref{fig:q2-daily-difference} 给出了各模型日 MAE 差值的分布，其中近 $7$ 日同刻均值整体表现出更低的预测误差。
 \begin{figure}[H]
 \centering
 \includegraphics[width=.88\textwidth]{figures/redesign/fig_q2_daily_difference.pdf}
-    \caption{近7日同刻均值与五种对照的配对日MAE差。}
+    \caption{近7日同刻均值与五种对照的配对日MAE差}
 \label{fig:q2-daily-difference}
 \end{figure}
 
-尽管附件提供全年实测数据，逐日决策严格遵循信息到达顺序。某日真实负荷和光伏仅在
-相应区间发生后用于执行、结算、状态更新与评价，不参与该日0:00计划。
-历史残差池也只纳入当时已经观测完成的日误差，这一逐步评价原则与prequential思想一致
-\cite{dawid1984}。
+为保证预测过程符合实际调度时序，模型按日期顺序逐日运行。每日 $0{:}00$ 的预测只使用此前已经获得的历史信息，当日实测负荷和光伏在发生后才用于状态更新、误差统计和后续预测。历史残差场景也按相同方式逐日扩充。
 
 \subsection{成对残差场景与两阶段随机MILP}
-点预测无法表达误差方向、连续性及负荷--光伏联合变化。对每一正式日，从该时点以前已经
-完成的历史日中成对抽取负荷和光伏整日残差，叠加于当日点预测并截取非负值，构造
-$S=50$条等概率场景；同一$s$始终对应同一历史残差日，保留日内相关性和联合依赖。
+点预测无法表达误差方向、连续性及负荷--光伏联合变化。对于每个正式预测日，从当前决策时点
+之前已完整观测的历史日期中，成对抽取同一历史日的负荷与光伏整日残差，并将其分别叠加到
+当日负荷和光伏点预测上；对叠加结果进行非负截断后，构造$S=50$条等概率场景。同一场景$s$
+中的负荷残差与光伏残差始终取自同一历史日，从而保留预测误差的日内相关性以及负荷与光伏
+之间的联合相关性。
 场景构造不假设正态、时段独立或负荷与光伏独立。
 这一场景层正是将式\eqref{eq:q2-local-regret}所揭示的下行暴露传递至决策端：它不仅保留误差
 幅度，还保留整日时间依赖和负荷--光伏联合依赖，使优化器能够权衡计划购电与紧急补购风险。
@@ -69,8 +60,8 @@ $S=50$条等概率场景；同一$s$始终对应同一历史残差日，保留�
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=.30\textwidth]{../results/problem2/figures/fig_p2_joint_residual_scenarios.pdf}
-\caption{代表日负荷与光伏的成对整日残差场景。}
+\includegraphics[width=.70\textwidth]{../results/problem2/figures/fig_p2_joint_residual_scenarios.pdf}
+\caption{代表日负荷与光伏的成对整日残差场景}
 \label{fig:q2-paired-scenarios}
 \end{figure}
 
@@ -96,20 +87,16 @@ E_{\min}\le E_t&\le E_{\max},\\
 其中$t=1,\ldots,144$、$s=1,\ldots,50$，储能参数沿用问题一。
 $g_t-x_{t,s}$是已经购买但场景中未调用的计划电，不是物理注入，也不等同于弃光。
 
-为避免单日视界末端无代价放空，$V_d$采用三段边际价值递减的凹分段线性函数。
-第一断点为$E_{\min}$加“场景净负荷相对点预测的正误差日能量”80\%分位数，
-第二断点为其与$E_{\max}$的中点，第三断点为$E_{\max}$；三段边际价值依次为
-$\eta_dQ_{0.9}(p)$、$\eta_dQ_{0.5}(p)$、$\eta_dQ_{0.1}(p)$。
-该项只用于决策，不计入费用结算；问题二不强制每天回到6000 kWh。
+为反映日末储能对后续运行的延续价值，在单日优化目标中引入凹分段线性函数 $V_d(E_{145})$。其边际价值随储能电量增加而递减：第一断点取 $E_{\min}$ 与场景净负荷正预测误差日累计能量的 80\% 分位数之和，第二断点取第一断点与 $E_{\max}$ 的中点，第三断点为 $E_{\max}$；三段边际价值依次取 $\eta_dQ_{0.9}(p)$、$\eta_dQ_{0.5}(p)$ 和 $\eta_dQ_{0.1}(p)$。由此，模型能够根据后续供电风险合理保留日末电量，并将实际日末 SOC 连续传递至下一日。$V_d$ 用于刻画跨日储能价值，实际购电费用仍按题目规定的交易费用统计。
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=.92\textwidth,trim=0 0 0 28pt,clip]{figures/flowcharts/flowchart_two_stage_stochastic_dispatch.pdf}
-\caption{问题二两阶段随机优化与实际执行流程。}
+\caption{问题二两阶段随机优化与实际执行流程}
 \label{fig:q2-two-stage-dispatch-flow}
 \end{figure}
 
-图\ref{fig:q2-two-stage-dispatch-flow}进一步给出问题二从因果信息形成、联合场景构造到计划决策及事后物理执行的完整流程，其中未来真实负荷与光伏仅用于实际回放、结算及状态更新，不进入当期优化。
+图\ref{fig:q2-two-stage-dispatch-flow} 展示了问题二的整体决策流程。每日 0:00 先依据已获得的历史信息形成负荷与光伏预测，并构造联合场景求解日前调度方案。真实负荷和光伏在实际运行后用于结算和储能状态更新，从而形成下一日的初始状态。
 
 \subsection{实际执行、费用与风险扩展}
 计划确定后，以附件2实测序列顺序回放。实际充放电不超过计划动作，并受当期可消纳功率、
@@ -119,7 +106,7 @@ E_{t+1}^{\rm act}=E_t^{\rm act}+\eta_cc_t^{\rm act}\Delta t
 -d_t^{\rm act}\Delta t/\eta_d,\qquad
 E_{d+1,1}^{\rm act}=E_{d,145}^{\rm act}.
 \]
-首日初值为6000 kWh，后续传递上一日实际终值，不存在未吸收放电或隐藏能量汇。
+按附件5规定，正式调度与结果输出期为2025年2月1日至12月31日。本文将2月1日0:00作为正式期起点，初始储电量取6000 kWh；此后每日初始电量均由上一日实际日末电量连续传递，不存在未吸收放电或隐藏能量汇。
 334/334个日模型均最优，期望口径与实际结算见表\ref{tab:q2-results}。
 \input{contents/generated/q2_results.tex}
 主方案$\lambda_{\rm r}=0$的实际紧急购电量为$398\,161.901$ kWh，
@@ -127,23 +114,30 @@ E_{d+1,1}^{\rm act}=E_{d,145}^{\rm act}.
 $1.00\times10^{-6}$ kW，实际电量递推残差为$9.84\times10^{-6}$ kWh；
 实际$E_t$处于1200--10800 kWh，跨日衔接通过审计。
 
-风险敏感扩展仅把场景紧急购电费用
-$C_{d,s}^{\rm emg}=\sum_t5p_te_{t,s}\Delta t$作为风险损失。取$\alpha=0.90$，
+为刻画紧急购电的尾部风险，将场景$s$下第$d$日的紧急购电费用定义为
 \[
-\operatorname{CVaR}_{\alpha,d}=\zeta_d+
-\frac{1}{(1-\alpha)S}\sum_s\xi_{d,s},\quad
-\xi_{d,s}\ge C_{d,s}^{\rm emg}-\zeta_d,\ \xi_{d,s}\ge0,
+C^{\mathrm{emg}}_{d,s}=\sum_t5p_te_{t,s}\Delta t.
 \]
-并在式\eqref{eq:q2-model}目标中加入
-$\lambda_{\rm r}\operatorname{CVaR}_{\alpha,d}$。计划购电费不进入CVaR损失；
-$\lambda_{\rm r}=0$仍为主结果。图\ref{fig:q2-risk}表明，提高风险权重降低紧急尾部暴露但提高
-期望运行费用。作为温和示例，$\lambda_{\rm r}=0.05$使期望运行费用增加约0.093\%，
-紧急电量和CVaR分别下降约13.75\%、13.39\%；实际费用事后下降0.119\%，
-该事后结果不用于宣称其事前最优。CVaR线性化参照\cite{rockafellar2000}。
+取置信水平$\alpha=0.90$，则
+\[
+\operatorname{CVaR}_{\alpha,d}
+=\zeta_d+\frac{1}{(1-\alpha)S}\sum_s\xi_{d,s},
+\]
+其中
+\[
+\xi_{d,s}\ge C^{\mathrm{emg}}_{d,s}-\zeta_d,\qquad \xi_{d,s}\ge0.
+\]
+在式\eqref{eq:q2-model}的期望成本目标中加入风险权重
+$\lambda_{\rm r}\operatorname{CVaR}_{\alpha,d}$，即可在期望运行费用与紧急购电尾部风险之间
+进行权衡；本文以$\lambda_{\rm r}=0$作为基准方案，并进一步改变$\lambda_{\rm r}$考察风险
+偏好的影响。
+
+图\ref{fig:q2-risk} 展示了不同风险权重下运行费用与紧急购电风险的变化。随着 $\lambda_r$ 增大，模型会提前安排更多购电，从而减少高额紧急购电的发生，但期望运行费用也有所增加。以 $\lambda_r=0.05$ 为例，期望运行费用增加约 0.093\%，紧急购电量和 CVaR 分别下降约 13.75\% 和 13.39\%，全年实际运行费用下降 0.119\%。因此，在本算例中，较小的风险权重即可明显降低紧急购电风险，同时保持较低的运行成本。CVaR 的线性化形式参照文献\cite{rockafellar2000}。
+
 \begin{figure}[H]
 \centering
 \includegraphics[width=.84\textwidth]{figures/redesign/fig_q2_risk.pdf}
-    \caption{风险权重下的期望运行费用与紧急购电CVaR权衡。}
+    \caption{风险权重下的期望运行费用与紧急购电CVaR权衡}
 \label{fig:q2-risk}
 \end{figure}
 

@@ -379,7 +379,7 @@ def write_outputs(lower_bound: dict[str, object], daily: dict[str, object], hash
     SUMMARY_PATH.write_text(json.dumps(combined, ensure_ascii=False, indent=2) + "\n")
     PAPER_GENERATED_DIR.mkdir(parents=True, exist_ok=True)
     INFORMATION_BOUND_TEX_PATH.write_text(
-        "\\begin{table}[htbp]\n"
+        "\\begin{table}[H]\n"
         "\\centering\\small\n"
         "\\caption{因果策略与离线全信息基准的同口径费用比较}"
         "\\label{tab:information-bound}\n"
@@ -397,7 +397,7 @@ def write_outputs(lower_bound: dict[str, object], daily: dict[str, object], hash
         "\\end{table}\n"
     )
     Q3_DAILY_VALUE_TEX_PATH.write_text(
-        "\\begin{table}[htbp]\n"
+        "\\begin{table}[H]\n"
         "\\centering\\small\n"
         "\\caption{$S_2$相对$S_0$的日级配对经济收益}"
         "\\label{tab:q3-daily-value}\n"

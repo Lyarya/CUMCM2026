@@ -53,6 +53,10 @@ def _fmt(value: float) -> str:
     return f"{value:.3f}"
 
 
+def _date_label(day: date) -> str:
+    return f"{day.year}.{day.month}.{day.day}"
+
+
 def _date_frame(path: Path, sheet: str) -> pd.DataFrame:
     frame = pd.read_excel(path, sheet_name=sheet)
     date_column = frame.columns[0]
@@ -152,71 +156,62 @@ def _emergency_segments(path: Path) -> tuple[dict[date, list[tuple[str, float]]]
 
 
 def _plan_table(problem: int, rows: list[list[str]]) -> str:
-    body = "\n".join(" & ".join(row) + r" \\" for row in rows)
-    headers = [
-        "日期",
-        "10:00--10:10",
-        "12:00--12:10",
-        "14:00--14:10",
-        "16:00--16:10",
-        "18:00--18:10",
-        "20:00--20:10",
-        "全天电量/kWh",
-        "全天费用/元",
-    ]
+    blocks = []
+    for day, row in zip(SPECIFIED_DATES, rows):
+        values = row[1:]
+        blocks.append(
+            f"\\multicolumn{{6}}{{c}}{{\\textbf{{{_date_label(day)}}}}} \\\\\n"
+            "\\cmidrule(lr){1-6}\n"
+            "\\textbf{时间段} & \\textbf{购电量/kWh} & \\textbf{时间段} & \\textbf{购电量/kWh} & \\textbf{时间段} & \\textbf{购电量/kWh} \\\\\n"
+            f"10:00--10:10 & {values[0]} & 12:00--12:10 & {values[1]} & 14:00--14:10 & {values[2]} \\\\\n"
+            f"16:00--16:10 & {values[3]} & 18:00--18:10 & {values[4]} & 20:00--20:10 & {values[5]} \\\\\n"
+            "\\midrule\n"
+            f"\\textbf{{全天购电量}} & \\multicolumn{{2}}{{c}}{{\\textbf{{{values[6]} kWh}}}} & "
+            f"\\textbf{{全天购电费}} & \\multicolumn{{2}}{{c}}{{\\textbf{{{values[7]} 元}}}} \\\\"
+        )
+    body = "\n\\addlinespace[4pt]\n".join(blocks)
     return (
-        "\\begin{table}[H]\n\\centering\\scriptsize\n"
+        "\\begin{table}[H]\n\\centering\\small\n"
         f"\\caption{{问题{PROBLEM_NAMES[problem]}指定日期的计划购电结果}}"
         f"\\label{{tab:q{problem}-specified-plan}}\n"
-        "\\setlength{\\tabcolsep}{2.4pt}\n"
-        "\\resizebox{\\textwidth}{!}{%\n"
-        "\\begin{tabular}{lrrrrrrrr}\n\\toprule\n"
-        + " & ".join(headers)
-        + r" \\"
-        + "\n\\midrule\n"
+        "\\renewcommand{\\arraystretch}{0.82}\n"
+        "\\begin{tabular*}{\\textwidth}{@{\\extracolsep{\\fill}}crcrcr@{}}\n\\toprule\n"
         + body
-        + "\n\\bottomrule\n\\end{tabular}}\n\\end{table}\n"
+        + "\n\\bottomrule\n\\end{tabular*}\n\\end{table}\n"
     )
 
 
 def _storage_table(
     problem: int, rows: list[list[str]], states: dict[date, dict[str, float]]
 ) -> str:
-    date_header = " & ".join(
-        f"\\multicolumn{{2}}{{c}}{{{day.isoformat()}}}" for day in SPECIFIED_DATES
-    )
-    cmidrules = " ".join(
-        f"\\cmidrule(lr){{{2 + 2 * index}-{3 + 2 * index}}}"
-        for index in range(len(SPECIFIED_DATES))
-    )
-    subheader = "时段 & " + " & ".join(["充电量 & 放电量"] * len(SPECIFIED_DATES))
-    body_rows = []
-    for period_index, period in enumerate(STORAGE_PERIODS):
-        values = []
-        for date_index in range(len(SPECIFIED_DATES)):
-            values.extend(rows[date_index][2 * period_index : 2 * period_index + 2])
-        body_rows.append(period.replace("-", "--") + " & " + " & ".join(values) + r" \\")
-    state_rows = []
-    for time in ("00:00", "24:00"):
-        values = " & ".join(
-            f"\\multicolumn{{2}}{{c}}{{{_fmt(states[day][time])}}}"
-            for day in SPECIFIED_DATES
+    blocks = []
+    for day, values in zip(SPECIFIED_DATES, rows):
+        period_rows = []
+        for left_index, right_index in ((0, 1), (2, 3), (4, 5)):
+            period_rows.append(
+                f"{STORAGE_PERIODS[left_index].replace('-', '--')} & "
+                f"{values[2 * left_index]} & {values[2 * left_index + 1]} & "
+                f"{STORAGE_PERIODS[right_index].replace('-', '--')} & "
+                f"{values[2 * right_index]} & {values[2 * right_index + 1]} \\\\"
+            )
+        blocks.append(
+            f"\\multicolumn{{6}}{{c}}{{\\textbf{{{_date_label(day)}}}}} \\\\\n"
+            "\\cmidrule(lr){1-6}\n"
+            "\\textbf{时间段} & \\textbf{充电量/kWh} & \\textbf{放电量/kWh} & \\textbf{时间段} & \\textbf{充电量/kWh} & \\textbf{放电量/kWh} \\\\\n"
+            + "\n".join(period_rows)
+            + "\n\\midrule\n"
+            f"\\textbf{{0:00储电量}} & \\multicolumn{{2}}{{c}}{{\\textbf{{{_fmt(states[day]['00:00'])} kWh}}}} & "
+            f"\\textbf{{24:00储电量}} & \\multicolumn{{2}}{{c}}{{\\textbf{{{_fmt(states[day]['24:00'])} kWh}}}} \\\\"
         )
-        state_rows.append(f"{time}储电量 & {values}" + r" \\")
+    body = "\n\\addlinespace[4pt]\n".join(blocks)
     return (
-        "\\begin{table}[H]\n\\centering\\scriptsize\n"
+        "\\begin{table}[H]\n\\centering\\small\n"
         f"\\caption{{问题{PROBLEM_NAMES[problem]}指定日期的储能充放电与边界电量}}"
         f"\\label{{tab:q{problem}-specified-storage}}\n"
-        "\\setlength{\\tabcolsep}{2.0pt}\n"
-        "\\resizebox{\\textwidth}{!}{%\n"
-        "\\begin{tabular}{lrrrrrrrr}\n\\toprule\n"
-        f" & {date_header} \\\\\n{cmidrules}\n{subheader} \\\\\n\\midrule\n"
-        + "\n".join(body_rows)
-        + "\n\\midrule\n"
-        + "\n".join(state_rows)
-        + "\n\\bottomrule\n\\end{tabular}}\n"
-        "\\par\\vspace{2pt}\\footnotesize 充、放电量及边界储电量单位均为kWh。\n"
-        "\\end{table}\n"
+        "\\renewcommand{\\arraystretch}{0.72}\n"
+        "\\begin{tabular*}{\\textwidth}{@{\\extracolsep{\\fill}}crrcrr@{}}\n\\toprule\n"
+        + body
+        + "\n\\bottomrule\n\\end{tabular*}\n\\end{table}\n"
     )
 
 
@@ -226,7 +221,7 @@ def _emergency_table(
     totals: dict[date, float],
 ) -> str:
     date_header = " & ".join(
-        f"\\multicolumn{{2}}{{c}}{{{day.isoformat()}}}" for day in SPECIFIED_DATES
+        f"\\multicolumn{{2}}{{c}}{{{_date_label(day)}}}" for day in SPECIFIED_DATES
     )
     cmidrules = " ".join(
         f"\\cmidrule(lr){{{1 + 2 * index}-{2 + 2 * index}}}"
@@ -252,14 +247,12 @@ def _emergency_table(
         "\\begin{table}[H]\n\\centering\\scriptsize\n"
         f"\\caption{{问题{PROBLEM_NAMES[problem]}指定日期的紧急购电结果}}"
         f"\\label{{tab:q{problem}-specified-emergency}}\n"
-        "\\setlength{\\tabcolsep}{2.2pt}\\renewcommand{\\arraystretch}{0.90}\n"
+        "\\setlength{\\tabcolsep}{2.2pt}\\renewcommand{\\arraystretch}{0.70}\n"
         "\\resizebox{\\textwidth}{!}{%\n"
         "\\begin{tabular}{rrrrrrrr}\n\\toprule\n"
         f"{date_header} \\\\\n{cmidrules}\n{subheader} \\\\\n\\midrule\n"
         + "\n".join(body_rows)
-        + "\n\\bottomrule\n\\end{tabular}}\n"
-        "\\par\\vspace{2pt}\\footnotesize 仅列非零紧急购电；连续10分钟区间合并，电量按区间求和。\n"
-        "\\end{table}\n"
+        + "\n\\bottomrule\n\\end{tabular}}\n\\end{table}\n"
     )
 
 

@@ -27,6 +27,15 @@ TABLE_DIR = OUTPUT_DIR / "tables"
 RESULT1_PATH = OUTPUT_DIR / "result1.xlsx"
 
 
+def _interval_label(slot: int) -> str:
+    start_minutes = (int(slot) - 1) * 10
+    end_minutes = int(slot) * 10
+    start_hour, start_minute = divmod(start_minutes % (24 * 60), 60)
+    end_hour, end_minute = divmod(end_minutes % (24 * 60), 60)
+    suffix = "+1" if end_minutes >= 24 * 60 else ""
+    return f"{start_hour}:{start_minute:02d}-{end_hour}:{end_minute:02d}{suffix}"
+
+
 def _sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as stream:
@@ -52,7 +61,9 @@ def export_result1(
     purchase_sheet = workbook["计划购电量"]
     if purchase_sheet.max_row != 145:
         raise ValueError("The official purchase sheet must contain 144 data rows")
-    for offset, value in enumerate(dispatch["grid_purchase_kwh"], start=2):
+    for slot, value in enumerate(dispatch["grid_purchase_kwh"], start=1):
+        offset = slot + 1
+        purchase_sheet.cell(row=offset, column=1).value = _interval_label(slot)
         cell = purchase_sheet.cell(row=offset, column=2)
         cell.value = float(value)
         cell.number_format = "0.000000"
