@@ -1,11 +1,7 @@
 \section{符号说明}
 
-功率、能量和费用分别采用kW、kWh和元。$E_t$始终表示储能电量而非比例SOC；
-下标$d$为运营日，$d_t$为放电功率，二者由下标区分。上标act表示实际执行量。
-主要符号见表\ref{tab:symbols}，局部辅助变量随公式定义。
-\begin{table}[htbp]
+\begin{table}[H]
 \centering\small
-\caption{主要符号及单位}\label{tab:symbols}
 \renewcommand{\arraystretch}{1.07}
 \begin{tabularx}{\textwidth}{lXl}
 \toprule 符号 & 含义 & 单位\\\midrule
@@ -17,6 +13,7 @@ $P_t,\widehat P_t$ & 实际光伏与光伏预测 & kW\\
 $N_t,\widehat N_t$ & 实际净负荷与净负荷预测 & kW\\
 $L_{t,s},P_{t,s}$ & 场景$s$的负荷与光伏 & kW\\
 $p_t$ & 外网普通购电价格 & 元/kWh\\
+$p_t^{(\gamma)}$ & 保持均价不变、按$\gamma$缩放波动后的电价 & 元/kWh\\
 $E_t,E_t^{\rm act}$ & 计划与实际储能电量 & kWh\\
 $E_{\min},E_{\max}$ & 储能电量上下界 & kWh\\
 $c_t,d_t,P_{\max}$ & 充电功率、放电功率及其上限 & kW\\
@@ -30,6 +27,7 @@ $\zeta_d,\operatorname{CVaR}_{\alpha,d}$ & VaR辅助阈值、日紧急购电费�
 $S_0,S_1,S_2,S_3$ & 更新时间表：$\{0\},\{0,6\},\{0,6,12\},\{0,6,12,18\}$ & h\\
 $C(S_i),\operatorname{VOI}(S_i)$ & 实际总费用、相对$S_0$的信息价值 & 元\\
 $\Delta\operatorname{VOI}_i$ & 相邻更新时间表的增量信息价值 & 元\\
+$\gamma,\kappa$ & 问题四的价格波动系数、成对预测残差幅度系数 & --\\
 \bottomrule
 \end{tabularx}
 \end{table}

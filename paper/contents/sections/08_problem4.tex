@@ -1,57 +1,145 @@
-\section{问题四的动态电价与信息结构}
+\section{问题四：动态电价下的调度扩展}
 \input{../results/problem4/tables/q4_price_numbers.tex}
 
-\subsection{附件4的数据质量与统计特征}
+\subsection{动态电价特征与信息口径}
 
-附件4给出2025年1月1日至12月31日的外网电价，时间分辨率为10 min，单位为元/kWh。按照区间结束时刻展开后，共得到52560条记录，连续覆盖2025年1月1日00:10至2026年1月1日00:00，每日均为144条。数据不存在缺失值、重复时刻、负电价或零电价，与问题二采用的规范运行网格逐点一致。标准化分数绝对值超过3的观测仅作为极值保留，不进行删除或缩尾处理。
+附件4给出2025年1月1日至12月31日的10分钟外网电价，单位为元/kWh。按区间结束时刻展开后
+共52560条记录，连续覆盖2025年1月1日00:10至2026年1月1日00:00，每日144条；不存在
+缺失、重复、负值或零值，并与负荷和光伏运行网格逐点一致。极端价格是实际市场信号，故仅作
+核验而不删除或缩尾。
 
 \input{../results/problem4/tables/q4_price_summary.tex}
-
-表\ref{tab:q4-price-summary}汇总了附件4的描述性统计。全年平均电价为\QFourPriceMean{}元/kWh，标准差为\QFourPriceStd{}元/kWh，最小值和最大值分别为\QFourPriceMin{}元/kWh和\QFourPriceMax{}元/kWh，表明外网购电成本具有明显的时变性。图\ref{fig:q4-price-annual-monthly}显示，不同月份的电价位置与离散程度均有差异；全年日内价格极差的平均值为\QFourDailyRange{}元/kWh，同一运营日内相邻10 min区间的最大绝对价格变化为\QFourMaxChange{}元/kWh。
-
-\begin{figure}[H]
+全年电价均值、标准差及范围分别为\QFourPriceMean{}、\QFourPriceStd{}和
+$[\QFourPriceMin{},\QFourPriceMax{}]$元/kWh。图\ref{fig:q4-price-annual-monthly}表明价格水平
+和离散程度随月份变化；全年日内价格极差的日均值为\QFourDailyRange{}元/kWh，相邻10分钟
+价格最大绝对变化为\QFourMaxChange{}元/kWh。
+\begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.88\textwidth]{../results/problem4/figures/fig_p4_price_annual_monthly.pdf}
-  \caption{附件4动态电价的全年变化与月度分布}
+  \includegraphics[width=0.86\textwidth]{../results/problem4/figures/fig_p4_price_annual_monthly.pdf}
+  \caption{附件4动态电价的全年变化与月度分布。上图为10分钟价格序列，下图为各月全部观测的
+  分布；极端值均保留。}
   \label{fig:q4-price-annual-monthly}
 \end{figure}
 
-进一步计算144个日内时段的均值与四分位区间，结果见图\ref{fig:q4-price-intraday}。依据24个小时均价的上下四分位数作数据驱动划分，0:00--4:00及22:00--24:00属于低价小时，8:00--10:00及17:00--21:00属于高价小时。该划分仅刻画样本中的价格结构，不代表预先规定的峰谷电价制度。
-
-\begin{figure}[H]
+对144个日内时段计算中位数与四分位区间，见图\ref{fig:q4-price-intraday}。按24个小时均价的
+上下四分位数划分，0:00--4:00和22:00--24:00为样本低价小时，8:00--10:00和
+17:00--21:00为样本高价小时；该划分只是数据描述，不代表预设峰谷电价制度。
+\begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.92\textwidth]{../results/problem4/figures/fig_p4_price_intraday_distribution.pdf}
-  \caption{动态电价的日内轮廓与全年分布}
+  \includegraphics[width=0.88\textwidth]{../results/problem4/figures/fig_p4_price_intraday_distribution.pdf}
+  \caption{动态电价的日内轮廓与全年分布。日内主线及阴影分别表示同刻中位数和四分位区间，
+  阴影不是置信区间。}
   \label{fig:q4-price-intraday}
 \end{figure}
 
-\subsection{电价与系统运行状态的关联}
-
-为判断价格变化是否与微网用能状态同步，分别计算电价与实际负荷、实际光伏和净负荷的Pearson与Spearman相关系数。净负荷定义为实际负荷减去实际光伏，不对负值截断。
-
+净负荷仍定义为$N_t=L_t-P_t$且不截断。电价与负荷的Pearson、Spearman系数分别为
+\QFourLoadPearson{}和\QFourLoadSpearman{}，与净负荷的两类系数分别为
+\QFourNetPearson{}和\QFourNetSpearman{}；与光伏的线性相关接近于零。这说明价格与系统状态
+存在有限关联，但不能据此作因果解释。完整相关系数见表\ref{tab:q4-price-correlation}，联合分布见
+图\ref{fig:q4-price-system}。
 \input{../results/problem4/tables/q4_price_correlations.tex}
-
-表\ref{tab:q4-price-correlation}给出电价与系统状态的相关系数。电价与实际负荷的Pearson和Spearman系数分别为\QFourLoadPearson{}和\QFourLoadSpearman{}，呈中等程度正相关；电价与净负荷的两类系数分别为\QFourNetPearson{}和\QFourNetSpearman{}，正相关程度较弱；电价与实际光伏的线性相关性接近于零。上述结果用于描述变量关联，不作因果解释。图\ref{fig:q4-price-system}给出了相关系数和全部52560个区间的电价--净负荷联合分布。
-
-\begin{figure}[H]
+\begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.94\textwidth]{../results/problem4/figures/fig_p4_price_system_relation.pdf}
-  \caption{动态电价与负荷、光伏及净负荷的关联}
+  \includegraphics[width=0.90\textwidth]{../results/problem4/figures/fig_p4_price_system_relation.pdf}
+  \caption{动态电价与实际负荷、光伏及净负荷的相关结构。相关系数与散点密度均使用全年
+  52560个同步区间，只描述关联。}
   \label{fig:q4-price-system}
 \end{figure}
 
-\subsection{未来电价的信息可用性与输入接口}
-
-题面指出外网电价“实时波动”，并要求使用附件4在波动电价下重新计算问题二和问题三，但没有说明每天0:00制定计划时是否能够提前获知全天价格。因此，本文将未来电价可用性判定为不明确，并建立两种互斥的信息模式：完美信息模式直接使用附件4的未来价格，作为理论基准；严格因果模式只允许使用当前时刻之前已经实现的价格和冻结的价格预测。
-
-在因果模式下，比较前一日同刻、前一周同刻、近7日同刻均值和岭回归四种轻量方法。岭回归的输入仅包含历史价格滞后及已知日历周期特征。模型使用1月8日至16日数据拟合，1月17日至30日按RMSE最小、MAE并列判据完成选择，2月1日至12月31日只作冻结样本外评价。最终选择的因果岭回归在验证期的MAE和RMSE分别为\QFourValMAE{}元/kWh和\QFourValRMSE{}元/kWh，在正式评价期分别为\QFourOOSMAE{}元/kWh和\QFourOOSRMSE{}元/kWh。
-图\ref{fig:q4-price-forecast}给出各轻量候选方法的验证期与冻结样本外误差，仅用于确定未来价格输入接口，不据此计算问题四的年度调度费用。
-
-\begin{figure}[H]
+题面要求依据附件4在波动电价下重新计算问题二、三，但没有说明0:00制定计划或日内更新时能否
+预先获知余下价格，因此价格信息可得性判为\textbf{不明确}。本文将两种口径分开：正式年度结果
+采用\texttt{GIVEN\_PRICE}，即把附件4当日144点价格作为题目给定输入；另保留严格因果价格预测
+接口，用于未来价格未知的解释。因果接口只用历史价格滞后和日历特征，经一月拟合、验证后冻结，
+样本外指标见图\ref{fig:q4-price-forecast}；该预测路径没有被混入下述正式费用。
+\begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.82\textwidth]{../results/problem4/figures/fig_p4_price_forecast_comparison.pdf}
-  \caption{轻量因果电价预测方法的验证与样本外比较}
+  \includegraphics[width=0.76\textwidth]{../results/problem4/figures/fig_p4_price_forecast_comparison.pdf}
+  \caption{未来价格未知口径下的轻量因果预测比较。验证期用于选型，2--12月仅作冻结样本外
+  评价；该图不作为\texttt{GIVEN\_PRICE}年度费用的数据来源。}
   \label{fig:q4-price-forecast}
 \end{figure}
 
-价格信息按144个区间组织，并通过已执行区间掩码和未来区间掩码区分历史与待决策时域；在6:00、12:00和18:00，已经执行的区间保持冻结。因果价格路径于日初形成，后续时刻只截取剩余部分，不使用未来实测价格修正。完美信息与因果预测两种模式须分别标注，预测误差的改善不能直接解释为购电成本的降低。
+\subsection{Q4-2与Q4-3模型}
+
+问题四不另建储能模型，而把附件4逐时价格$p_t$传入已封板的调度链。Q4-2完整复用问题二的
+因果负荷/光伏预测、50条成对整日残差场景、两阶段随机MILP、延续价值、实际执行和跨日SOC；
+只将式\eqref{eq:q2-model}中的固定日价格替换为当日动态价格。因此目标仍为
+\begin{equation}
+ \min\ \sum_t p_tg_t\Delta t+
+ \frac1{50}\sum_s\sum_t5p_te_{t,s}\Delta t-V_d(E_{145}),
+ \label{eq:q42-objective}
+\end{equation}
+其余场景功率平衡、互斥、功率和电量边界均不变。实际费用按各区间真实价格核算为计划购电费与
+紧急购电费之和，紧急购电仍为$5p_t$。
+
+Q4-3完整复用问题三的因果融合预测、已执行区间冻结、实际SOC交接和滚动结算。0:00按式
+\eqref{eq:q42-objective}形成初始承诺；在$\tau\in\{6,12,18\}$获得新光伏预测后，只对$t>\tau$
+的未来区间最小化
+\begin{equation}
+ \sum_{t>\tau}p_t\Delta t(1.5\Delta g_t^+-0.5\Delta g_t^-)
+ +\frac1{50}\sum_s\sum_{t>\tau}5p_te_{t,s}\Delta t-V_d(E_{145}).
+ \label{eq:q43-objective}
+\end{equation}
+增购、减购和紧急购电均使用其所属10分钟区间的$p_t$，不以日均价或人工峰谷价替代。主结果
+沿用“相对上一承诺”的顺序结算，均相对0:00承诺的解释仅作敏感性核验。
+
+\subsection{年度调度结果}
+
+2025年2月1日至12月31日的正式结果见表\ref{tab:q4-dispatch-results}。Q4-2共334/334日最优，
+计划购电费为$13\,926\,450.778073$元，模型内期望紧急购电费为$1\,090\,095.357606$元；
+实际回放的紧急购电量和费用分别为$396\,204.272796$ kWh和$1\,621\,505.578288$元，实际
+总费用为$15\,547\,956.356361$元。储能充、放电加权平均电价分别为0.466423和1.121601元/kWh，价差
+0.655178元/kWh，说明优化结果确实把电量由相对低价区间转移至高价区间，而非依赖人为峰谷划分。
+
+\input{contents/generated/q4_dispatch_results.tex}
+
+Q4-3四种更新时间表的实际总费用依次为$15\,431\,293.173519$、$15\,332\,979.276497$、
+$15\,196\,922.472637$和$15\,200\,168.117470$元，仍以$S_2=\{0,6,12\}$最低。相对$S_0$，
+$S_2$节省$234\,370.700882$元（1.5188\%），紧急购电量由$365\,303.875194$降至
+$302\,154.909779$ kWh，下降17.2867\%。相对Q4-2，$S_2$少支出$351\,033.883724$元
+（2.2577\%）。新增6:00和12:00发布的边际运营信息价值分别为$+98\,313.897022$和
+$+136\,056.803860$元，18:00为$-3\,245.644832$元；这仍表示特定年度路径上的边际经济收益，
+而非“18:00预测更差”。两种调整
+结算解释均保持$S_2<S_3<S_1<S_0$，同一方案年度费用最大差异仅265.457元。
+
+所有方案均通过动态价格逐点对齐、功率平衡、SOC递推及边界、跨日实际SOC、充放电互斥、
+执行区间冻结和结算重构审计；未吸收放电为0。按题意导出的两个结果工作簿分别对应Q4-2和采用
+全部四个发布时间的$S_3$；$S_2$的最低费用作为更新频率比较结论报告。
+
+\subsection{价格与预测不确定性鲁棒性}
+
+为分离价格形状与平均价格的影响，令
+\[
+ p_t^{(\gamma)}=\bar p+\gamma(p_t-\bar p),\qquad
+ \gamma\in\{0,0.25,0.50,0.75,1.00\}.
+\]
+各情形保持均价、真实负荷/光伏、点预测、残差抽样索引和物理参数不变。图
+\ref{fig:q4-price-robustness}显示，$S_2$在全部$\gamma$点均低于Q4-2，节费率为
+2.04\%--2.26\%；但费用在$\gamma=0$至0.25间略升，随后下降，故不能声称波动越大费用必然
+越低。波动增强总体扩大了可利用价差信号，同时改变计划和紧急购电的时点配置。
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.94\textwidth]{../results/problem4/robustness/figures/fig_p4_price_volatility_robustness.pdf}
+  \caption{价格波动强度鲁棒性。各点为固定输入下的一次334日时序回放；左为实际总费用，右为
+  紧急购电量。空心圈标记正式$\gamma=1$，不添加无重复样本依据的误差棒。}
+  \label{fig:q4-price-robustness}
+\end{figure}
+
+再保持点预测中心不变，将同一成对残差日的负荷和光伏误差同步缩放为
+$\varepsilon^{(s,\kappa)}=\kappa\varepsilon^{(s)}$，其中
+$\kappa\in\{0.75,1.00,1.25,1.50\}$。图\ref{fig:q4-uncertainty-robustness}显示，随着
+$\kappa$增大，更宽的规划场景促使计划提高预防性覆盖，两种方案的事后紧急购电量均下降；但过度
+放大残差会增加保守计划或调整代价，实际费用在正式$\kappa=1$附近较低而非严格单调。$S_2$在
+全部测试点仍低于Q4-2，节费率为1.62\%--2.71\%。该试验只比较Q4-2与既定$S_2$，没有在每个
+扰动点重新选择$S_0$--$S_3$，因而不据此宣称$S_2$对任意参数都全局最优。
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.94\textwidth]{../results/problem4/robustness/figures/fig_p4_forecast_uncertainty_robustness.pdf}
+  \caption{预测残差幅度鲁棒性。固定随机种子及成对场景索引，只缩放残差幅度；各点为单次年度
+  轨迹，左为实际总费用，右为紧急购电量，不设置误差棒。}
+  \label{fig:q4-uncertainty-robustness}
+\end{figure}
+
+价格与残差扰动共8个表格点（含复用的正式基线）全部通过物理、结算、冻结及价格对齐审计，
+7个新扰动点的两类模型均为334/334日最优。这说明滚动更新的费用优势在所测范围内较稳定；同时，
+非单调响应表明动态电价、风险覆盖与调整结算共同决定费用，不能用单一“波动越大套利越多”解释。
