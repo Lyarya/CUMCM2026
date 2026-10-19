@@ -14,9 +14,9 @@ from matplotlib.figure import Figure
 
 FIGURE_FORMATS = ("svg", "pdf", "jpg", "png")
 
-# Palette distilled from the user's energy-competition and Lyra figure code.
-# Energy variables retain the competition colors; model-focused panels use the
-# quieter Lyra blue/teal/orange/purple-grey family.
+# Palette adapted from the author's earlier energy-competition and research
+# plotting utilities. Energy variables retain the competition colors;
+# model-focused panels use a muted blue/teal/orange/purple-grey family.
 CUMCM_PALETTE = {
     "primary": "#0B4F8A",
     "primary_light": "#5DA8C9",

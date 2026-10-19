@@ -1,8 +1,8 @@
 """Hankel singular-spectrum analysis for C-problem load and PV signals.
 
-Adapted from OnlineLyra-TSTE's PV decomposition analysis. This module has no
-file-system assumptions: preprocessing must supply a clean one-dimensional
-power series before these functions are called.
+Adapted from the author's earlier photovoltaic decomposition utilities.
+This module has no file-system assumptions: preprocessing must supply a clean
+one-dimensional power series before these functions are called.
 """
 
 from __future__ import annotations

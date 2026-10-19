@@ -19,7 +19,7 @@
 
 ## C. Not Yet Established
 
-- 尚未证明 Lyra 或任何 Hankel-based 模型最优。
+- 尚未证明任何 Hankel-based 模型最优。
 - 尚未证明大型深度模型是必要的。
 - 尚未证明 Official、Phase 与 Low-Rank 的融合形式或权重最优。
 - 尚未完成概率预测、区间校准或场景生成。

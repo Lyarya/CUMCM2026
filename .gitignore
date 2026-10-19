@@ -52,5 +52,17 @@ results/logs/*
 !results/logs/.gitkeep
 .cache/
 
+# Local research prototypes and planning notes
+/src/common/*_vandermonde.py
+/src/common/battery.py
+/docs/notes/model_decisions.md
+
+# Local delivery copies and temporary paper exports
+/paper.zip
+/支撑材料*/
+/支撑材料*.zip
+/paper/paper_figures/
+/paper/tmp/
+
 # Keep competition inputs versioned until their size is known.
 # data/raw/ is intentionally NOT ignored.

@@ -75,3 +75,9 @@ git push origin arya
 - `paper/` 基于 [jayxin/cumcm](https://github.com/jayxin/cumcm) 的 CUMCM 2026 模板；原说明与许可保存在 `docs/template/`。
 
 更多复现入口见 `docs/REPRODUCIBILITY.md`，开赛读题记录见 `docs/notes/problem_analysis.md`。
+
+## 公开版本范围
+
+公开版本以 Git 已跟踪的竞赛代码、数据、结果和论文文件为准。公共绘图和奇异谱工具保留了对作者此前工具的适配说明。
+
+本地研究原型、模型决策笔记、重复交付包和论文临时导出目录不属于公开版本，已加入 `.gitignore`。提交时逐项确认文件清单，避免强制加入这些本地材料。
