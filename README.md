@@ -1,8 +1,10 @@
 # CUMCM 2026
 
-两人协作的 2026 年全国大学生数学建模竞赛工作区。仓库把数据、代码、结果和论文分开，目标是让 `main` 始终保持可运行、可编译。
+![Status: Completed (2026 CUMCM Beijing First Prize)](https://img.shields.io/badge/Status-Completed%20%282026%20CUMCM%20Beijing%20First%20Prize%29-brightgreen)
 
-## 分支约定
+两人协作完成的 2026 年全国大学生数学建模竞赛 C 题参赛项目，获北京赛区一等奖。项目已完结，本仓库用于成果展示与复现，保留数据、代码、结果和论文及其开发记录。
+
+## 比赛期间的分支约定
 
 - `main`：稳定分支，只通过 Pull Request 合并已验证的代码、数据处理、图表和论文。
 - `arya`：Arya 的长期开发分支。
@@ -15,7 +17,7 @@
 
 ```text
 data/       raw 与 processed 数据
-src/        公共代码、三个问题的独立流水线及环境测试
+src/        公共代码、四个问题的独立流水线及环境测试
 notebooks/  数据检查、EDA 和各问探索
 results/    可复现生成的图、表、模型和日志
 paper/      CUMCM 2026 LaTeX 模板与论文正文
@@ -51,7 +53,7 @@ cd paper && latexmk main.tex
 
 第二条命令会同时生成 `results/figures/test_pipeline.{pdf,png}` 和论文可直接引用的 `paper/figures/common/test_pipeline.{pdf,png}`。
 
-## 日常协作
+## 比赛期间的协作流程
 
 ```bash
 git checkout main
@@ -76,8 +78,8 @@ git push origin arya
 
 更多复现入口见 `docs/REPRODUCIBILITY.md`，开赛读题记录见 `docs/notes/problem_analysis.md`。
 
-## 公开版本范围
+## 项目成果
 
-公开版本以 Git 已跟踪的竞赛代码、数据、结果和论文文件为准。公共绘图和奇异谱工具保留了对作者此前工具的适配说明。
-
-本地研究原型、模型决策笔记、重复交付包和论文临时导出目录不属于公开版本，已加入 `.gitignore`。提交时逐项确认文件清单，避免强制加入这些本地材料。
+- [最终论文](paper/main.pdf)：论文主体及参考文献共 33 页，含 AI 工具使用说明与附录的完整 PDF 共 91 页。
+- [项目源码](src/)：数据处理、预测建模、四问调度优化及论文图表生成程序。
+- [复现说明](docs/REPRODUCIBILITY.md)：环境配置、运行入口与验收说明。
